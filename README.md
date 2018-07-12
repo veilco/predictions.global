@@ -1,6 +1,6 @@
 # Predictions.Global website
 
-See `../server/proto/markets.proto` for data model.
+See https://github.com/StateShape/interfaces for data model.
 
 # This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 

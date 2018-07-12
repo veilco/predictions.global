@@ -1,0 +1,177 @@
+// #tetrad for Predictions.Global's brand http://www.paletton.com/#uid=72T0u0kuuDciWKuotFQCjtAE0mZ
+// tetrad is four colors, 5 shades each (darkest is 5th shade; not all colors added yet). The base tetrad colors are -3, eg. $tetrad-red-3.
+$tetrad-green-3: #0ad136;
+$tetrad-green-4: #00b227;
+$tetrad-green-5: #008a1f;
+$tetrad-blue-3: #0d9bb6;
+$tetrad-blue-4: #037b91;
+$tetrad-blue-5: #025f71;
+$tetrad-orange: #ff830c;
+$tetrad-red-1: #ff7668;
+$tetrad-red-3: #ff230c;
+$tetrad-red-5: #b71100;
+
+.green-3 {
+  color: $tetrad-green-3;
+}
+
+.green-4 {
+  color: $tetrad-green-4;
+}
+
+.green-5 {
+  color: $tetrad-green-5;
+}
+
+.blue-3 {
+  color: $tetrad-blue-3;
+}
+
+.blue-4 {
+  color: $tetrad-blue-4;
+}
+
+.blue-5 {
+  color: $tetrad-blue-5;
+}
+
+.orange {
+  color: $tetrad-orange;
+}
+
+.red-3 {
+  color: $tetrad-red-3;
+}
+
+.red-5 {
+  color: $tetrad-red-5;
+}
+
+.__react_component_tooltip {
+  // There's currently no way to configure tooltip opacity https://github.com/wwayne/react-tooltip/issues/241
+  // default is 0.262458
+  opacity: 0.95 !important; // sass-lint:disable-line no-important
+}
+
+.market-controls {
+  $control-padding-not-mobile: 9.5481px; // small golden ratio^2 * 25px square length of twitter icon
+  $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
+
+  &.not-mobile {
+    .column {
+      &:not(:first-child) {
+        padding-top: 0;
+      }
+
+      &:not(:last-child) {
+        padding-bottom: $control-padding-not-mobile;
+      }
+    }
+  }
+
+  &.mobile {
+    .column {
+      &:not(:first-child) {
+        padding-left: 0;
+      }
+
+      &:not(:last-child) {
+        padding-right: $control-padding-mobile;
+      }
+    }
+  }
+  // TwitterIcon (inside TwitterShareButton) uses a div where the icon will be left-aligned if there's margin to spare; this causes the icon to be horizontally centered.
+  .SocialMediaShareButton {
+    // sass-lint:disable-line class-name-format
+    // prevent ugly outline from showing after clicking tweet button
+    outline: none !important; // sass-lint:disable-line no-important
+
+    & > div {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .augur-logo {
+    height: 25px; // same dimension as twitter logo
+    width: 25px;
+  }
+}
+
+.no-padding-bottom {
+  padding-bottom: 0;
+}
+
+.section {
+  // the default section padding-top/bottom is 3rem; this is too much whitespace at top of page.
+  &.less-padding-top {
+    padding-top: 1.5rem;
+  }
+
+  &.less-padding-bottom {
+    padding-bottom: 1.5rem;
+  }
+}
+// example of sass variable in calc:
+// $golden-decay: calc(.618 * #{$canonical-bulma-padding});
+
+.logo {
+  // Fixed-width on desktop; auto width on mobile where screen resizing is less of an expectation and we'd like logo to fill its column on mobile.
+  @media(min-width: 769px) {
+    // bulma is-mobile stops at 768px.
+    width: 378px;
+  }
+}
+$canonical-bulma-padding: 0.75rem; // columns seem to use this
+
+.header {
+  padding: $canonical-bulma-padding;
+  // Move header dropdown menu left a fixed amount so that the dropdown items don't appear offscreen on mobile.
+  .dropdown-menu {
+    left: -117px;
+  }
+  @media(max-width: 768px) {
+    .datum {
+      padding-bottom: 0;
+
+      &:not(:first-child) {
+        padding-top: 0;
+      }
+
+      &:not(:last-child) {
+        padding-bottom: 0;
+      }
+    }
+  }
+}
+$one-market-summary-margin-top: 1.5em; // may later vary this responsively
+
+.market {
+  margin-top: $one-market-summary-margin-top;
+  // the first OneMarketSummary is the 2nd child of its section; we want this margin top to be smaller so the first OMS is closer to the currency selector.
+  &:nth-child(-n+2) {
+    margin-top: 0.75rem;
+  }
+}
+// 768px is largest "mobile" size by default in Bulma.css.
+// Maybe we can read this value from a Bulma scss variable?
+@media(max-width: 768px) {
+  .market {
+    margin-top: $one-market-summary-margin-top;
+  }
+}
+
+.comment-link {
+  text-decoration: underline $tetrad-orange;
+}
+
+.search {
+  position: relative;
+  width: 20rem;
+
+  i {
+    position: absolute;
+    right: 10px;
+    transform: translateY(+65%);
+  }
+}

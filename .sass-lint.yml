@@ -1,0 +1,10 @@
+options:
+  formatter: stylish
+files:
+  include: '**/*.s+(a|c)ss'
+rules:
+  nesting-depth: 0
+  leading-zero: 0
+  empty-line-between-blocks: 0
+  class-name-format: 0
+  final-newline: 0

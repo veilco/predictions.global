@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "predictions-global-staging",
+    "prod": "predictions-global-prod"
+  }
+}

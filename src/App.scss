@@ -153,6 +153,7 @@ $one-market-summary-margin-top: 1.5em; // may later vary this responsively
     margin-top: 0.75rem;
   }
 }
+
 // 768px is largest "mobile" size by default in Bulma.css.
 // Maybe we can read this value from a Bulma scss variable?
 @media(max-width: 768px) {

@@ -8,6 +8,8 @@ import { Currency } from './Currency';
 import { Market, MarketType, Prediction, Price } from './generated/markets_pb';
 import { Observer } from './observer';
 import Price2, { usdFormat, numberFormat } from "./Price";
+import * as classNames from 'classnames';
+import * as ReactTooltip from "react-tooltip";
 
 interface HasMarket {
   m: Market
@@ -83,21 +85,33 @@ type OneMarketSummaryProps = HasMarket & {
   now: moment.Moment,
   index: number,
   currencySelectionObserver: Observer<Currency>,
+  isEmbedded?: boolean,
 };
 
 interface OneMarketSummaryState {
   // used to show visual feedback that user copied to clipboard
   isMarketIdCopiedToClipboard: boolean,
   isMarketSummaryCopiedToClipboard: boolean,
+  showEmbed: boolean,
 }
 
 const oneMarketSummaryInitialState: OneMarketSummaryState = {
   isMarketIdCopiedToClipboard: false,
   isMarketSummaryCopiedToClipboard: false,
-}
+  showEmbed: false,
+};
 
 class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketSummaryState> {
   public readonly state: OneMarketSummaryState = oneMarketSummaryInitialState
+
+  public componentDidMount(): void {
+    document.addEventListener("keydown", this.handleEscapeKey, false);
+  }
+
+  public componentWillUnmount(): void {
+    document.removeEventListener("keydown", this.handleEscapeKey, false);
+  }
+
   public copiedToClipboard = (type: "isMarketIdCopiedToClipboard" | "isMarketSummaryCopiedToClipboard") => {
     // weird if statement required for typescript to recognize type is valid key of state
     if (type === "isMarketIdCopiedToClipboard") {
@@ -124,6 +138,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
 
   public render() {
     const props = this.props;
+    const { m, isEmbedded } = this.props;
+    const {showEmbed} = this.state;
+
+    const marketID = m.getId();
     const name = props.m.getName();
     const ps = props.m.getPredictionsList();
     const mt = props.m.getMarketType();
@@ -183,13 +201,13 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
         {
           type === 'mobile' ?
             <img className="augur-logo"
-              src="augur-logo.svg"
+              src="/augur-logo.svg"
               data-multiline={true}
               data-tip='View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of this page.' />
             : <a target="blank"
               href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
               <img className="augur-logo"
-                src="augur-logo.svg"
+                src="/augur-logo.svg"
                 data-multiline={true}
                 data-tip='View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of this page.' />
             </a>
@@ -241,6 +259,33 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 </div>
               )}
 
+              { !isEmbedded && (
+                <div className="column content is-12">
+                  <button className="button" onClick={this.toggleEmbed}>Embed</button>
+                </div>
+              )}
+
+              <div className={classNames('modal has-text-left', showEmbed && 'is-active')}>
+                <div className="modal-background"/>
+                <div className="modal-card">
+                  <header className="modal-card-head">
+                    <p className="modal-card-title">Embed Market</p>
+                  </header>
+                  <section className="modal-card-body">
+                    <p>Embed the following HTML code:</p>
+                    <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
+                      <pre data-tip="Click to copy to your clipboard">
+                        {this.getMarketEmbedCode(marketID)}
+                      </pre>
+                    </CopyToClipboard>
+                  </section>
+                  <footer className="modal-card-foot">
+                    <button className="button is-success" onClick={this.closeEmbed}>Done</button>
+                  </footer>
+                </div>
+                <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed} />
+              </div>
+
             </div>
           </div>
           <div className="column is-12 is-hidden-tablet">
@@ -250,6 +295,29 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       </div>
     </div>;
   }
-};
+
+  private toggleEmbed = () => {
+    this.setState(({showEmbed}) => ({
+      showEmbed: !showEmbed,
+    }));
+  };
+
+  private closeEmbed = () => {
+    this.setState({
+      showEmbed: false,
+    });
+  };
+
+  private handleEscapeKey = (e: KeyboardEvent) => {
+    // Escape keycode
+    if(e.keyCode === 27) {
+      this.closeEmbed();
+    }
+  };
+
+  private getMarketEmbedCode = (marketID: string) => {
+    return `<iframe width="360" height="270" src="${window.location.href.replace(window.location.pathname, '')}/e/${marketID}" frameborder="0"></iframe>`;
+  };
+}
 
 export default OneMarketSummary;

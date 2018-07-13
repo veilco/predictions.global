@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
-import {App as Home} from './App';
+import {Home} from './App';
 import {EmbeddedMarketCard} from './EmbeddedMarketCard';
 import {MarketsSummary} from "./generated/markets_pb";
 import {RouteComponentProps} from "react-router";
@@ -80,9 +80,16 @@ export class Routes extends React.Component<any, RoutesState> {
     const {marketsSummary} = this.state;
     if(marketsSummary == null) {
       return (
-        <div>
-          Loading
-        </div>
+        <Router>
+          <div>
+            <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo" src="/logo.png" />
+            <div style={{textAlign: 'center', marginTop: '40px'}}>
+              <div style={{display: 'inline-block'}}>
+                <i className="fas fa-sync fa-spin fa-2x"/>
+              </div>
+            </div>
+          </div>
+        </Router>
       );
     }
 

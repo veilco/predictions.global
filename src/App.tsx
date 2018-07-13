@@ -10,7 +10,6 @@ import Header, {HasMarketsSummary} from './Header';
 import {makeObserverOwner, ObserverOwner, Observer} from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
-import { Routes } from './Routes';
 import * as classNames from 'classnames';
 import {getQueryString, updateQueryString} from "./url";
 import OldSelector from './oldSelector';
@@ -23,7 +22,7 @@ interface State {
   currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
 }
 
-export class App extends React.Component<HasMarketsSummary, State> {
+export class Home extends React.Component<HasMarketsSummary, State> {
   public readonly state: State;
 
   public constructor(props: HasMarketsSummary) {
@@ -45,7 +44,6 @@ export class App extends React.Component<HasMarketsSummary, State> {
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <Routes />
         <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
         <section className="less-padding-bottom section">
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">

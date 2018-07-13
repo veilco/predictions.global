@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import App from './App';
@@ -6,7 +7,7 @@ import registerServiceWorker from './registerServiceWorker';
 import { MarketsSummary } from './generated/markets_pb';
 
 function makeDataLoader(dataURI: string, setData: (ms: MarketsSummary) => void): void {
-  function reload() {
+  function reload(autoReloadOnStaleData: boolean) {
     // fetch polyfill is automatically supplied by create-react-app's build.
     fetch(new Request(dataURI, {
       mode: "cors", // mode cors assumes dataURI has a different origin; once dataURI is served from CDN (instead of directly from google storage bucket) we'll want to update this code.
@@ -16,10 +17,18 @@ function makeDataLoader(dataURI: string, setData: (ms: MarketsSummary) => void):
       }
       return resp.arrayBuffer()
     }).then(ab => {
-      setData(MarketsSummary.deserializeBinary(new Uint8Array(ab)));
+      const ms = MarketsSummary.deserializeBinary(new Uint8Array(ab));
+      const genTime = moment.unix(ms.getGenerationTime());
+      if (autoReloadOnStaleData &&
+        genTime.add(5, 'minutes').isBefore()) {
+        reload(false);
+      } else {
+        setData(ms);
+      }
+
     }).catch(console.error.bind(console));
   }
-  reload();
+  reload(true);
   // setInterval(reload, 15000); // naive real time updates
   // TODO backoff on error
   // TODO smarter real time data updates
@@ -35,5 +44,5 @@ function makeDataLoader(dataURI: string, setData: (ms: MarketsSummary) => void):
 registerServiceWorker();
 
 makeDataLoader((window as any).DATA_URI, (ms: MarketsSummary) => {
-  ReactDOM.render(<App ms={ms}/>, document.getElementById('root') as HTMLElement);
+  ReactDOM.render(<App ms={ms} />, document.getElementById('root') as HTMLElement);
 });

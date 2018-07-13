@@ -80,16 +80,14 @@ export class Routes extends React.Component<any, RoutesState> {
     const {marketsSummary} = this.state;
     if(marketsSummary == null) {
       return (
-        <Router>
-          <div>
-            <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo" src="/logo.png" />
-            <div style={{textAlign: 'center', marginTop: '40px'}}>
-              <div style={{display: 'inline-block'}}>
-                <i className="fas fa-sync fa-spin fa-2x"/>
-              </div>
+        <div>
+          <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo" src="/logo.png" />
+          <div style={{textAlign: 'center', marginTop: '40px'}}>
+            <div style={{display: 'inline-block'}}>
+              <i className="fas fa-sync fa-spin fa-2x"/>
             </div>
           </div>
-        </Router>
+        </div>
       );
     }
 

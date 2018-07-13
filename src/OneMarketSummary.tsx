@@ -7,7 +7,7 @@ import { TwitterIcon, TwitterShareButton } from 'react-share';
 import { Currency } from './Currency';
 import { Market, MarketType, Prediction, Price } from './generated/markets_pb';
 import { Observer } from './observer';
-import Price2, { usdFormat } from "./Price";
+import Price2, { usdFormat, numberFormat } from "./Price";
 
 interface HasMarket {
   m: Market
@@ -31,7 +31,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
   const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
   const r = `${Math.round(p)}%`; // assume 0 <= p < 100 (as opposed to p < 1.0)
   const name = ps[0].getName();
-  const v = ps[0].getValue();
+  const v = numberFormat.format(ps[0].getValue());
   switch (mt) {
     case MarketType.YESNO:
       text += `${r} Yes`;

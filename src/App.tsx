@@ -90,8 +90,35 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
 ]);
 const paginationLimits = [10, 20, 50];
 
-// Wildcard category that matches any and all categories
-const allCategory = 'All';
+// MarketCategory is our own curated category enum based on empirical survey of size of live categories in Augur App.
+enum MarketCategory {
+  All = 'All', // Wildcard category that matches any and all categories
+  WorldCup = 'World Cup',
+  Sports = 'Sports',
+  Cryptocurrency = 'Cryptocurrency',
+  Finance = 'Finance',
+  Other = 'Other',
+}
+
+const cryptocurrencyMarketCategoryRegexp = /ethereum| ether|ether |bitcoin|btc| crypto|crypto |cryptocurrenc|flippening/;
+const financeMarketCategoryRegexp = / trade|trade | trading|trading | price|price | credit|credit /;
+const fifaRegexp = / fifa|fifa |world cup/;
+
+function getMarketCategory(m: Market): MarketCategory {
+  const c = m.getCategory().toLowerCase();
+  const n = m.getName().toLowerCase();
+  if (c === 'world cup' || n.search(fifaRegexp) > -1) {
+    return MarketCategory.WorldCup;
+  } else if (c === 'sports' || c === 'sport') {
+    return MarketCategory.Sports;
+  } else if (c === 'cryptocurrency' || c === 'cryptocurrencies' || n.search(cryptocurrencyMarketCategoryRegexp) > -1) {
+    return MarketCategory.Cryptocurrency;
+  } else if (c === 'finance' || n.search(financeMarketCategoryRegexp) > -1) {
+    // finance must occur after crypto so as to avoid capturing words like "trade"
+    return MarketCategory.Finance;
+  }
+  return MarketCategory.Other;
+}
 
 interface MarketListProps {
   marketList: Market[],
@@ -99,9 +126,10 @@ interface MarketListProps {
   currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
 
+// TODO create a UIMarket type as a wrapper for Market, which constructs stuff like getMarketCategory() and a moment(endDate) once at in MarketList constructor, instead of each re-render. Note that Market.AsObject is provided by protobuf, so we don't necessarily want to create a complete 3rd type. We also don't want to aggressively call Market.AsObject, it is really expensive and Market itself is quite optimized by protobuf. Current preference is UIMarket { m: Market, ... newStuff }, so that only new fields are declared directly in UIMarket.
 interface MarketListState {
-  category: string,
-  categoryOwner: ObserverOwner<string>,
+  category: MarketCategory,
+  categoryOwner: ObserverOwner<MarketCategory>,
   paginationLimit: number,
   paginationLimitOwner: ObserverOwner<number>,
   paginationOffset: number,
@@ -124,8 +152,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
 
     this.state = {
-      category: allCategory,
-      categoryOwner: makeObserverOwner(allCategory),
+      category: MarketCategory.All,
+      categoryOwner: makeObserverOwner(MarketCategory.All),
       paginationLimit,
       paginationLimitOwner: makeObserverOwner(10),
       paginationOffset,
@@ -145,15 +173,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     const {marketList, currencySelectionObserver} = this.props;
     const {paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
 
-    // Possible to optimize by only updating when props received
-    const categories = [allCategory].concat(Array.from(marketList.reduce((acc: Set<string>, market: Market) => acc.add(market.getCategory()), new Set()).values()));
-
     const filteredMarketList = marketList
-      .filter((market: Market) => category === allCategory || market.getCategory() === category)
-      .filter((market: Market) => showEnded || moment.unix(market.getEndDate()).isAfter())
-
+      .filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category)
+      .filter((m: Market) => showEnded || moment.unix(m.getEndDate()).isAfter())
       // Basic fuzzy text search
-      .filter((market: Market) => market.getName().toLowerCase().replace(' ', '').indexOf(searchQuery) !== -1)
+      .filter((m: Market) => m.getName().toLowerCase().replace(' ', '').indexOf(searchQuery) !== -1)
       .sort(sortOrders.get(sortOrder));
 
     const numberOfPages = Math.ceil(filteredMarketList.length / paginationLimit);
@@ -216,7 +240,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               currentValueObserver={categoryOwner.o}
               renderValue={this.renderCategory}
               setValue={this.setCategory}
-              values={categories}/>
+              values={Object.keys(MarketCategory).map(k => MarketCategory[k])}/>
           </div>
           <div className="column is-narrow">
             <label className="checkbox">
@@ -302,7 +326,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   private renderCategory = (category: string) => (category);
 
-  private setCategory = (category: string) => {
+  private setCategory = (category: MarketCategory) => {
     this.setState({
       category,
     });

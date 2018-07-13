@@ -3,12 +3,7 @@ import { Currency } from "./Currency";
 import { Price } from './generated/markets_pb';
 import { Observer, Unsubscribe } from './observer';
 
-const naturalNumberFormat = new Intl.NumberFormat('en-US');
-
-// renderInt is for natural numbers with no concerns about precision or rounding
-export function renderInt(n: number): string {
-  return naturalNumberFormat.format(n);
-}
+export const numberFormat = new Intl.NumberFormat('en-US');
 
 export const usdFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 export const cryptocurrencyFormat = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 8 });

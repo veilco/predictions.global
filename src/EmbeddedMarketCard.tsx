@@ -32,7 +32,7 @@ export class EmbeddedMarketCard extends React.Component<EmbeddedMarketCardProps,
     const marketsList = marketsSummary.getMarketsList();
     const marketID = match.params.id;
     const market = marketsList.find((m: Market) => m.getId() === marketID);
-    if(market == null) {
+    if (market == null) {
       return (
         <div className="embedded-market-card">
           No markets found.

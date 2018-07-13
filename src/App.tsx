@@ -12,6 +12,7 @@ import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
 import * as classNames from 'classnames';
 import {getQueryString, updateQueryString} from "./url";
+import OldSelector from './oldSelector';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -91,6 +92,7 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
 const paginationLimits = [10, 20, 50];
 
 // MarketCategory is our own curated category enum based on empirical survey of size of live categories in Augur App.
+// Example of strong typed array of MarketCategory: `Object.keys(MarketCategory).map(key => MarketCategory[key]) as MarketCategory[]`
 enum MarketCategory {
   All = 'All', // Wildcard category that matches any and all categories
   WorldCup = 'World Cup',
@@ -236,11 +238,15 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             Category
           </div>
           <div className="column is-narrow">
-            <Selector
-              currentValueObserver={categoryOwner.o}
-              renderValue={this.renderCategory}
+            <OldSelector
+              currentValue={category}
+              currentRendered={category}
               setValue={this.setCategory}
-              values={Object.keys(MarketCategory).map(k => MarketCategory[k])}/>
+              values={Object.keys(MarketCategory).map(key => {
+                return {
+                  rendered: MarketCategory[key],
+                  value: MarketCategory[key],
+              }})}/>
           </div>
           <div className="column is-narrow">
             <label className="checkbox">
@@ -288,7 +294,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               {paginationIndex > 0 && (
                 <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
               {paginationIndex < numberOfPages - 1 && (
-                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next Page</a>)}
+                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
               <ul className="pagination-list">
                 { paginationIndices.map((page: number) => page < 0 ? (
                   <li key={page}>

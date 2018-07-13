@@ -4,6 +4,7 @@ interface Props<T> {
   currentValue: T,
   currentRendered: React.ReactNode,
   setValue: (t: T) => void,
+  // TODO warning, this values Array<complex type> will allow passing props that aren't actually of that type.
   values: Array<{
     value: T,
     rendered: React.ReactNode,

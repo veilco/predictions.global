@@ -11,6 +11,7 @@ import {makeObserverOwner, ObserverOwner, Observer} from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
 import * as classNames from 'classnames';
+import {getQueryString, updateQueryString} from "./url";
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -85,7 +86,7 @@ const sortOrders: Map<string, (a: Market, b: Market) => number> = new Map([
   ['New Markets', (a: Market, b: Market) => b.getCreationTime() - a.getCreationTime()],
   ['Ending Soon', (a: Market, b: Market) => a.getEndDate() - b.getEndDate()]
 ]);
-const categories = ['All', 'Sports', 'Cryptocurrency', 'Other'];
+const paginationLimits = [10, 20, 50];
 
 interface MarketListProps {
   marketList: Market[],
@@ -97,6 +98,7 @@ interface MarketListState {
   category: string,
   categoryOwner: ObserverOwner<string>,
   paginationLimit: number,
+  paginationLimitOwner: ObserverOwner<number>,
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
@@ -110,11 +112,18 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   constructor(props: MarketListProps) {
     super(props);
 
+    const paginationOffsetQuery = parseInt(getQueryString('page'), 10);
+    const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery;
+    const paginationLimitQuery = parseInt(getQueryString('limit'), 10);
+    const paginationLimit = isNaN(paginationLimitQuery) ? paginationLimits[0] :
+      Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
+
     this.state = {
       category: 'All',
-      categoryOwner: makeObserverOwner(categories[0]),
-      paginationLimit: 2,
-      paginationOffset: 0,
+      categoryOwner: makeObserverOwner('All'),
+      paginationLimit,
+      paginationLimitOwner: makeObserverOwner(10),
+      paginationOffset,
       searchQuery: '',
       showEnded: false,
       sortOrder: 'Money at Stake',
@@ -124,7 +133,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   public render() {
     const {marketList, currencySelectionObserver} = this.props;
-    const {paginationLimit, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
+    const {paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
+
+    const categories = ['All'].concat(Array.from(marketList.reduce((acc: Set<string>, market: Market) => acc.add(market.getCategory()), new Set()).values()));
 
     const filteredMarketList = marketList
       .filter((market: Market) => category === 'All' || market.getCategory() === category)
@@ -133,14 +144,15 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       .sort(sortOrders.get(sortOrder));
 
     const numberOfPages = Math.ceil(filteredMarketList.length / paginationLimit);
-    const paginationStart = paginationLimit * paginationOffset;
-    const paginationEnd = paginationLimit * (paginationOffset + 1);
+    const paginationIndex = Math.min(Math.max(paginationOffset, 0), numberOfPages - 1);
+    const paginationStart = paginationLimit * paginationIndex;
+    const paginationEnd = paginationLimit * (paginationIndex + 1);
 
     const paginationIndices = Array.from(new Set([
       1,
-      Math.max(paginationOffset, 1),
-      paginationOffset + 1,
-      Math.min(paginationOffset + 2, numberOfPages),
+      Math.max(paginationIndex, 1),
+      paginationIndex + 1,
+      Math.min(paginationIndex + 2, numberOfPages),
       numberOfPages]
     ).values());
 
@@ -149,10 +161,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     return (
       <section className="less-padding-top section">
         <div
-          className="column no-padding-bottom is-8-mobile is-4-tablet is-4-desktop is-marginless content has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
+          className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
           <p><strong>Prediction Markets</strong></p>
         </div>
-        <div className="columns is-centered is-vcentered is-mobile">
+        <div className="columns is-centered is-vcentered is-mobile is-multiline">
           <div className="column">
             <Selector
               currentValueObserver={currencySelectionObserver}
@@ -199,17 +211,23 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 index={paginationStart + index}/>)
             )}
           <nav className="pagination is-centered" role="navigation" aria-label="pagination">
-            {paginationOffset > 0 && (
-              <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationOffset - 1)}>Prev
+            <Selector
+              currentValueObserver={paginationLimitOwner.o}
+              renderValue={this.renderPaginationLimit}
+              setValue={this.setPaginationLimit}
+              values={paginationLimits}
+            />
+            {paginationIndex > 0 && (
+              <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev
                 Page</a>)}
-            {paginationOffset < numberOfPages - 1 && (
-              <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationOffset + 1)}>Next
+            {paginationIndex < numberOfPages - 1 && (
+              <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next
                 Page</a>)}
             <ul className="pagination-list">
               {paginationIndices.map((page: number) => (
                 <li key={page}>
                   <a
-                    className={classNames('pagination-link', page === (paginationOffset + 1) && 'is-current')}
+                    className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
                     aria-label={`Goto page ${page}`}
                     aria-current="page"
                     onClick={this.setPaginationOffset.bind(this, page - 1)}
@@ -250,8 +268,18 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setPaginationOffset = (paginationOffset: number) => {
+    updateQueryString('page', paginationOffset);
     this.setState({
       paginationOffset,
+    });
+  };
+
+  private renderPaginationLimit = (paginationLimit: number) => (paginationLimit);
+
+  private setPaginationLimit = (paginationLimit: number) => {
+    updateQueryString('limit', paginationLimit);
+    this.setState({
+      paginationLimit,
     });
   };
 

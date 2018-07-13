@@ -36,7 +36,7 @@ myMS.setMarketsList([
     })());
     m.setEndDate((() => {
       const d = new Date();
-      d.setDate(d.getDate() + 7);
+      d.setDate(d.getDate() - 1);
       return Math.round(d.getTime() / 1000);
     })());
     return m;

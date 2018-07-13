@@ -74,7 +74,7 @@ function renderCappedLength(l: number, s: string): React.ReactNode {
   if (s.length < l) {
     return s;
   }
-  return <span>{s.substring(0,l)}&hellip;</span>;
+  return <span>{s.substring(0, l)}&hellip;</span>;
 }
 
 function getMarketSummaryString(name: string, openInterest: Price | undefined,
@@ -208,55 +208,62 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const mobileControls = controls("mobile");
     return <div className="market columns is-centered">
       <div className="column box">
-        <div className="columns is-mobile is-multiline">
+        <div className="columns">
           <div className="column is-1 is-hidden-mobile">
             {notMobileControls}
           </div>
-          <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
-            <Dotdotdot clamp={4}>
-              { isFeatured && (
+          <div className="column is-12-mobile is-11-tablet is-11-desktop">
+            <div className="columns is-mobile is-multiline">
+              {isFeatured && (
+                <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3">featured
                     {' '}<i className="fas fa-star" />
                     <br />
                   </strong>
+                </div>
               )}
-              <strong className="orange">#{props.index + 1}</strong>
-              {" "}<strong>{name}</strong>
-              {
-                resolutionSource.length > 0 && (
-                  <span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome"><br />source: {renderCappedLength(28, resolutionSource)}</span>
-                )
-              }
-            </Dotdotdot>
-          </div>
-          <div className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
-            <div className="columns is-multiline">
-              <div className="column content is-12 is-marginless">
-                {prediction.node}
+              <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
+                <Dotdotdot clamp={4}>
+
+                  <strong className="orange">#{props.index + 1}</strong>
+                  {" "}<strong>{name}</strong>
+                  {
+                    resolutionSource.length > 0 && (
+                      <span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome"><br />source: {renderCappedLength(28, resolutionSource)}</span>
+                    )
+                  }
+                </Dotdotdot>
               </div>
-              <div className="column content is-12">
-                <p className="is-italic comment-link is-marginless" data-tip="Coming Soon!">{props.m.getCommentCount()} comments</p>
+              <div className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+                <div className="columns is-multiline">
+                  <div className="column content is-12 is-marginless">
+                    {prediction.node}
+                  </div>
+                  <div className="column content is-12">
+                    <p className="is-italic comment-link is-marginless" data-tip="Coming Soon!">{props.m.getCommentCount()} comments</p>
+                  </div>
+                </div>
+              </div>
+              <div className="column is-half-mobile has-text-right">
+                <div className="columns is-multiline">
+                  <div className="column content is-12 is-marginless is-centered">
+                    {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}
+                    {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
+                      : <Price2
+                        p={props.m.getMarketCapitalization()}
+                        o={props.currencySelectionObserver} />
+                    }
+                    <br />at stake
+                  </div>
+                  <div className="column content is-12">
+                    {renderEndDate()}
+                  </div>
+                </div>
+              </div>
+              <div className="column is-12 is-hidden-tablet">
+                {mobileControls}
               </div>
             </div>
-          </div>
-          <div className="column is-half-mobile has-text-right">
-            <div className="columns is-multiline">
-              <div className="column content is-12 is-marginless is-centered">
-                {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}
-                {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
-                  : <Price2
-                    p={props.m.getMarketCapitalization()}
-                    o={props.currencySelectionObserver} />
-                }
-                <br />at stake
-              </div>
-              <div className="column content is-12">
-                {renderEndDate()}
-              </div>
-            </div>
-          </div>
-          <div className="column is-12 is-hidden-tablet">
-            {mobileControls}
           </div>
         </div>
       </div>

@@ -43,7 +43,6 @@ class App extends React.Component<HasMarketsSummary, State> {
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <ReactTooltip/> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
         <Header ms={ms} currencySelectionObserver={currencySelectionObserver}/>
         <section className="less-padding-bottom section">
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
@@ -117,7 +116,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     super(props);
 
     const paginationOffsetQuery = parseInt(getQueryString('page'), 10);
-    const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery;
+    const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery - 1;
     const paginationLimitQuery = parseInt(localStorage.getItem('paginationLimit') || '', 10);
     const paginationLimit = isNaN(paginationLimitQuery) ? paginationLimits[0] :
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
@@ -133,6 +132,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       sortOrder: 'Money at Stake',
       sortOrderOwner: makeObserverOwner(sortOrders.keys().next().value),
     };
+  }
+
+  public componentDidUpdate() {
+    // When changing pages, react tooltip needs to be updated with the new data-tip attributes
+    ReactTooltip.rebuild();
   }
 
   public render() {
@@ -179,6 +183,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     return (
       <section className="less-padding-top section">
+        <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
         <div className="columns is-centered is-vcentered is-mobile is-multiline is-variable is-1">
           <div
             className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
@@ -309,7 +314,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setPaginationOffset = (paginationOffset: number) => {
-    updateQueryString('page', paginationOffset);
+    updateQueryString('page', paginationOffset + 1);
     this.setState({
       paginationOffset,
     });

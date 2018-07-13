@@ -167,6 +167,7 @@ interface MarketListState {
   searchQuery: string,
   showEnded: boolean,
   sortOrder: sortKey,
+  topOfMarketList: React.RefObject<HTMLDivElement>,
 }
 
 class MarketList extends React.Component<MarketListProps, MarketListState> {
@@ -189,6 +190,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       searchQuery: '',
       showEnded: false,
       sortOrder: 'Money at Stake',
+      topOfMarketList: React.createRef(),
     };
   }
 
@@ -245,7 +247,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       <section className="less-padding-top section">
         <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
         <div className="market-list-controls columns is-centered is-vcentered is-mobile is-multiline">
-          <div
+          <div ref={this.state.topOfMarketList}
             className="column is-paddingless has-text-centered-mobile is-6-mobile has-text-left-tablet has-text-left-desktop">
             <p><strong>Prediction Markets</strong></p>
           </div>
@@ -305,13 +307,20 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         </div>
         <div className="market-list-controls columns is-centered is-vcentered">
           <div className="column has-text-centered">
+            {
+              this.state.paginationOffset > 0 && (
+                <span style={{paddingRight: "3em"}}>
+                  Page {this.state.paginationOffset+1}
+                </span>
+              )
+            }
             <label className="checkbox">
               Show Ended Markets&nbsp;
               <input type="checkbox" onChange={this.setShowEnded} />
             </label>
           </div>
           {/* this spacer column causes "Show Ended Markets" and Search box to be left and right-aligned, respectively */}
-          <div className="column is-hidden-mobile is-4" />
+          <div className="column is-hidden-mobile is-2" />
           <div className="column has-text-centered">
             <div className="search">
               <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery} />
@@ -413,6 +422,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       paginationOffset,
     });
+    if (this.state.topOfMarketList.current !== null) {
+      this.state.topOfMarketList.current.scrollIntoView(true);
+    }
   };
 
   private renderPaginationLimit = (paginationLimit: number) => (paginationLimit);

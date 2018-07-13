@@ -54,7 +54,7 @@ export default class Selector<T> extends React.Component<Props<T>, SelectorState
         if (this.state.isActive) {
           this.setState({ isActive: false });
         }
-      }, 75); // previously this was 25ms, but users reported currency selector not working on desktop, which I believe is due to this race condition. We might want to move to a different dropdown library in general.
+      }, 150); // previously this was 25ms, but users reported currency selector not working on desktop, which I believe is due to this race condition. We might want to move to a different dropdown library in general.
     }
   }
   public toggleIsActive(): void {

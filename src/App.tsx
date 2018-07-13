@@ -3,15 +3,15 @@ import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
-import {Currency, renderCurrency} from './Currency';
+import { Currency, renderCurrency } from './Currency';
 import Footer from './Footer';
-import {Market, MarketsSummary} from './generated/markets_pb';
-import Header, {HasMarketsSummary} from './Header';
-import {makeObserverOwner, ObserverOwner, Observer} from './observer';
+import { Market, MarketsSummary } from './generated/markets_pb';
+import Header, { HasMarketsSummary } from './Header';
+import { makeObserverOwner, ObserverOwner, Observer } from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
 import * as classNames from 'classnames';
-import {getQueryString, updateQueryString} from "./url";
+import { getQueryString, updateQueryString } from "./url";
 import OldSelector from './oldSelector';
 
 // example of changing moment language globally to fr; only works since fr was imported.
@@ -36,20 +36,20 @@ class App extends React.Component<HasMarketsSummary, State> {
   public render() {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
-      return <div/>;
+      return <div />;
     }
 
-    const {currencySelectionObserverOwner} = this.state;
+    const { currencySelectionObserverOwner } = this.state;
     const currencySelectionObserver = this.state.currencySelectionObserverOwner.o;
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <Header ms={ms} currencySelectionObserver={currencySelectionObserver}/>
+        <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
         <section className="less-padding-bottom section">
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
             <div className="column is-12-mobile is-5-tablet is-5-desktop">
               {/* NB logo is fixed width and column must be larger than this or logo column will bleed into next column. The fixed width value in App.scss was chosen to make logo look good responsively. */}
-              <img className="logo" src="logo.png"/>
+              <img className="logo" src="logo.png" />
             </div>
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
@@ -62,7 +62,7 @@ class App extends React.Component<HasMarketsSummary, State> {
         </section>
         <div className="container">
           <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
-                      currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()}/>
+            currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()} />
         </div>
         {Footer}
       </div>
@@ -70,10 +70,26 @@ class App extends React.Component<HasMarketsSummary, State> {
   }
 }
 
+function isFeaturedGoesFirst(a: Market, b: Market): number {
+  const af = a.getIsFeatured();
+  const bf = b.getIsFeatured();
+  if (af && !bf) {
+    return -1;
+  }
+  if (bf && !af) {
+    return 1;
+  }
+  return 0;
+}
+
 type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
-const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number> ([
+const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
   ['Money at Stake', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
     const aCapitalization = a.getMarketCapitalization();
     const bCapitalization = b.getMarketCapitalization();
     if (aCapitalization == null) {
@@ -86,8 +102,20 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
 
     return bCapitalization.getUsd() - aCapitalization.getUsd()
   }],
-  ['New Markets', (a: Market, b: Market) => b.getCreationTime() - a.getCreationTime()],
-  ['Ending Soon', (a: Market, b: Market) => a.getEndDate() - b.getEndDate()]
+  ['New Markets', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return b.getCreationTime() - a.getCreationTime();
+  }],
+  ['Ending Soon', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return a.getEndDate() - b.getEndDate();
+  }]
 ]);
 const paginationLimits = [10, 20, 50];
 
@@ -122,6 +150,8 @@ function getMarketCategory(m: Market): MarketCategory {
   return MarketCategory.Other;
 }
 
+const whitespaceGlobalRegexp = /\s+/g;
+
 interface MarketListProps {
   marketList: Market[],
   currencySelectionObserver: Observer<Currency>,
@@ -131,14 +161,12 @@ interface MarketListProps {
 // TODO create a UIMarket type as a wrapper for Market, which constructs stuff like getMarketCategory() and a moment(endDate) once at in MarketList constructor, instead of each re-render. Note that Market.AsObject is provided by protobuf, so we don't necessarily want to create a complete 3rd type. We also don't want to aggressively call Market.AsObject, it is really expensive and Market itself is quite optimized by protobuf. Current preference is UIMarket { m: Market, ... newStuff }, so that only new fields are declared directly in UIMarket.
 interface MarketListState {
   category: MarketCategory,
-  categoryOwner: ObserverOwner<MarketCategory>,
   paginationLimit: number,
   paginationLimitOwner: ObserverOwner<number>,
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
   sortOrder: sortKey,
-  sortOrderOwner: ObserverOwner<sortKey>,
 }
 
 class MarketList extends React.Component<MarketListProps, MarketListState> {
@@ -155,14 +183,12 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     this.state = {
       category: MarketCategory.All,
-      categoryOwner: makeObserverOwner(MarketCategory.All),
       paginationLimit,
       paginationLimitOwner: makeObserverOwner(10),
       paginationOffset,
       searchQuery: '',
       showEnded: false,
       sortOrder: 'Money at Stake',
-      sortOrderOwner: makeObserverOwner(sortOrders.keys().next().value),
     };
   }
 
@@ -172,15 +198,21 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   }
 
   public render() {
-    const {marketList, currencySelectionObserver} = this.props;
-    const {paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
+    const { marketList, currencySelectionObserver } = this.props;
+    const { paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
 
-    const filteredMarketList = marketList
-      .filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category)
-      .filter((m: Market) => showEnded || moment.unix(m.getEndDate()).isAfter())
-      // Basic fuzzy text search
-      .filter((m: Market) => m.getName().toLowerCase().replace(' ', '').indexOf(searchQuery) !== -1)
-      .sort(sortOrders.get(sortOrder));
+    const filteredMarketList: Market[] = (() => {
+      let ms = marketList.filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category);
+      if (!showEnded) {
+        ms = ms.filter((m: Market) => moment.unix(m.getEndDate()).isAfter(now));
+      }
+      if (searchQuery.length > 0) {
+        // Basic fuzzy text search
+        ms = ms.filter((m: Market) => m.getName().toLowerCase().replace(whitespaceGlobalRegexp, '').indexOf(searchQuery) !== -1 || m.getId().indexOf(searchQuery) !== -1);
+      }
+      ms.sort(sortOrders.get(sortOrder))
+      return ms;
+    })();
 
     const numberOfPages = Math.ceil(filteredMarketList.length / paginationLimit);
 
@@ -199,11 +231,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     ).values());
 
     // Negative page indices represents ellipses
-    if(paginationIndex > 1) {
+    if (paginationIndex > 1) {
       paginationIndices.splice(1, 0, -1);
     }
 
-    if(paginationIndex < numberOfPages - 2) {
+    if (paginationIndex < numberOfPages - 2) {
       paginationIndices.splice(paginationIndices.length - 1, 0, -2);
     }
 
@@ -212,9 +244,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     return (
       <section className="less-padding-top section">
         <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
-        <div className="columns is-centered is-vcentered is-mobile is-multiline is-variable is-1">
+        <div className="market-list-controls columns is-centered is-vcentered is-mobile is-multiline">
           <div
-            className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
+            className="column is-paddingless has-text-centered-mobile is-6-mobile has-text-left-tablet has-text-left-desktop">
             <p><strong>Prediction Markets</strong></p>
           </div>
           <div className="column is-narrow">
@@ -222,45 +254,79 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               currentValueObserver={currencySelectionObserver}
               renderValue={renderCurrency}
               setValue={this.setCurrency}
-              values={[Currency.USD, Currency.ETH, Currency.BTC]}/>
+              values={[Currency.USD, Currency.ETH, Currency.BTC]} />
           </div>
           <div className="column is-narrow">
-            Sort By
+            <div className="level is-mobile" >
+              <div className="level-left" >
+                <div className="level-item sort-by-label">
+                  Sort By&nbsp;
+                </div>
+              </div>
+              <div className="level-right" >
+                <div className="level-item sort-by-box">
+                  <OldSelector
+                    currentValue={sortOrder}
+                    currentRendered={sortOrder}
+                    setValue={this.setSortOrder}
+                    values={Array.from(sortOrders.keys()).map(key => {
+                      return {
+                        rendered: key,
+                        value: key,
+                      }
+                    })} />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="column is-narrow">
-            <Selector<sortKey>
-              currentValueObserver={sortOrderOwner.o}
-              renderValue={this.renderSortOrder}
-              setValue={this.setSortOrder}
-              values={Array.from(sortOrders.keys())}/>
-          </div>
-          <div className="column is-narrow">
-            Category
-          </div>
-          <div className="column is-narrow">
-            <OldSelector
-              currentValue={category}
-              currentRendered={category}
-              setValue={this.setCategory}
-              values={Object.keys(MarketCategory).map(key => {
-                return {
-                  rendered: MarketCategory[key],
-                  value: MarketCategory[key],
-              }})}/>
-          </div>
-          <div className="column is-narrow">
-            <label className="checkbox">
-              <input type="checkbox" onChange={this.setShowEnded}/>&nbsp;
-              Show Ended Markets
-            </label>
-          </div>
-          <div className="column is-narrow">
-            <div className="search">
-              <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery}/>
-              <i className="fas fa-search"/>
+            <div className="level is-mobile" >
+              <div className="level-left" >
+                <div className="level-item category-label">
+                  Category&nbsp;
+                </div>
+              </div>
+              <div className="level-right" >
+                <div className="level-item category-box">
+                  <OldSelector
+                    currentValue={category}
+                    currentRendered={category}
+                    setValue={this.setCategory}
+                    values={Object.keys(MarketCategory).map(key => {
+                      return {
+                        rendered: MarketCategory[key],
+                        value: MarketCategory[key],
+                      }
+                    })} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <div className="market-list-controls columns is-centered is-vcentered">
+          <div className="column has-text-centered">
+            <label className="checkbox">
+              Show Ended Markets&nbsp;
+              <input type="checkbox" onChange={this.setShowEnded} />
+            </label>
+          </div>
+          {/* this spacer column causes "Show Ended Markets" and Search box to be left and right-aligned, respectively */}
+          <div className="column is-hidden-mobile is-4" />
+          <div className="column has-text-centered">
+            <div className="search">
+              <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery} />
+              <i className="fas fa-search" />
+            </div>
+          </div>
+        </div>
+        {
+      filteredMarketList.length < 1 ?
+        <div className="columns is-vcentered">
+          <div className="column content has-text-centered">
+            <strong>No Search Results</strong>
+            <p>Please search on market name or id.</p>
+          </div>
+        </div> :
         <div>
           {filteredMarketList
             .slice(paginationStart, paginationEnd)
@@ -270,67 +336,64 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 now={now}
                 currencySelectionObserver={currencySelectionObserver}
                 m={m}
-                index={paginationStart + index}/>)
+                index={paginationStart + index} />)
             )}
-        <div className="columns is-vcentered">
-          <div className="column is-narrow is-paddingless">
-            <label>
-              Markets Per Page
-            </label>
-          </div>
-          <div className="column is-narrow">
-            <Selector
-              currentValueObserver={paginationLimitOwner.o}
-              renderValue={this.renderPaginationLimit}
-              setValue={this.setPaginationLimit}
-              values={paginationLimits}
-            />
-          </div>
-          <div className="column">
-            <nav className="pagination" role="navigation" aria-label="pagination">
+          <div className="columns is-vcentered">
+            <div className="column is-narrow is-paddingless">
               <label>
-                &nbsp;&nbsp;Page&nbsp;
+                Markets Per Page
               </label>
-              {paginationIndex > 0 && (
-                <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
-              {paginationIndex < numberOfPages - 1 && (
-                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
-              <ul className="pagination-list">
-                { paginationIndices.map((page: number) => page < 0 ? (
-                  <li key={page}>
-                    <span className="pagination-ellipsis">&hellip;</span>
-                  </li>
-                ) :(
-                  <li key={page}>
-                    <a
-                      className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                      aria-label={`Goto page ${page}`}
-                      aria-current="page"
-                      onClick={this.setPaginationOffset.bind(this, page - 1)}
-                    >
-                      {page}
-                    </a>
-                  </li>
-                ))
-                }
-              </ul>
-            </nav>
+            </div>
+            <div className="column is-narrow">
+              <Selector
+                currentValueObserver={paginationLimitOwner.o}
+                renderValue={this.renderPaginationLimit}
+                setValue={this.setPaginationLimit}
+                values={paginationLimits}
+              />
+            </div>
+            <div className="column">
+              <nav className="pagination" role="navigation" aria-label="pagination">
+                <label>
+                  &nbsp;&nbsp;Page&nbsp;
+                </label>
+                {paginationIndex > 0 && (
+                  <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
+                {paginationIndex < numberOfPages - 1 && (
+                  <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                <ul className="pagination-list">
+                  {paginationIndices.map((page: number) => page < 0 ? (
+                    <li key={page}>
+                      <span className="pagination-ellipsis">&hellip;</span>
+                    </li>
+                  ) : (
+                      <li key={page}>
+                        <a
+                          className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                          aria-label={`Goto page ${page}`}
+                          aria-current="page"
+                          onClick={this.setPaginationOffset.bind(this, page - 1)}
+                        >
+                          {page}
+                        </a>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </nav>
+            </div>
           </div>
         </div>
-        </div>
-      </section>
+    }
+      </section >
     );
   }
-
-  private renderSortOrder = (sortOrder: sortKey) => (sortOrder);
 
   private setSortOrder = (sortOrder: sortKey) => {
     this.setState({
       sortOrder,
     });
   };
-
-  private renderCategory = (category: string) => (category);
 
   private setCategory = (category: MarketCategory) => {
     this.setState({
@@ -368,8 +431,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchQuery: string = e.target.value.toLowerCase().replace(' ', '');
-    console.log(searchQuery) // tslint:disable-line:no-console
+    const searchQuery: string = e.target.value.toLowerCase().replace(whitespaceGlobalRegexp, '');
     this.setState({
       searchQuery,
     })

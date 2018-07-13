@@ -70,6 +70,13 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
   }
 }
 
+function renderCappedLength(l: number, s: string): React.ReactNode {
+  if (s.length < l) {
+    return s;
+  }
+  return <span>{s.substring(0,l)}&hellip;</span>;
+}
+
 function getMarketSummaryString(name: string, openInterest: Price | undefined,
   prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {
@@ -217,7 +224,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               {" "}<strong>{name}</strong>
               {
                 resolutionSource.length > 0 && (
-                  <span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome"><br />resolution source: {resolutionSource}</span>
+                  <span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome"><br />source: {renderCappedLength(28, resolutionSource)}</span>
                 )
               }
             </Dotdotdot>

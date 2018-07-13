@@ -214,6 +214,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               )}
               <strong className="orange">#{props.index + 1}</strong>
               {" "}<strong>{name}</strong>
+              <br /><span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome">resolution source: {props.m.getResolutionSource()}</span>
             </Dotdotdot>
           </div>
           <div className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">

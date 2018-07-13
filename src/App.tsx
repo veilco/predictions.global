@@ -10,6 +10,7 @@ import Header, { HasMarketsSummary } from './Header';
 import { makeObserverOwner, ObserverOwner } from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
+import { Routes } from './Routes';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -47,6 +48,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     const now = moment();
     return (
       <div>
+        <Routes />
         <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
         <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
         <section className="less-padding-bottom section">

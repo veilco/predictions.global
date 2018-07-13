@@ -7,9 +7,10 @@ import { Currency, renderCurrency } from './Currency';
 import Footer from './Footer';
 import { Market, MarketsSummary } from './generated/markets_pb';
 import Header, { HasMarketsSummary } from './Header';
-import { makeObserverOwner, ObserverOwner } from './observer';
+import { makeObserverOwner, ObserverOwner, Observer } from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
+import * as classNames from 'classnames';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -19,24 +20,24 @@ interface State {
   currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
 }
 
-const initialState: State = {
-  currencySelectionObserverOwner: undefined,
-}
-
 class App extends React.Component<HasMarketsSummary, State> {
-  public readonly state: State = initialState;
+  public readonly state: State;
+
   public constructor(props: HasMarketsSummary) {
     super(props);
-    this.state = Object.assign({}, this.state, {
+
+    this.state = {
       currencySelectionObserverOwner: makeObserverOwner(Currency.USD),
-    });
+    };
   }
+
   // https://reactjs.org/docs/faq-functions.html
   public setCurrency = (currency: Currency) => {
     if (this.state.currencySelectionObserverOwner !== undefined) {
       this.state.currencySelectionObserverOwner.setValueAndNotifyObservers(currency);
     }
-  }
+  };
+
   public render() {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
@@ -67,7 +68,7 @@ class App extends React.Component<HasMarketsSummary, State> {
               <p><strong>Top Prediction Markets</strong></p>
             </div>
             <div className="column no-padding-bottom is-marginless is-narrow is-4-mobile">
-              <Selector<Currency>
+              <Selector
                 currentValueObserver={currencySelectionObserver}
                 renderValue={renderCurrency}
                 setValue={this.setCurrency}
@@ -80,17 +81,101 @@ class App extends React.Component<HasMarketsSummary, State> {
               </div>
             </div>
           </div>
-          {ms.getMarketsList().map((m: Market, index: number) => <OneMarketSummary
-            key={index}
-            now={now}
-            currencySelectionObserver={currencySelectionObserver}
-            m={m}
-            index={index} />)}
+          <MarketList currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()}/>
+          {/*{ms.getMarketsList().map((m: Market, index: number) => <OneMarketSummary*/}
+            {/*key={index}*/}
+            {/*now={now}*/}
+            {/*currencySelectionObserver={currencySelectionObserver}*/}
+            {/*m={m}*/}
+            {/*index={index} />)}*/}
         </section>
         {Footer}
       </div>
     );
   }
+}
+
+interface MarketListProps {
+  marketList: Market[],
+  currencySelectionObserver: Observer<Currency>,
+}
+
+interface MarketListState {
+  paginationLimit: number,
+  paginationOffset: number,
+}
+
+class MarketList extends React.Component<MarketListProps, MarketListState> {
+  public readonly state: MarketListState;
+
+  constructor(props: MarketListProps) {
+    super(props);
+
+    this.state = {
+      paginationLimit: 2,
+      paginationOffset: 0,
+    };
+  }
+
+  public render() {
+    const { marketList, currencySelectionObserver } = this.props;
+    const { paginationLimit, paginationOffset } = this.state;
+
+    const numberOfPages = Math.ceil(marketList.length / paginationLimit);
+    const paginationStart = paginationLimit * paginationOffset;
+    const paginationEnd = paginationLimit * (paginationOffset + 1);
+
+    const paginationIndices = Array.from(new Set([
+      1,
+      Math.max(paginationOffset, 1),
+      paginationOffset + 1,
+      Math.min(paginationOffset + 2, numberOfPages),
+      numberOfPages]
+    ).values());
+
+    const now = moment();
+
+
+    return (
+      <div>
+        {marketList
+          .slice(paginationStart, paginationEnd)
+          .map((m: Market, index: number) => (
+          <OneMarketSummary
+            key={paginationStart + index}
+            now={now}
+            currencySelectionObserver={currencySelectionObserver}
+            m={m}
+            index={paginationStart + index} />)
+          )}
+        <nav className="pagination is-centered" role="navigation" aria-label="pagination">
+          { paginationOffset > 0 && (<a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationOffset - 1)}>Prev Page</a>)}
+          { paginationOffset < numberOfPages - 1 && (<a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationOffset + 1)}>Next Page</a>)}
+          <ul className="pagination-list">
+            { paginationIndices.map((page: number) => (
+              <li key={page}>
+                <a
+                  className={classNames('pagination-link', page === (paginationOffset + 1) && 'is-current')}
+                  aria-label={`Goto page ${page}`}
+                  aria-current="page"
+                  onClick={this.setPaginationOffset.bind(this, page - 1)}
+                >
+                  {page}
+                  </a>
+              </li>
+            ))
+            }
+          </ul>
+        </nav>
+      </div>
+    );
+  }
+
+  private setPaginationOffset(page: number) {
+    this.setState({
+      paginationOffset: page,
+    });
+  };
 }
 
 export default App;

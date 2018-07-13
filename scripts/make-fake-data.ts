@@ -19,6 +19,7 @@ myMS.setMarketsList([
     m.setMarketType(MarketType.CATEGORICAL);
     m.setName("Who will be President in 2020?");
     m.setCommentCount(42);
+    m.setCategory('Sports');
     m.setPredictionsList([
       (() => {
         const p = new Prediction();
@@ -47,6 +48,7 @@ myMS.setMarketsList([
     m.setMarketType(MarketType.CATEGORICAL);
     m.setName("Who will be Chief Justice in 2023?");
     m.setCommentCount(42);
+    m.setCategory('Politics');
     m.setPredictionsList([
       (() => {
         const p = new Prediction();
@@ -75,6 +77,7 @@ myMS.setMarketsList([
     m.setMarketType(MarketType.YESNO);
     m.setName("Will Augur have more than 650 markets created a week after launch?");
     m.setCommentCount(638);
+    m.setCategory('Cryptocurrency');
     m.setPredictionsList([
       (() => {
         const p = new Prediction();
@@ -103,6 +106,7 @@ myMS.setMarketsList([
     m.setMarketType(MarketType.SCALAR);
     m.setName("How many markets will have been created in Augur mainnet by Fri Jul 13, 2018? Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec lacinia neque vel quam malesuada, bibendum fermentum massa euismod. Nulla massa mauris, elementum eu convallis in, vulputate in ipsum.");
     m.setCommentCount(37);
+    m.setCategory('Cryptocurrency');
     m.setPredictionsList([
       (() => {
         const p = new Prediction();
@@ -131,6 +135,7 @@ myMS.setMarketsList([
     m.setMarketType(MarketType.SCALAR);
     m.setName("Why did this market end already?");
     m.setCommentCount(37);
+    m.setCategory('Cryptocurrency');
     m.setPredictionsList([
       (() => {
         const p = new Prediction();

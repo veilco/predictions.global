@@ -3,7 +3,7 @@ import { Currency } from './Currency';
 import { MarketsSummary } from './generated/markets_pb';
 import { Observer } from './observer';
 import OldSelector from './oldSelector';
-import Price2, { renderInt } from './Price';
+import Price2, { numberFormat } from './Price';
 
 export const feedbackFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSdTCmsQH3EUKOaIeV1ECA124iLZMB5GiHby7XtRj19glqtNRw/viewform";
 
@@ -64,7 +64,7 @@ const Header: React.SFC<HeaderProps> = (props) => {
             <div className="datum column is-narrow">
               <span className="content">
                 <strong>Markets: </strong>
-                {renderInt(props.ms.getTotalMarkets())}
+                {numberFormat.format(props.ms.getTotalMarkets())}
               </span>
             </div>
             <div className="datum column is-narrow">
@@ -76,7 +76,7 @@ const Header: React.SFC<HeaderProps> = (props) => {
             <div className="datum column">
               <span className="content">
                 <strong>Block Number: </strong>
-                {renderInt(props.ms.getBlock())}
+                {numberFormat.format(props.ms.getBlock())}
               </span>
             </div>
           </div>

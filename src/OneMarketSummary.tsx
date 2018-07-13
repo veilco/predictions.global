@@ -7,7 +7,7 @@ import { TwitterIcon, TwitterShareButton } from 'react-share';
 import { Currency } from './Currency';
 import { Market, MarketType, Prediction, Price } from './generated/markets_pb';
 import { Observer } from './observer';
-import Price2, { usdFormat } from "./Price";
+import Price2, { usdFormat, numberFormat } from "./Price";
 
 interface HasMarket {
   m: Market
@@ -31,7 +31,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
   const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
   const r = `${Math.round(p)}%`; // assume 0 <= p < 100 (as opposed to p < 1.0)
   const name = ps[0].getName();
-  const v = ps[0].getValue();
+  const v = numberFormat.format(ps[0].getValue());
   switch (mt) {
     case MarketType.YESNO:
       text += `${r} Yes`;
@@ -115,30 +115,38 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       }
     }, 100);
   }
+
   // tslint:disable-next-line
   public marketIdCopiedToClipboard = this.copiedToClipboard.bind(this, "isMarketIdCopiedToClipboard")
+
   // tslint:disable-next-line
   public marketSummaryCopiedToClipboard = this.copiedToClipboard.bind(this, "isMarketSummaryCopiedToClipboard")
+
   public render() {
     const props = this.props;
-    const name = props.m.getName()
+    const name = props.m.getName();
     const ps = props.m.getPredictionsList();
     const mt = props.m.getMarketType();
+    const isFeatured = props.m.getIsFeatured();
     const prediction = renderPrediction(mt, ps);
     const openInterest = props.m.getMarketCapitalization();
     const callToActionURL = "https://predictions.global" // TODO link to this market directly once that's possible
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
+
     function renderEndDate(): React.ReactNode {
       const endDate = moment.unix(props.m.getEndDate());
       return <span>{props.now.isBefore(endDate) ? 'ends' : 'ended'} {props.now.to(endDate)}</span>;
     }
+
     const controls = (type: "mobile" | "not-mobile") => <div className={"columns market-controls has-text-centered is-centered " + (
       type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline"
     )}>
       <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
         <TwitterShareButton url={callToActionURL} title={marketSummary}>
           <TwitterIcon
-            size={25} /* size 25 produces a twitter bird the same size as the official twitter bird in the official (but shitty) tweet generator https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview */
+            size={
+              /* Size 25 produces a twitter bird the same size as the official twitter bird in the official (but shitty) tweet generator https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview */
+              25}
             round={true}
           />
         </TwitterShareButton >
@@ -191,7 +199,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const notMobileControls = controls("not-mobile");
     const mobileControls = controls("mobile");
     return <div className="market columns is-centered">
-      <div className="column box is-narrow is-12-mobile is-9-tablet is-9-desktop">
+      <div className="column box">
         <div className="columns is-mobile is-multiline">
           <div className="column is-1 is-hidden-mobile">
             {notMobileControls}
@@ -226,6 +234,13 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column content is-12">
                 {renderEndDate()}
               </div>
+
+              { isFeatured && (
+                <div className="column content is-12">
+                  Featured
+                </div>
+              )}
+
             </div>
           </div>
           <div className="column is-12 is-hidden-tablet">

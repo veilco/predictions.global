@@ -3,7 +3,6 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
-    "@types/classnames": "^2.2.4",
     "bulma": "^0.7.1",
     "classnames": "^2.2.6",
     "google-protobuf": "^3.6.0",
@@ -40,6 +39,7 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.4",
     "@types/google-protobuf": "^3.2.7",
     "@types/jest": "^23.1.2",
     "@types/mkdirp": "^0.5.2",

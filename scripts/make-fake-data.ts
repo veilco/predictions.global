@@ -75,6 +75,7 @@ myMS.setMarketsList([
     const m = new Market();
     m.setId('3938');
     m.setMarketType(MarketType.YESNO);
+    m.setIsFeatured(true);
     m.setName("Will Augur have more than 650 markets created a week after launch?");
     m.setCommentCount(638);
     m.setCategory('Cryptocurrency');

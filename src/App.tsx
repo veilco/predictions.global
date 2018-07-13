@@ -69,7 +69,9 @@ class App extends React.Component<HasMarketsSummary, State> {
   }
 }
 
-const sortOrders: Map<string, (a: Market, b: Market) => number> = new Map([
+type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
+
+const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number> ([
   ['Money at Stake', (a: Market, b: Market) => {
     const aCapitalization = a.getMarketCapitalization();
     const bCapitalization = b.getMarketCapitalization();
@@ -105,8 +107,8 @@ interface MarketListState {
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
-  sortOrder: string,
-  sortOrderOwner: ObserverOwner<string>,
+  sortOrder: sortKey,
+  sortOrderOwner: ObserverOwner<sortKey>,
 }
 
 class MarketList extends React.Component<MarketListProps, MarketListState> {
@@ -200,7 +202,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             Sort By
           </div>
           <div className="column is-narrow">
-            <Selector
+            <Selector<sortKey>
               currentValueObserver={sortOrderOwner.o}
               renderValue={this.renderSortOrder}
               setValue={this.setSortOrder}
@@ -290,9 +292,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     );
   }
 
-  private renderSortOrder = (sortOrder: string) => (sortOrder);
+  private renderSortOrder = (sortOrder: sortKey) => (sortOrder);
 
-  private setSortOrder = (sortOrder: string) => {
+  private setSortOrder = (sortOrder: sortKey) => {
     this.setState({
       sortOrder,
     });

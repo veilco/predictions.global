@@ -162,7 +162,6 @@ interface MarketListProps {
 interface MarketListState {
   category: MarketCategory,
   paginationLimit: number,
-  paginationLimitOwner: ObserverOwner<number>,
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
@@ -185,7 +184,6 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.state = {
       category: MarketCategory.All,
       paginationLimit,
-      paginationLimitOwner: makeObserverOwner(10),
       paginationOffset,
       searchQuery: '',
       showEnded: false,
@@ -201,7 +199,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   public render() {
     const { marketList, currencySelectionObserver } = this.props;
-    const { paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
+    const { paginationLimit, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
 
     const filteredMarketList: Market[] = (() => {
       let ms = marketList.filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category);
@@ -354,12 +352,16 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               </label>
             </div>
             <div className="column is-narrow">
-              <Selector
-                currentValueObserver={paginationLimitOwner.o}
-                renderValue={this.renderPaginationLimit}
+              <OldSelector
+                currentValue={paginationLimit}
+                currentRendered={paginationLimit}
                 setValue={this.setPaginationLimit}
-                values={paginationLimits}
-              />
+                values={paginationLimits.map(l => {
+                  return {
+                    rendered: l,
+                    value: l,
+                  }
+                })} />
             </div>
             <div className="column">
               <nav className="pagination" role="navigation" aria-label="pagination">

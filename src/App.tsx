@@ -118,7 +118,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     const paginationOffsetQuery = parseInt(getQueryString('page'), 10);
     const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery;
-    const paginationLimitQuery = parseInt(getQueryString('limit'), 10);
+    const paginationLimitQuery = parseInt(localStorage.getItem('paginationLimit') || '', 10);
     const paginationLimit = isNaN(paginationLimitQuery) ? paginationLimits[0] :
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
 
@@ -179,7 +179,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     return (
       <section className="less-padding-top section">
-        <div className="columns is-centered is-vcentered is-mobile is-multiline">
+        <div className="columns is-centered is-vcentered is-mobile is-multiline is-variable is-1">
           <div
             className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
             <p><strong>Prediction Markets</strong></p>
@@ -192,11 +192,17 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               values={[Currency.USD, Currency.ETH, Currency.BTC]}/>
           </div>
           <div className="column is-narrow">
+            Sort By
+          </div>
+          <div className="column is-narrow">
             <Selector
               currentValueObserver={sortOrderOwner.o}
               renderValue={this.renderSortOrder}
               setValue={this.setSortOrder}
               values={Array.from(sortOrders.keys())}/>
+          </div>
+          <div className="column is-narrow">
+            Category
           </div>
           <div className="column is-narrow">
             <Selector
@@ -249,11 +255,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 &nbsp;&nbsp;Page&nbsp;
               </label>
               {paginationIndex > 0 && (
-                <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev
-                  Page</a>)}
+                <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
               {paginationIndex < numberOfPages - 1 && (
-                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next
-                  Page</a>)}
+                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next Page</a>)}
               <ul className="pagination-list">
                 { paginationIndices.map((page: number) => page < 0 ? (
                   <li key={page}>
@@ -314,7 +318,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   private renderPaginationLimit = (paginationLimit: number) => (paginationLimit);
 
   private setPaginationLimit = (paginationLimit: number) => {
-    updateQueryString('limit', paginationLimit);
+    localStorage.setItem('paginationLimit', paginationLimit.toString());
     this.setState({
       paginationLimit,
     });

@@ -58,13 +58,34 @@ class App extends React.Component<HasMarketsSummary, State> {
             </div>
           </div>
         </section>
-        <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
-                    currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()}/>
+        <div className="container">
+          <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
+                      currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()}/>
+        </div>
         {Footer}
       </div>
     );
   }
 }
+
+const sortOrders: Map<string, (a: Market, b: Market) => number> = new Map([
+  ['Money at Stake', (a: Market, b: Market) => {
+    const aCapitalization = a.getMarketCapitalization();
+    const bCapitalization = b.getMarketCapitalization();
+    if (aCapitalization == null) {
+      return -1;
+    }
+
+    if (bCapitalization == null) {
+      return 1;
+    }
+
+    return aCapitalization.getUsd() - bCapitalization.getUsd()
+  }],
+  ['New Markets', (a: Market, b: Market) => b.getCreationTime() - a.getCreationTime()],
+  ['Ending Soon', (a: Market, b: Market) => a.getEndDate() - b.getEndDate()]
+]);
+const categories = ['All', 'Sports', 'Cryptocurrency', 'Other'];
 
 interface MarketListProps {
   marketList: Market[],
@@ -73,9 +94,14 @@ interface MarketListProps {
 }
 
 interface MarketListState {
+  category: string,
+  categoryOwner: ObserverOwner<string>,
   paginationLimit: number,
   paginationOffset: number,
+  searchQuery: string,
   showEnded: boolean,
+  sortOrder: string,
+  sortOrderOwner: ObserverOwner<string>,
 }
 
 class MarketList extends React.Component<MarketListProps, MarketListState> {
@@ -85,17 +111,26 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     super(props);
 
     this.state = {
+      category: 'All',
+      categoryOwner: makeObserverOwner(categories[0]),
       paginationLimit: 2,
       paginationOffset: 0,
+      searchQuery: '',
       showEnded: false,
+      sortOrder: 'Money at Stake',
+      sortOrderOwner: makeObserverOwner(sortOrders.keys().next().value),
     };
   }
 
   public render() {
     const {marketList, currencySelectionObserver} = this.props;
-    const {paginationLimit, paginationOffset, showEnded} = this.state;
+    const {paginationLimit, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
 
-    const filteredMarketList = marketList.filter((market: Market) => showEnded || moment.unix(market.getEndDate()).isAfter());
+    const filteredMarketList = marketList
+      .filter((market: Market) => category === 'All' || market.getCategory() === category)
+      .filter((market: Market) => showEnded || moment.unix(market.getEndDate()).isAfter())
+      .filter((market: Market) => market.getName().toLowerCase().replace(' ', '').indexOf(searchQuery) !== -1)
+      .sort(sortOrders.get(sortOrder));
 
     const numberOfPages = Math.ceil(filteredMarketList.length / paginationLimit);
     const paginationStart = paginationLimit * paginationOffset;
@@ -114,27 +149,40 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     return (
       <section className="less-padding-top section">
         <div
-          className="columns is-centered is-vcentered is-mobile is-marginless is-paddingless is-multiline is-8 is-variable">
-          <div
-            className="column no-padding-bottom is-8-mobile is-4-tablet is-4-desktop is-marginless content has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
-            <p><strong>Top Prediction Markets</strong></p>
-          </div>
-          <div className="column no-padding-bottom is-marginless is-narrow is-4-mobile">
+          className="column no-padding-bottom is-8-mobile is-4-tablet is-4-desktop is-marginless content has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
+          <p><strong>Prediction Markets</strong></p>
+        </div>
+        <div className="columns is-centered is-vcentered is-mobile">
+          <div className="column">
             <Selector
               currentValueObserver={currencySelectionObserver}
               renderValue={renderCurrency}
               setValue={this.setCurrency}
               values={[Currency.USD, Currency.ETH, Currency.BTC]}/>
           </div>
-          <div className="column no-padding-bottom is-marginless is-narrow is-4-mobile">
+          <div className="column">
+            <Selector
+              currentValueObserver={sortOrderOwner.o}
+              renderValue={this.renderSortOrder}
+              setValue={this.setSortOrder}
+              values={Array.from(sortOrders.keys())}/>
+          </div>
+          <div className="column">
+            <Selector
+              currentValueObserver={categoryOwner.o}
+              renderValue={this.renderCategory}
+              setValue={this.setCategory}
+              values={categories}/>
+          </div>
+          <div className="column">
             <label className="checkbox">
-              <input type="checkbox" onChange={this.setShowEnded} />&nbsp;
+              <input type="checkbox" onChange={this.setShowEnded}/>&nbsp;
               Show Ended Markets
             </label>
           </div>
-          <div className="column no-padding-bottom is-marginless is-narrow">
+          <div className="column">
             <div className="search">
-              <input className="input" type="text" placeholder="Search Coming Soon!"/>
+              <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery}/>
               <i className="fas fa-search"/>
             </div>
           </div>
@@ -178,6 +226,22 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     );
   }
 
+  private renderSortOrder = (sortOrder: string) => (sortOrder);
+
+  private setSortOrder = (sortOrder: string) => {
+    this.setState({
+      sortOrder,
+    });
+  };
+
+  private renderCategory = (category: string) => (category);
+
+  private setCategory = (category: string) => {
+    this.setState({
+      category,
+    });
+  };
+
   // https://reactjs.org/docs/faq-functions.html
   private setCurrency = (currency: Currency) => {
     if (this.props.currencySelectionObserverOwner) {
@@ -185,9 +249,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     }
   };
 
-  private setPaginationOffset = (page: number) => {
+  private setPaginationOffset = (paginationOffset: number) => {
     this.setState({
-      paginationOffset: page,
+      paginationOffset,
     });
   };
 
@@ -195,6 +259,14 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState(prevState => ({
       showEnded: !prevState.showEnded,
     }));
+  };
+
+  private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchQuery: string = e.target.value.toLowerCase().replace(' ', '');
+    console.log(searchQuery) // tslint:disable-line:no-console
+    this.setState({
+      searchQuery,
+    })
   };
 }
 

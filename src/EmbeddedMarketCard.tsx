@@ -23,7 +23,7 @@ export class EmbeddedMarketCard extends React.Component<EmbeddedMarketCardProps,
     };
   }
 
-  public render() {
+  public render(): JSX.Element {
     const {currencyObserverOwner} = this.state;
     const {marketsSummary, match} = this.props;
     const marketsList = marketsSummary.getMarketsList();

@@ -23,7 +23,7 @@ interface State {
   currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
 }
 
-class App extends React.Component<HasMarketsSummary, State> {
+export class App extends React.Component<HasMarketsSummary, State> {
   public readonly state: State;
 
   public constructor(props: HasMarketsSummary) {
@@ -34,7 +34,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     };
   }
 
-  public render() {
+  public render(): JSX.Element {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
       return <div/>;
@@ -230,7 +230,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             Sort By
           </div>
           <div className="column is-narrow">
-            <Selector<sortKey>
+            <Selector
               currentValueObserver={sortOrderOwner.o}
               renderValue={this.renderSortOrder}
               setValue={this.setSortOrder}
@@ -371,11 +371,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchQuery: string = e.target.value.toLowerCase().replace(' ', '');
-    console.log(searchQuery) // tslint:disable-line:no-console
     this.setState({
       searchQuery,
     })
   };
 }
-
-export default App;

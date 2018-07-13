@@ -89,6 +89,9 @@ const sortOrders: Map<string, (a: Market, b: Market) => number> = new Map([
 ]);
 const paginationLimits = [10, 20, 50];
 
+// Wildcard category that matches any and all categories
+const allCategory = 'All';
+
 interface MarketListProps {
   marketList: Market[],
   currencySelectionObserver: Observer<Currency>,
@@ -120,8 +123,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
 
     this.state = {
-      category: 'All',
-      categoryOwner: makeObserverOwner('All'),
+      category: allCategory,
+      categoryOwner: makeObserverOwner(allCategory),
       paginationLimit,
       paginationLimitOwner: makeObserverOwner(10),
       paginationOffset,
@@ -137,10 +140,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     const {paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
 
     // Possible to optimize by only updating when props received
-    const categories = ['All'].concat(Array.from(marketList.reduce((acc: Set<string>, market: Market) => acc.add(market.getCategory()), new Set()).values()));
+    const categories = [allCategory].concat(Array.from(marketList.reduce((acc: Set<string>, market: Market) => acc.add(market.getCategory()), new Set()).values()));
 
     const filteredMarketList = marketList
-      .filter((market: Market) => category === 'All' || market.getCategory() === category)
+      .filter((market: Market) => category === allCategory || market.getCategory() === category)
       .filter((market: Market) => showEnded || moment.unix(market.getEndDate()).isAfter())
 
       // Basic fuzzy text search

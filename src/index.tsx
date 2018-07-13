@@ -10,4 +10,4 @@ import registerServiceWorker from './registerServiceWorker';
 
 registerServiceWorker();
 
-ReactDOM.render(<Routes />, document.getElementById('root') as HTMLElement);
+ReactDOM.render(<Routes/>, document.getElementById('root') as HTMLElement);

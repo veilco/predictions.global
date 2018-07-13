@@ -3,11 +3,11 @@ import * as React from 'react';
 import * as CopyToClipboard from 'react-copy-to-clipboard';
 // @ts-ignore for Dotdotdot
 import Dotdotdot from 'react-dotdotdot';
-import { TwitterIcon, TwitterShareButton } from 'react-share';
-import { Currency } from './Currency';
-import { Market, MarketType, Prediction, Price } from './generated/markets_pb';
-import { Observer } from './observer';
-import Price2, { usdFormat, numberFormat } from "./Price";
+import {TwitterIcon, TwitterShareButton} from 'react-share';
+import {Currency} from './Currency';
+import {Market, MarketType, Prediction, Price} from './generated/markets_pb';
+import {Observer} from './observer';
+import Price2, {usdFormat, numberFormat} from "./Price";
 import * as classNames from 'classnames';
 import * as ReactTooltip from "react-tooltip";
 
@@ -52,7 +52,8 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
-          <span className="orange" data-multiline={true} data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+          <span className="orange" data-multiline={true}
+                data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
             {r} {name}
           </span>
         </Dotdotdot>,
@@ -63,7 +64,8 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
-          <span className="orange" data-multiline={true} data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+          <span className="orange" data-multiline={true}
+                data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
             {v} {name}
           </span>
         </Dotdotdot>,
@@ -73,7 +75,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
 }
 
 function getMarketSummaryString(name: string, openInterest: Price | undefined,
-  prediction: RenderedPrediction): string {
+                                prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {
     name += '?';
   }
@@ -115,16 +117,16 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
   public copiedToClipboard = (type: "isMarketIdCopiedToClipboard" | "isMarketSummaryCopiedToClipboard") => {
     // weird if statement required for typescript to recognize type is valid key of state
     if (type === "isMarketIdCopiedToClipboard") {
-      this.setState({ [type]: true });
+      this.setState({[type]: true});
     } else {
-      this.setState({ [type]: true });
+      this.setState({[type]: true});
     }
     setTimeout(() => {
       if (this.state[type]) {
         if (type === "isMarketIdCopiedToClipboard") {
-          this.setState({ [type]: false });
+          this.setState({[type]: false});
         } else {
-          this.setState({ [type]: false });
+          this.setState({[type]: false});
         }
       }
     }, 100);
@@ -138,7 +140,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
 
   public render() {
     const props = this.props;
-    const { m, isEmbedded } = this.props;
+    const {m, isEmbedded} = this.props;
     const {showEmbed} = this.state;
 
     const marketID = m.getId();
@@ -156,9 +158,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       return <span>{props.now.isBefore(endDate) ? 'ends' : 'ended'} {props.now.to(endDate)}</span>;
     }
 
-    const controls = (type: "mobile" | "not-mobile") => <div className={"columns market-controls has-text-centered is-centered " + (
-      type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline"
-    )}>
+    const controls = (type: "mobile" | "not-mobile") => <div
+      className={"columns market-controls has-text-centered is-centered " + (
+        type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline"
+      )}>
       <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
         <TwitterShareButton url={callToActionURL} title={marketSummary}>
           <TwitterIcon
@@ -167,22 +170,22 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               25}
             round={true}
           />
-        </TwitterShareButton >
+        </TwitterShareButton>
       </div>
       <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
         <CopyToClipboard text={`${marketSummary} ${callToActionURL}`}
-          onCopy={this.marketSummaryCopiedToClipboard}>
+                         onCopy={this.marketSummaryCopiedToClipboard}>
           <i className={
             (this.state.isMarketSummaryCopiedToClipboard ? 'fas' : 'far') + ' fa-copy'}
-            data-tip={
-              /* mobile tooltips don't display until clicked */
-              type === 'mobile' ? "Copied market summary to clipboard" : "Copy market summary to clipboard"
-            } />
+             data-tip={
+               /* mobile tooltips don't display until clicked */
+               type === 'mobile' ? "Copied market summary to clipboard" : "Copy market summary to clipboard"
+             }/>
         </CopyToClipboard>
       </div>
       <div className={"column content is-marginless " + (type === "mobile" ? "is-narrow" : "is-12")}>
         <CopyToClipboard text={props.m.getId()}
-          onCopy={this.marketIdCopiedToClipboard}>
+                         onCopy={this.marketIdCopiedToClipboard}>
           <div data-tip={
             /* mobile tooltips don't display until clicked */
             type === 'mobile' ? "Copied Augur market ID to clipboard" : "Copy Augur market ID to clipboard"
@@ -201,15 +204,15 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
         {
           type === 'mobile' ?
             <img className="augur-logo"
-              src="/augur-logo.svg"
-              data-multiline={true}
-              data-tip='View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of this page.' />
+                 src="/augur-logo.svg"
+                 data-multiline={true}
+                 data-tip='View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of this page.'/>
             : <a target="blank"
-              href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
+                 href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
               <img className="augur-logo"
-                src="/augur-logo.svg"
-                data-multiline={true}
-                data-tip='View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of this page.' />
+                   src="/augur-logo.svg"
+                   data-multiline={true}
+                   data-tip='View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of this page.'/>
             </a>
         }
       </div>
@@ -228,13 +231,15 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               {" "}<strong>{name}</strong>
             </Dotdotdot>
           </div>
-          <div className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+          <div
+            className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
             <div className="columns is-multiline">
               <div className="column content is-12 is-marginless">
                 {prediction.node}
               </div>
               <div className="column content is-12">
-                <p className="is-italic comment-link is-marginless" data-tip="Coming Soon!">{props.m.getCommentCount()} comments</p>
+                <p className="is-italic comment-link is-marginless" data-tip="Coming Soon!">{props.m.getCommentCount()}
+                  comments</p>
               </div>
             </div>
           </div>
@@ -245,21 +250,21 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
                   : <Price2
                     p={props.m.getMarketCapitalization()}
-                    o={props.currencySelectionObserver} />
+                    o={props.currencySelectionObserver}/>
                 }
-                <br />at stake
+                <br/>at stake
               </div>
               <div className="column content is-12">
                 {renderEndDate()}
               </div>
 
-              { isFeatured && (
+              {isFeatured && (
                 <div className="column content is-12">
                   Featured
                 </div>
               )}
 
-              { !isEmbedded && (
+              {!isEmbedded && (
                 <div className="column content is-12">
                   <button className="button" onClick={this.toggleEmbed}>Embed</button>
                 </div>
@@ -283,7 +288,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     <button className="button is-success" onClick={this.closeEmbed}>Done</button>
                   </footer>
                 </div>
-                <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed} />
+                <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed}/>
               </div>
 
             </div>
@@ -310,7 +315,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
 
   private handleEscapeKey = (e: KeyboardEvent) => {
     // Escape keycode
-    if(e.keyCode === 27) {
+    if (e.keyCode === 27) {
       this.closeEmbed();
     }
   };

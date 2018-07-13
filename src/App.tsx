@@ -54,7 +54,8 @@ export class Home extends React.Component<HasMarketsSummary, State> {
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
               <p>
-                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net" target="blank">Augur</a>
+                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
+                                                                                  target="blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>
@@ -72,7 +73,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
 
 type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
-const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number> ([
+const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
   ['Money at Stake', (a: Market, b: Market) => {
     const aCapitalization = a.getMarketCapitalization();
     const bCapitalization = b.getMarketCapitalization();
@@ -199,11 +200,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     ).values());
 
     // Negative page indices represents ellipses
-    if(paginationIndex > 1) {
+    if (paginationIndex > 1) {
       paginationIndices.splice(1, 0, -1);
     }
 
-    if(paginationIndex < numberOfPages - 2) {
+    if (paginationIndex < numberOfPages - 2) {
       paginationIndices.splice(paginationIndices.length - 1, 0, -2);
     }
 
@@ -211,7 +212,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     return (
       <section className="less-padding-top section">
-        <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
+        <ReactTooltip/> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
         <div className="columns is-centered is-vcentered is-mobile is-multiline is-variable is-1">
           <div
             className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
@@ -246,7 +247,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 return {
                   rendered: MarketCategory[key],
                   value: MarketCategory[key],
-              }})}/>
+                }
+              })}/>
           </div>
           <div className="column is-narrow">
             <label className="checkbox">
@@ -272,51 +274,52 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index}/>)
             )}
-        <div className="columns is-vcentered">
-          <div className="column is-narrow is-paddingless">
-            <label>
-              Markets Per Page
-            </label>
-          </div>
-          <div className="column is-narrow">
-            <Selector
-              currentValueObserver={paginationLimitOwner.o}
-              renderValue={this.renderPaginationLimit}
-              setValue={this.setPaginationLimit}
-              values={paginationLimits}
-            />
-          </div>
-          <div className="column">
-            <nav className="pagination" role="navigation" aria-label="pagination">
+          <div className="columns is-vcentered">
+            <div className="column is-narrow is-paddingless">
               <label>
-                &nbsp;&nbsp;Page&nbsp;
+                Markets Per Page
               </label>
-              {paginationIndex > 0 && (
-                <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
-              {paginationIndex < numberOfPages - 1 && (
-                <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
-              <ul className="pagination-list">
-                { paginationIndices.map((page: number) => page < 0 ? (
-                  <li key={page}>
-                    <span className="pagination-ellipsis">&hellip;</span>
-                  </li>
-                ) :(
-                  <li key={page}>
-                    <a
-                      className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                      aria-label={`Goto page ${page}`}
-                      aria-current="page"
-                      onClick={this.setPaginationOffset.bind(this, page - 1)}
-                    >
-                      {page}
-                    </a>
-                  </li>
-                ))
-                }
-              </ul>
-            </nav>
+            </div>
+            <div className="column is-narrow">
+              <Selector
+                currentValueObserver={paginationLimitOwner.o}
+                renderValue={this.renderPaginationLimit}
+                setValue={this.setPaginationLimit}
+                values={paginationLimits}
+              />
+            </div>
+            <div className="column">
+              <nav className="pagination" role="navigation" aria-label="pagination">
+                <label>
+                  &nbsp;&nbsp;Page&nbsp;
+                </label>
+                {paginationIndex > 0 && (
+                  <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
+                {paginationIndex < numberOfPages - 1 && (
+                  <a className="pagination-next"
+                     onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                <ul className="pagination-list">
+                  {paginationIndices.map((page: number) => page < 0 ? (
+                    <li key={page}>
+                      <span className="pagination-ellipsis">&hellip;</span>
+                    </li>
+                  ) : (
+                    <li key={page}>
+                      <a
+                        className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                        aria-label={`Goto page ${page}`}
+                        aria-current="page"
+                        onClick={this.setPaginationOffset.bind(this, page - 1)}
+                      >
+                        {page}
+                      </a>
+                    </li>
+                  ))
+                  }
+                </ul>
+              </nav>
+            </div>
           </div>
-        </div>
         </div>
       </section>
     );

@@ -42,7 +42,7 @@ function periodic<T>(func: () => Promise<T>, callback: (data: T) => void, interv
   return () => {
     isCancelled = true;
 
-    if(periodicFuncTimeout) {
+    if (periodicFuncTimeout) {
       clearTimeout(periodicFuncTimeout);
     }
   };
@@ -71,17 +71,18 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public componentWillUnmount() {
-    if(this.cancelFetchMarketsSummary) {
+    if (this.cancelFetchMarketsSummary) {
       this.cancelFetchMarketsSummary();
     }
   }
 
   public render(): JSX.Element {
     const {marketsSummary} = this.state;
-    if(marketsSummary == null) {
+    if (marketsSummary == null) {
       return (
         <div>
-          <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo" src="/logo.png" />
+          <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo"
+               src="/logo.png"/>
           <div style={{textAlign: 'center', marginTop: '40px'}}>
             <div style={{display: 'inline-block'}}>
               <i className="fas fa-sync fa-spin fa-2x"/>
@@ -92,7 +93,8 @@ export class Routes extends React.Component<any, RoutesState> {
     }
 
     const renderHome = (props: object) => (<Home ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
-    const renderEmbeddedMarketCard = (props: object) => (<EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+    const renderEmbeddedMarketCard = (props: object) => (
+      <EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     return (
       <Router>
         <div>
@@ -105,7 +107,7 @@ export class Routes extends React.Component<any, RoutesState> {
 
   private setMarketsSummary = (marketsSummary: MarketsSummary) => {
     // Disable automatic reloads
-    if(this.cancelFetchMarketsSummary) {
+    if (this.cancelFetchMarketsSummary) {
       this.cancelFetchMarketsSummary();
     }
 

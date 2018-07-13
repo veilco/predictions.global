@@ -44,7 +44,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
+        <Header ms={ms} currencySelectionObserver={currencySelectionObserver}/>
         <section className="less-padding-bottom section">
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
             <div className="column is-12-mobile is-5-tablet is-5-desktop">

@@ -206,6 +206,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           </div>
           <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
             <Dotdotdot clamp={4}>
+              { isFeatured || props.index < 4 && (
+                  <strong className="featured green-3">featured
+                    {' '}<i className="fas fa-star" />
+                    <br />
+                  </strong>
+              )}
               <strong className="orange">#{props.index + 1}</strong>
               {" "}<strong>{name}</strong>
             </Dotdotdot>
@@ -234,13 +240,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column content is-12">
                 {renderEndDate()}
               </div>
-
-              { isFeatured && (
-                <div className="column content is-12">
-                  Featured
-                </div>
-              )}
-
             </div>
           </div>
           <div className="column is-12 is-hidden-tablet">

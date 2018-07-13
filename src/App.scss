@@ -175,3 +175,8 @@ $one-market-summary-margin-top: 1.5em; // may later vary this responsively
     transform: translateY(+65%);
   }
 }
+
+.featured {
+  font-size: 0.618em; // golden ratio
+  text-transform: uppercase;
+}

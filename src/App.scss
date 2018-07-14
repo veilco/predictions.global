@@ -154,7 +154,23 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
   }
 }
 .market {
+<<<<<<< HEAD
   margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
+=======
+  margin-top: $one-market-summary-margin-top;
+  // the first OneMarketSummary is the 2nd child of its section; we want this margin top to be smaller so the first OMS is closer to the currency selector.
+  &:nth-child(-n+2) {
+    margin-top: 0.75rem;
+  }
+}
+
+// 768px is largest "mobile" size by default in Bulma.css.
+// Maybe we can read this value from a Bulma scss variable?
+@media(max-width: 768px) {
+  .market {
+    margin-top: $one-market-summary-margin-top;
+  }
+>>>>>>> origin/iframe
 }
 
 .comment-link {

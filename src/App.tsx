@@ -22,7 +22,7 @@ interface State {
   currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
 }
 
-class App extends React.Component<HasMarketsSummary, State> {
+export class Home extends React.Component<HasMarketsSummary, State> {
   public readonly state: State;
 
   public constructor(props: HasMarketsSummary) {
@@ -39,7 +39,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     };
   }
 
-  public render() {
+  public render(): JSX.Element {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
       return <div />;
@@ -60,7 +60,8 @@ class App extends React.Component<HasMarketsSummary, State> {
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
               <p>
-                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net" target="blank">Augur</a>
+                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
+                                                                                  target="blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>
@@ -370,29 +371,23 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index} />)
             )}
-          <div className="columns is-vcentered is-centered">
+          <div className="columns is-vcentered">
             <div className="column is-narrow is-paddingless">
-              <div className="columns is-vcentered is-mobile is-centered">
-                <div className="column is-narrow is-paddingless">
-                  <label>
-                    Markets Per Page
-                  </label>
-                </div>
-                <div className="column is-narrow is-paddingless">
-                  <div className="column is-narrow">
-                    <OldSelector
-                      currentValue={paginationLimit}
-                      currentRendered={paginationLimit}
-                      setValue={this.setPaginationLimit}
-                      values={paginationLimits.map(l => {
-                        return {
-                          rendered: l,
-                          value: l,
-                        }
-                      })} />
-                  </div>
-                </div>
-              </div>
+              <label>
+                Markets Per Page
+              </label>
+            </div>
+            <div className="column is-narrow">
+              <OldSelector
+                currentValue={paginationLimit}
+                currentRendered={paginationLimit}
+                setValue={this.setPaginationLimit}
+                values={paginationLimits.map(l => {
+                  return {
+                    rendered: l,
+                    value: l,
+                  }
+                })} />
             </div>
             <div className="column">
               <nav className="pagination" role="navigation" aria-label="pagination">
@@ -402,24 +397,25 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 {paginationIndex > 0 && (
                   <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
                 {paginationIndex < numberOfPages - 1 && (
-                  <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                  <a className="pagination-next"
+                     onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
                 <ul className="pagination-list">
                   {paginationIndices.map((page: number) => page < 0 ? (
                     <li key={page}>
                       <span className="pagination-ellipsis">&hellip;</span>
                     </li>
                   ) : (
-                      <li key={page}>
-                        <a
-                          className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                          aria-label={`Goto page ${page}`}
-                          aria-current="page"
-                          onClick={this.setPaginationOffset.bind(this, page - 1)}
-                        >
-                          {page}
-                        </a>
-                      </li>
-                    ))
+                    <li key={page}>
+                      <a
+                        className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                        aria-label={`Goto page ${page}`}
+                        aria-current="page"
+                        onClick={this.setPaginationOffset.bind(this, page - 1)}
+                      >
+                        {page}
+                      </a>
+                    </li>
+                  ))
                   }
                 </ul>
               </nav>
@@ -427,7 +423,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
         </div>
     }
-      </section >
+      </section>
     );
   }
 
@@ -496,5 +492,3 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     });
   };
 }
-
-export default App;

@@ -1,0 +1,10 @@
+.embedded-market-card {
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+
+  .market {
+    margin: 0;
+    height: 100%;
+  }
+}

@@ -227,13 +227,18 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       </div>
       { isEmbedded && (
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-          <img style={{width: '25px', display: 'inline-block' }} src="/logo-globe.png"/>
+          <a target="_parent"  href={`${window.location.protocol}//${window.location.host}`}>
+            <img style={{width: '25px', display: 'inline-block' }} src="/logo-globe.png" />
+          </a>
         </div>
       )}
       {!isEmbedded && (
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
           <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
-            <i className="fas fa-code" data-tip="Copy HTML to embed market summary"/>
+            <span>
+            <i className="fas fa-code is-hidden-mobile" data-tip="Copy HTML to embed market summary"/>
+            <i className="fas fa-code is-hidden-tablet" data-tip="Copied HTML to embed market summary"/>
+            </span>
           </CopyToClipboard>
         </div>
       )}

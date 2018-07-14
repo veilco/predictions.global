@@ -269,6 +269,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       </div>
     </div>;
   }
-};
+}
 
 export default OneMarketSummary;

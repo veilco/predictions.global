@@ -74,6 +74,13 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
   }
 }
 
+function renderCappedLength(l: number, s: string): React.ReactNode {
+  if (s.length < l) {
+    return s;
+  }
+  return <span>{s.substring(0, l)}&hellip;</span>;
+}
+
 function getMarketSummaryString(name: string, openInterest: Price | undefined,
                                 prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {
@@ -147,6 +154,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const name = props.m.getName();
     const ps = props.m.getPredictionsList();
     const mt = props.m.getMarketType();
+    const resolutionSource = props.m.getResolutionSource();
     const isFeatured = props.m.getIsFeatured();
     const prediction = renderPrediction(mt, ps);
     const openInterest = props.m.getMarketCapitalization();
@@ -221,7 +229,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const mobileControls = controls("mobile");
     return <div className="market columns is-centered">
       <div className="column box">
-        <div className="columns is-mobile is-multiline">
+        <div className="columns">
           <div className="column is-1 is-hidden-mobile">
             {notMobileControls}
           </div>
@@ -254,8 +262,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 }
                 <br/>at stake
               </div>
-              <div className="column content is-12">
-                {renderEndDate()}
+              <div className="column is-12 is-hidden-tablet">
+                {mobileControls}
               </div>
 
               {isFeatured && (
@@ -292,9 +300,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               </div>
 
             </div>
-          </div>
-          <div className="column is-12 is-hidden-tablet">
-            {mobileControls}
           </div>
         </div>
       </div>

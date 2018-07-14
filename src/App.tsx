@@ -3,15 +3,15 @@ import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
-import {Currency, renderCurrency} from './Currency';
+import { Currency, renderCurrency } from './Currency';
 import Footer from './Footer';
-import {Market, MarketsSummary} from './generated/markets_pb';
-import Header, {HasMarketsSummary} from './Header';
-import {makeObserverOwner, ObserverOwner, Observer} from './observer';
+import { Market, MarketsSummary } from './generated/markets_pb';
+import Header, { HasMarketsSummary } from './Header';
+import { makeObserverOwner, ObserverOwner, Observer } from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import Selector from './selector';
 import * as classNames from 'classnames';
-import {getQueryString, updateQueryString} from "./url";
+import { getQueryString, updateQueryString } from "./url";
 import OldSelector from './oldSelector';
 
 // example of changing moment language globally to fr; only works since fr was imported.
@@ -28,28 +28,34 @@ export class Home extends React.Component<HasMarketsSummary, State> {
   public constructor(props: HasMarketsSummary) {
     super(props);
 
+    // Cache currency in localStorage as is most likely long term preference
+    const localStorageCurrency = localStorage.getItem('currency');
+    const currency: Currency = new Set(Object.keys(Currency).map(k => Currency[k])).has(localStorageCurrency) ? (localStorageCurrency as Currency) : Currency.USD;
+
+    const o = makeObserverOwner(currency);
+    o.o((newCurrency) => localStorage.setItem('currency', newCurrency));
     this.state = {
-      currencySelectionObserverOwner: makeObserverOwner(Currency.USD),
+      currencySelectionObserverOwner: o,
     };
   }
 
   public render(): JSX.Element {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
-      return <div/>;
+      return <div />;
     }
 
-    const {currencySelectionObserverOwner} = this.state;
+    const { currencySelectionObserverOwner } = this.state;
     const currencySelectionObserver = this.state.currencySelectionObserverOwner.o;
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <Header ms={ms} currencySelectionObserver={currencySelectionObserver}/>
+        <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
         <section className="less-padding-bottom section">
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
             <div className="column is-12-mobile is-5-tablet is-5-desktop">
               {/* NB logo is fixed width and column must be larger than this or logo column will bleed into next column. The fixed width value in App.scss was chosen to make logo look good responsively. */}
-              <img className="logo" src="logo.png"/>
+              <img className="logo" src="logo.png" />
             </div>
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
@@ -63,7 +69,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
         </section>
         <div className="container">
           <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
-                      currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()}/>
+            currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()} />
         </div>
         {Footer}
       </div>
@@ -71,10 +77,26 @@ export class Home extends React.Component<HasMarketsSummary, State> {
   }
 }
 
+function isFeaturedGoesFirst(a: Market, b: Market): number {
+  const af = a.getIsFeatured();
+  const bf = b.getIsFeatured();
+  if (af && !bf) {
+    return -1;
+  }
+  if (bf && !af) {
+    return 1;
+  }
+  return 0;
+}
+
 type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
 const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
   ['Money at Stake', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
     const aCapitalization = a.getMarketCapitalization();
     const bCapitalization = b.getMarketCapitalization();
     if (aCapitalization == null) {
@@ -87,8 +109,20 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
 
     return bCapitalization.getUsd() - aCapitalization.getUsd()
   }],
-  ['New Markets', (a: Market, b: Market) => b.getCreationTime() - a.getCreationTime()],
-  ['Ending Soon', (a: Market, b: Market) => a.getEndDate() - b.getEndDate()]
+  ['New Markets', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return b.getCreationTime() - a.getCreationTime();
+  }],
+  ['Ending Soon', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return a.getEndDate() - b.getEndDate();
+  }]
 ]);
 const paginationLimits = [10, 20, 50];
 
@@ -123,6 +157,8 @@ function getMarketCategory(m: Market): MarketCategory {
   return MarketCategory.Other;
 }
 
+const whitespaceGlobalRegexp = /\s+/g;
+
 interface MarketListProps {
   marketList: Market[],
   currencySelectionObserver: Observer<Currency>,
@@ -132,14 +168,12 @@ interface MarketListProps {
 // TODO create a UIMarket type as a wrapper for Market, which constructs stuff like getMarketCategory() and a moment(endDate) once at in MarketList constructor, instead of each re-render. Note that Market.AsObject is provided by protobuf, so we don't necessarily want to create a complete 3rd type. We also don't want to aggressively call Market.AsObject, it is really expensive and Market itself is quite optimized by protobuf. Current preference is UIMarket { m: Market, ... newStuff }, so that only new fields are declared directly in UIMarket.
 interface MarketListState {
   category: MarketCategory,
-  categoryOwner: ObserverOwner<MarketCategory>,
   paginationLimit: number,
-  paginationLimitOwner: ObserverOwner<number>,
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
   sortOrder: sortKey,
-  sortOrderOwner: ObserverOwner<sortKey>,
+  topOfMarketList: React.RefObject<HTMLDivElement>,
 }
 
 class MarketList extends React.Component<MarketListProps, MarketListState> {
@@ -148,22 +182,36 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   constructor(props: MarketListProps) {
     super(props);
 
-    const paginationOffsetQuery = parseInt(getQueryString('page'), 10);
+    const paginationOffsetQuery = parseInt(getQueryString('p'), 10);
     const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery - 1;
     const paginationLimitQuery = parseInt(localStorage.getItem('paginationLimit') || '', 10);
     const paginationLimit = isNaN(paginationLimitQuery) ? paginationLimits[0] :
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
 
+    const categoryQuery = getQueryString('c');
+    const category: MarketCategory = new Set(Object.keys(MarketCategory).map(k => MarketCategory[k])).has(categoryQuery) ? (categoryQuery as MarketCategory) : MarketCategory.All;
+
+    const sortOrder: sortKey = (() => {
+      const sortOrderQuery = getQueryString('s');
+      // TODO should have used an enum for sortKey
+      if (sortOrderQuery === 'New Markets') {
+        return sortOrderQuery;
+      } else if (sortOrderQuery === 'Ending Soon') {
+        return sortOrderQuery;
+      }
+      return 'Money at Stake';
+    })();
+
+    const showEnded = getQueryString('e') === '1';
+
     this.state = {
-      category: MarketCategory.All,
-      categoryOwner: makeObserverOwner(MarketCategory.All),
+      category,
       paginationLimit,
-      paginationLimitOwner: makeObserverOwner(10),
       paginationOffset,
       searchQuery: '',
-      showEnded: false,
-      sortOrder: 'Money at Stake',
-      sortOrderOwner: makeObserverOwner(sortOrders.keys().next().value),
+      showEnded,
+      sortOrder,
+      topOfMarketList: React.createRef(),
     };
   }
 
@@ -173,15 +221,21 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   }
 
   public render() {
-    const {marketList, currencySelectionObserver} = this.props;
-    const {paginationLimit, paginationLimitOwner, paginationOffset, showEnded, sortOrder, sortOrderOwner, searchQuery, category, categoryOwner} = this.state;
+    const { marketList, currencySelectionObserver } = this.props;
+    const { paginationLimit, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
 
-    const filteredMarketList = marketList
-      .filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category)
-      .filter((m: Market) => showEnded || moment.unix(m.getEndDate()).isAfter())
-      // Basic fuzzy text search
-      .filter((m: Market) => m.getName().toLowerCase().replace(' ', '').indexOf(searchQuery) !== -1)
-      .sort(sortOrders.get(sortOrder));
+    const filteredMarketList: Market[] = (() => {
+      let ms = marketList.filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category);
+      if (!showEnded) {
+        ms = ms.filter((m: Market) => moment.unix(m.getEndDate()).isAfter(now));
+      }
+      if (searchQuery.length > 0) {
+        // Basic fuzzy text search
+        ms = ms.filter((m: Market) => m.getName().toLowerCase().replace(whitespaceGlobalRegexp, '').indexOf(searchQuery) !== -1 || m.getId().indexOf(searchQuery) !== -1);
+      }
+      ms.sort(sortOrders.get(sortOrder))
+      return ms;
+    })();
 
     const numberOfPages = Math.ceil(filteredMarketList.length / paginationLimit);
 
@@ -223,10 +277,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               currentValueObserver={currencySelectionObserver}
               renderValue={renderCurrency}
               setValue={this.setCurrency}
-              values={[Currency.USD, Currency.ETH, Currency.BTC]}/>
-          </div>
-          <div className="column is-narrow">
-            Sort By
+              values={[Currency.USD, Currency.ETH, Currency.BTC]} />
           </div>
           <div className="column is-narrow">
             <Selector
@@ -250,19 +301,41 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 }
               })}/>
           </div>
-          <div className="column is-narrow">
+        </div>
+        <div className="market-list-controls columns is-centered is-vcentered">
+          {/* this spacer column causes "Show Ended Markets" and Search box to be left and right-aligned, respectively */}
+          <div className="column is-hidden-mobile is-3" />
+          <div className="column has-text-centered">
+            {
+              this.state.paginationOffset > 0 && (
+                <span className="page-number">
+                  Page {this.state.paginationOffset+1}
+                </span>
+              )
+            }
+            <span className="reset-filters" onClick={this.resetFilters}>
+              <a>reset</a>
+            </span>
             <label className="checkbox">
-              <input type="checkbox" onChange={this.setShowEnded}/>&nbsp;
-              Show Ended Markets
+              Show Ended Markets&nbsp;
+              <input type="checkbox" onChange={this.setShowEnded} checked={this.state.showEnded}/>
             </label>
           </div>
-          <div className="column is-narrow">
+          <div className="column has-text-centered">
             <div className="search">
-              <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery}/>
-              <i className="fas fa-search"/>
+              <input className="input" type="text" placeholder="Search for market name or id" onChange={this.setSearchQuery} />
+              <i className="fas fa-search" />
             </div>
           </div>
         </div>
+        {
+      filteredMarketList.length < 1 ?
+        <div className="columns is-vcentered">
+          <div className="column content has-text-centered">
+            <strong>No Search Results</strong>
+            <p>Please search on market name or id.</p>
+          </div>
+        </div> :
         <div>
           {filteredMarketList
             .slice(paginationStart, paginationEnd)
@@ -272,7 +345,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 now={now}
                 currencySelectionObserver={currencySelectionObserver}
                 m={m}
-                index={paginationStart + index}/>)
+                index={paginationStart + index} />)
             )}
           <div className="columns is-vcentered">
             <div className="column is-narrow is-paddingless">
@@ -325,17 +398,15 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     );
   }
 
-  private renderSortOrder = (sortOrder: sortKey) => (sortOrder);
-
   private setSortOrder = (sortOrder: sortKey) => {
+    updateQueryString('s', sortOrder);
     this.setState({
       sortOrder,
     });
   };
 
-  private renderCategory = (category: string) => (category);
-
   private setCategory = (category: MarketCategory) => {
+    updateQueryString('c', category);
     this.setState({
       category,
     });
@@ -349,13 +420,14 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setPaginationOffset = (paginationOffset: number) => {
-    updateQueryString('page', paginationOffset + 1);
+    updateQueryString('p', paginationOffset + 1);
     this.setState({
       paginationOffset,
     });
+    if (this.state.topOfMarketList.current !== null) {
+      this.state.topOfMarketList.current.scrollIntoView(true);
+    }
   };
-
-  private renderPaginationLimit = (paginationLimit: number) => (paginationLimit);
 
   private setPaginationLimit = (paginationLimit: number) => {
     localStorage.setItem('paginationLimit', paginationLimit.toString());
@@ -365,9 +437,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setShowEnded = () => {
-    this.setState(prevState => ({
-      showEnded: !prevState.showEnded,
-    }));
+    const newShowEnded = !this.state.showEnded;
+    updateQueryString('e', newShowEnded ? '1' : '0');
+    this.setState({
+      showEnded: newShowEnded,
+    });
   };
 
   private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -375,5 +449,17 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       searchQuery,
     })
+  };
+
+  private resetFilters = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    window.history.pushState({}, '', '/'); // remove all query strings, which right now is the same thing as resetting filters.
+    this.setState({
+      category: MarketCategory.All,
+      paginationOffset: 0,
+      searchQuery: '',
+      showEnded: false,
+      sortOrder: 'Money at Stake',
+    });
   };
 }

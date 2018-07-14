@@ -98,6 +98,15 @@ $tetrad-red-5: #b71100;
   }
 }
 
+.market-list-controls {
+  margin-bottom: 0;
+
+  .column {
+    padding-bottom: 0.25rem;
+    padding-top: 0.25rem;
+  }
+}
+
 .no-padding-bottom {
   padding-bottom: 0;
 }
@@ -144,8 +153,6 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
     }
   }
 }
-$one-market-summary-margin-top: 1.5em; // may later vary this responsively
-
 .market {
   margin-top: $one-market-summary-margin-top;
   // the first OneMarketSummary is the 2nd child of its section; we want this margin top to be smaller so the first OMS is closer to the currency selector.
@@ -167,6 +174,8 @@ $one-market-summary-margin-top: 1.5em; // may later vary this responsively
 }
 
 .search {
+  margin-left: auto;
+  margin-right: auto;
   position: relative;
   width: 20rem;
 
@@ -174,5 +183,57 @@ $one-market-summary-margin-top: 1.5em; // may later vary this responsively
     position: absolute;
     right: 10px;
     transform: translateY(+65%);
+  }
+}
+
+.featured {
+  font-size: 0.618em; // golden ratio
+  text-transform: uppercase;
+}
+
+.sort-by-label {
+  width: 5rem;
+}
+
+.sort-by-box {
+  button {
+    width: 10rem; // prevent category box from resizing when changing selected value, which causes page to jank
+  }
+}
+
+.category-label {
+  width: 5rem;
+}
+
+.category-box {
+  button {
+    width: 10rem; // prevent category box from resizing when changing selected value, which causes page to jank
+  }
+}
+
+.page-number {
+  padding-right: $canonical-bulma-padding;
+}
+
+.reset-filters {
+  $black: #000;
+  padding-right: $canonical-bulma-padding;
+  a {
+    color: $black;
+    text-decoration: underline;
+    &:visited {
+      color: $black;
+    }
+  }
+}
+
+.pagination-ellipsis {
+  @media(max-width: 769px) {
+    // bulma is-mobile stops at 768px.
+    // margin-left: 0;
+    // margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+
   }
 }

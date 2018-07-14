@@ -15,6 +15,10 @@ $tetrad-red-5: #b71100;
   color: $tetrad-green-3;
 }
 
+.green-3-bg {
+  background-color: $tetrad-green-3;
+}
+
 .green-4 {
   color: $tetrad-green-4;
 }
@@ -45,6 +49,10 @@ $tetrad-red-5: #b71100;
 
 .red-5 {
   color: $tetrad-red-5;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
 }
 
 .__react_component_tooltip {
@@ -154,23 +162,7 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
   }
 }
 .market {
-<<<<<<< HEAD
   margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
-=======
-  margin-top: $one-market-summary-margin-top;
-  // the first OneMarketSummary is the 2nd child of its section; we want this margin top to be smaller so the first OMS is closer to the currency selector.
-  &:nth-child(-n+2) {
-    margin-top: 0.75rem;
-  }
-}
-
-// 768px is largest "mobile" size by default in Bulma.css.
-// Maybe we can read this value from a Bulma scss variable?
-@media(max-width: 768px) {
-  .market {
-    margin-top: $one-market-summary-margin-top;
-  }
->>>>>>> origin/iframe
 }
 
 .comment-link {
@@ -182,6 +174,7 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
   margin-right: auto;
   position: relative;
   width: 20rem;
+  max-width: 100%;
 
   i {
     position: absolute;

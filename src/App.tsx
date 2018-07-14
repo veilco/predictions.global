@@ -338,7 +338,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               )
             }
             <span className="reset-filters" onClick={this.resetFilters}>
-              <a>reset</a>
+              <a>Reset</a>
             </span>
             <label className="checkbox">
               Show Ended Markets&nbsp;
@@ -371,23 +371,28 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index} />)
             )}
+          <br/>
           <div className="columns is-vcentered">
-            <div className="column is-narrow is-paddingless">
-              <label>
-                Markets Per Page
-              </label>
-            </div>
             <div className="column is-narrow">
-              <OldSelector
-                currentValue={paginationLimit}
-                currentRendered={paginationLimit}
-                setValue={this.setPaginationLimit}
-                values={paginationLimits.map(l => {
-                  return {
-                    rendered: l,
-                    value: l,
-                  }
-                })} />
+              <div className="columns is-vcentered is-mobile">
+                <div className="column is-narrow">
+                  <label>
+                    Markets Per Page
+                  </label>
+                </div>
+                <div className="column is-narrow is-paddingless">
+                <OldSelector
+                  currentValue={paginationLimit}
+                  currentRendered={paginationLimit}
+                  setValue={this.setPaginationLimit}
+                  values={paginationLimits.map(l => {
+                    return {
+                      rendered: l,
+                      value: l,
+                    }
+                  })} />
+                </div>
+              </div>
             </div>
             <div className="column">
               <nav className="pagination" role="navigation" aria-label="pagination">

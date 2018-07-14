@@ -81,7 +81,7 @@ const Header: React.SFC<HeaderProps> = (props) => {
             </div>
           </div>
         </div>
-        <div className="column">
+        <div className="column is-3">
           <div className="is-clearfix">
             <div className="is-pulled-left is-hidden-touch">
               <a href={feedbackFormURL} target="blank">Send Feedback</a>

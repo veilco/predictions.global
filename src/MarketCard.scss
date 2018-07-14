@@ -1,0 +1,17 @@
+.market {
+  .badge {
+    padding: 0.6rem 1rem;
+    color: white;
+    background-color: #0ad136;
+    border-radius: 2rem;
+  }
+}
+
+.market > .column {
+  border-left: 6px solid #0D9BB6;
+  border-radius: 4px;
+}
+
+.market-controls > .column {
+  cursor: pointer;
+}

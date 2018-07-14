@@ -5,7 +5,6 @@ import OneMarketSummary from "./OneMarketSummary";
 import * as moment from "moment";
 import {makeObserverOwner, ObserverOwner} from "./observer";
 import {Currency} from "./Currency";
-
 import './EmbeddedMarketCard.css';
 
 interface EmbeddedMarketCardProps {

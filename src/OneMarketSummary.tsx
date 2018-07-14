@@ -10,6 +10,7 @@ import {Observer} from './observer';
 import Price2, {usdFormat, numberFormat} from "./Price";
 import * as classNames from 'classnames';
 import * as ReactTooltip from "react-tooltip";
+import './MarketCard.css';
 
 interface HasMarket {
   m: Market
@@ -41,9 +42,9 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <span>
           {prefix}
-          <span
+          <strong
             className={p < 50 ? "red-3" : "green-3"}
-            data-tip={`${r} chance to be a Yes. (${p < 50 ? 'Unlikely' : 'Likely'})`}>{r} Yes</span>
+            data-tip={`${r} chance to be a Yes. (${p < 50 ? 'Unlikely' : 'Likely'})`}>{r} Yes</strong>
         </span>,
         text,
       };
@@ -52,10 +53,10 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
-          <span className="orange" data-multiline={true}
-                data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+          <strong className="orange" data-multiline={true}
+                  data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
             {r} {name}
-          </span>
+          </strong>
         </Dotdotdot>,
         text,
       };
@@ -64,10 +65,10 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
-          <span className="orange" data-multiline={true}
-                data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+          <strong className="orange" data-multiline={true}
+                  data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
             {v} {name}
-          </span>
+          </strong>
         </Dotdotdot>,
         text,
       };
@@ -163,7 +164,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
 
     function renderEndDate(): React.ReactNode {
       const endDate = moment.unix(props.m.getEndDate());
-      return <span>{props.now.isBefore(endDate) ? 'ends' : 'ended'} {props.now.to(endDate)}</span>;
+      return (<span>{props.now.isBefore(endDate) ? 'Ends' : 'Ended'} <strong>{props.now.to(endDate)}</strong></span>);
     }
 
     const controls = (type: "mobile" | "not-mobile") => <div
@@ -224,6 +225,18 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
             </a>
         }
       </div>
+      { isEmbedded && (
+        <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
+          <img style={{width: '25px', display: 'inline-block' }} src="/logo-globe.png"/>
+        </div>
+      )}
+      {!isEmbedded && (
+        <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
+          <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
+            <i className="fas fa-code" data-tip="Copy HTML to embed market summary"/>
+          </CopyToClipboard>
+        </div>
+      )}
     </div>;
     const notMobileControls = controls("not-mobile");
     const mobileControls = controls("mobile");
@@ -235,33 +248,38 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           </div>
           <div className="column is-12-mobile is-11-tablet is-11-desktop">
             <div className="columns is-mobile is-multiline">
-              {isFeatured && (
-                <div className="column content is-12 is-marginless no-padding-bottom">
-                  <strong className="featured green-3">featured
-                    {' '}<i className="fas fa-star" />
-                    <br />
+                {isFeatured && !isEmbedded && (
+              <div className="column content is-12 is-marginless no-padding-bottom">
+                  <strong className="featured green-3-bg badge" key="featured">
+                    Featured
+                    {' '}<i className="fas fa-star"/>
+                    <br/>
                   </strong>
-                </div>
-              )}
+              </div>
+                )}
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
                 <Dotdotdot clamp={4}>
-
-                  <strong className="orange">#{props.index + 1}</strong>
+                  {!isEmbedded && (
+                    <strong className="orange">#{props.index + 1}</strong>
+                  )}
                   {" "}<strong>{name}</strong>
-                  {
-                    resolutionSource.length > 0 && (
-                      <span data-multiline={true} data-tip="Used by Augur Reporters<br>to determine market outcome"><br />source: {renderCappedLength(28, resolutionSource)}</span>
-                    )
-                  }
+                  {/*{*/}
+                  {/*resolutionSource.length > 0 && (*/}
+                  {/*<span data-multiline={true}*/}
+                  {/*data-tip="Used by Augur Reporters<br>to determine market outcome"><br/>source: {renderCappedLength(28, resolutionSource)}</span>*/}
+                  {/*)*/}
+                  {/*}*/}
                 </Dotdotdot>
               </div>
-              <div className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+              <div
+                className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
                 <div className="columns is-multiline">
                   <div className="column content is-12 is-marginless">
                     {prediction.node}
                   </div>
                   <div className="column content is-12">
-                    <p className="is-italic comment-link is-marginless" data-tip="Coming Soon!">{props.m.getCommentCount()} comments</p>
+                    <p className="is-italic comment-link is-marginless"
+                       data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
                   </div>
                 </div>
               </div>
@@ -270,11 +288,11 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   <div className="column content is-12 is-marginless is-centered">
                     {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}
                     {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
-                      : <Price2
+                      : <strong><Price2
                         p={props.m.getMarketCapitalization()}
-                        o={props.currencySelectionObserver} />
+                        o={props.currencySelectionObserver}/></strong>
                     }
-                    <br />at stake
+                    <br/>at stake
                   </div>
                   <div className="column content is-12">
                     {renderEndDate()}
@@ -284,17 +302,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column is-12 is-hidden-tablet">
                 {mobileControls}
               </div>
-              {isFeatured && (
-                <div className="column content is-12">
-                  Featured
-                </div>
-              )}
-
-              {!isEmbedded && (
-                <div className="column content is-12">
-                  <button className="button" onClick={this.toggleEmbed}>Embed</button>
-                </div>
-              )}
 
               <div className={classNames('modal has-text-left', showEmbed && 'is-active')}>
                 <div className="modal-background"/>
@@ -343,7 +350,9 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
   };
 
   private getMarketEmbedCode = (marketID: string) => {
-    return `<iframe width="360" height="270" src="${window.location.protocol}//${window.location.host}/e/${marketID}" frameborder="0"></iframe>`;
+    const width = 320;
+    const height = 270;
+    return `<iframe width="${width}" height="${height}" src="${window.location.protocol}//${window.location.host}/e/${marketID}" frameborder="0"></iframe>`;
   };
 }
 

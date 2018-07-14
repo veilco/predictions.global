@@ -225,10 +225,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
             </a>
         }
       </div>
-      { isEmbedded && (
+      {isEmbedded && (
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-          <a target="_parent"  href={`${window.location.protocol}//${window.location.host}`}>
-            <img style={{width: '25px', display: 'inline-block' }} src="/logo-globe.png" />
+          <a target="_parent" href={`${window.location.protocol}//${window.location.host}`}>
+            <img style={{width: '25px', display: 'inline-block'}} src="/logo-globe.png"/>
           </a>
         </div>
       )}
@@ -253,15 +253,19 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           </div>
           <div className="column is-12-mobile is-11-tablet is-11-desktop">
             <div className="columns is-mobile is-multiline">
-                {isFeatured && !isEmbedded && (
-              <div className="column content is-12 is-marginless no-padding-bottom">
+              {isFeatured && !isEmbedded && (
+                <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3-bg badge" key="featured">
                     Featured
                     {' '}<i className="fas fa-star"/>
                     <br/>
                   </strong>
+                </div>
+              )}
+              <div
+                className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless has-text-centered is-paddingless">
+                <img style={{width: '115px', marginTop: '1rem'}} className="logo" src="/logo.png"/>
               </div>
-                )}
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
                 <Dotdotdot clamp={4}>
                   {!isEmbedded && (

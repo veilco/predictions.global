@@ -60,8 +60,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
               <p>
-                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
-                                                                                  target="blank">Augur</a>
+                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net" target="blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>
@@ -266,10 +265,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
     return (
       <section className="less-padding-top section">
-        <ReactTooltip/> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
-        <div className="columns is-centered is-vcentered is-mobile is-multiline is-variable is-1">
-          <div
-            className="column is-paddingless has-text-centered-mobile has-text-left-tablet has-text-left-desktop">
+        <ReactTooltip /> {/* <ReactTooltip /> is extremely non-performant and we want only one of these in entire React tree. */}
+        <div className="market-list-controls columns is-centered is-vcentered is-mobile is-multiline">
+          <div ref={this.state.topOfMarketList}
+            className="column is-paddingless has-text-centered-mobile is-6-mobile has-text-left-tablet has-text-left-desktop">
             <p><strong>Prediction Markets</strong></p>
           </div>
           <div className="column is-narrow">
@@ -280,26 +279,50 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               values={[Currency.USD, Currency.ETH, Currency.BTC]} />
           </div>
           <div className="column is-narrow">
-            <Selector
-              currentValueObserver={sortOrderOwner.o}
-              renderValue={this.renderSortOrder}
-              setValue={this.setSortOrder}
-              values={Array.from(sortOrders.keys())}/>
+            <div className="level is-mobile" >
+              <div className="level-left" >
+                <div className="level-item sort-by-label">
+                  Sort By&nbsp;
+                </div>
+              </div>
+              <div className="level-right" >
+                <div className="level-item sort-by-box">
+                  <OldSelector
+                    currentValue={sortOrder}
+                    currentRendered={sortOrder}
+                    setValue={this.setSortOrder}
+                    values={Array.from(sortOrders.keys()).map(key => {
+                      return {
+                        rendered: key,
+                        value: key,
+                      }
+                    })} />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="column is-narrow">
-            Category
-          </div>
-          <div className="column is-narrow">
-            <OldSelector
-              currentValue={category}
-              currentRendered={category}
-              setValue={this.setCategory}
-              values={Object.keys(MarketCategory).map(key => {
-                return {
-                  rendered: MarketCategory[key],
-                  value: MarketCategory[key],
-                }
-              })}/>
+            <div className="level is-mobile" >
+              <div className="level-left" >
+                <div className="level-item category-label">
+                  Category&nbsp;
+                </div>
+              </div>
+              <div className="level-right" >
+                <div className="level-item category-box">
+                  <OldSelector
+                    currentValue={category}
+                    currentRendered={category}
+                    setValue={this.setCategory}
+                    values={Object.keys(MarketCategory).map(key => {
+                      return {
+                        rendered: MarketCategory[key],
+                        value: MarketCategory[key],
+                      }
+                    })} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="market-list-controls columns is-centered is-vcentered">
@@ -347,19 +370,29 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index} />)
             )}
-          <div className="columns is-vcentered">
+          <div className="columns is-vcentered is-centered">
             <div className="column is-narrow is-paddingless">
-              <label>
-                Markets Per Page
-              </label>
-            </div>
-            <div className="column is-narrow">
-              <Selector
-                currentValueObserver={paginationLimitOwner.o}
-                renderValue={this.renderPaginationLimit}
-                setValue={this.setPaginationLimit}
-                values={paginationLimits}
-              />
+              <div className="columns is-vcentered is-mobile is-centered">
+                <div className="column is-narrow is-paddingless">
+                  <label>
+                    Markets Per Page
+                  </label>
+                </div>
+                <div className="column is-narrow is-paddingless">
+                  <div className="column is-narrow">
+                    <OldSelector
+                      currentValue={paginationLimit}
+                      currentRendered={paginationLimit}
+                      setValue={this.setPaginationLimit}
+                      values={paginationLimits.map(l => {
+                        return {
+                          rendered: l,
+                          value: l,
+                        }
+                      })} />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="column">
               <nav className="pagination" role="navigation" aria-label="pagination">
@@ -369,32 +402,32 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 {paginationIndex > 0 && (
                   <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
                 {paginationIndex < numberOfPages - 1 && (
-                  <a className="pagination-next"
-                     onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                  <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
                 <ul className="pagination-list">
                   {paginationIndices.map((page: number) => page < 0 ? (
                     <li key={page}>
                       <span className="pagination-ellipsis">&hellip;</span>
                     </li>
                   ) : (
-                    <li key={page}>
-                      <a
-                        className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                        aria-label={`Goto page ${page}`}
-                        aria-current="page"
-                        onClick={this.setPaginationOffset.bind(this, page - 1)}
-                      >
-                        {page}
-                      </a>
-                    </li>
-                  ))
+                      <li key={page}>
+                        <a
+                          className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                          aria-label={`Goto page ${page}`}
+                          aria-current="page"
+                          onClick={this.setPaginationOffset.bind(this, page - 1)}
+                        >
+                          {page}
+                        </a>
+                      </li>
+                    ))
                   }
                 </ul>
               </nav>
             </div>
           </div>
         </div>
-      </section>
+    }
+      </section >
     );
   }
 
@@ -445,7 +478,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchQuery: string = e.target.value.toLowerCase().replace(' ', '');
+    const searchQuery: string = e.target.value.toLowerCase().replace(whitespaceGlobalRegexp, '');
     this.setState({
       searchQuery,
     })

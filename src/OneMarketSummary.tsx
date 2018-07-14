@@ -28,7 +28,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       text: 'No predictions',
     };
   }
-  const prefix = "Augur predicts ";
+  const prefix = "Augur predicts: ";
   let text = prefix; // see note on RenderedPrediction
   // TODO these locals are never all required
   const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
@@ -42,6 +42,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <span>
           {prefix}
+          <br/>
           <strong
             className={p < 50 ? "red-3" : "green-3"}
             data-tip={`${r} chance to be a Yes. (${p < 50 ? 'Unlikely' : 'Likely'})`}>{r} Yes</strong>
@@ -53,6 +54,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
+          <br/>
           <strong className="orange" data-multiline={true}
                   data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
             {r} {name}
@@ -65,6 +67,7 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
       return {
         node: <Dotdotdot clamp={2}>
           {prefix}
+          <br/>
           <strong className="orange" data-multiline={true}
                   data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
             {v} {name}
@@ -283,7 +286,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 </Dotdotdot>
               </div>
               <div
-                className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+                className="column is-two-thirds-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
                 <div className="columns is-multiline">
                   <div className="column content is-12 is-marginless">
                     {prediction.node}
@@ -294,7 +297,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   </div>
                 </div>
               </div>
-              <div className="column is-half-mobile has-text-right">
+              <div className="column is-one-third-mobile has-text-right">
                 <div className="columns is-multiline">
                   <div className="column content is-12 is-marginless is-centered">
                     {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}

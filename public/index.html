@@ -19,7 +19,7 @@
           integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link rel="preload" href="logo.png" as="image">
     <link rel="preload" href="augur-logo.svg" as="image">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
     <!--
       This preload link will cause the MarketsSummary data to be preloaded in parallel with javascript parse. In chrome devtools, you know this is working when the network request for the DATA_URI happens only once at start of page load. The browser will also warn when a preloaded resource isn't used. In order for this to work and prevent javascript from fetching DATA_URI, I needed to use crossorigin="use-credentials" and then use { credentials "include" } in the javascript fetch(). Chrome seems unable to respect a preload unless crossorigin="use-credentails" (ie. crossorigin="anonymous" preloads the resource, but then it's loaded again in JS.) DATA_URI from google storage bucket doesn't support crossorigin="use-credentials" because Google omits the "Access-Control-Allow-Credentials" header (in which case the preload is cancelled with on explanation in the devtools network panel.)
       We can retry this preload once the data file is served in production from a location other than CORS google bucket. -->

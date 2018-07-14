@@ -262,10 +262,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   </strong>
                 </div>
               )}
-              <div
-                className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless has-text-centered is-paddingless">
-                <img style={{width: '115px', marginTop: '1rem'}} className="logo" src="/logo.png"/>
-              </div>
+              { isEmbedded && (
+                <div
+                  className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless has-text-centered is-paddingless">
+                  <img style={{width: '115px', marginTop: '1rem'}} className="logo" src="/logo.png"/>
+                </div>
+              )}
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
                 <Dotdotdot clamp={4}>
                   {!isEmbedded && (

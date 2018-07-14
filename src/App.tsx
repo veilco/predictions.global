@@ -28,8 +28,14 @@ class App extends React.Component<HasMarketsSummary, State> {
   public constructor(props: HasMarketsSummary) {
     super(props);
 
+    // Cache currency in localStorage as is most likely long term preference
+    const localStorageCurrency = localStorage.getItem('currency');
+    const currency: Currency = new Set(Object.keys(Currency).map(k => Currency[k])).has(localStorageCurrency) ? (localStorageCurrency as Currency) : Currency.USD;
+
+    const o = makeObserverOwner(currency);
+    o.o((newCurrency) => localStorage.setItem('currency', newCurrency));
     this.state = {
-      currencySelectionObserverOwner: makeObserverOwner(Currency.USD),
+      currencySelectionObserverOwner: o,
     };
   }
 
@@ -175,19 +181,35 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   constructor(props: MarketListProps) {
     super(props);
 
-    const paginationOffsetQuery = parseInt(getQueryString('page'), 10);
+    const paginationOffsetQuery = parseInt(getQueryString('p'), 10);
     const paginationOffset = isNaN(paginationOffsetQuery) ? 0 : paginationOffsetQuery - 1;
     const paginationLimitQuery = parseInt(localStorage.getItem('paginationLimit') || '', 10);
     const paginationLimit = isNaN(paginationLimitQuery) ? paginationLimits[0] :
       Math.min(Math.max(paginationLimitQuery, paginationLimits[0]), paginationLimits[paginationLimits.length - 1]);
 
+    const categoryQuery = getQueryString('c');
+    const category: MarketCategory = new Set(Object.keys(MarketCategory).map(k => MarketCategory[k])).has(categoryQuery) ? (categoryQuery as MarketCategory) : MarketCategory.All;
+
+    const sortOrder: sortKey = (() => {
+      const sortOrderQuery = getQueryString('s');
+      // TODO should have used an enum for sortKey
+      if (sortOrderQuery === 'New Markets') {
+        return sortOrderQuery;
+      } else if (sortOrderQuery === 'Ending Soon') {
+        return sortOrderQuery;
+      }
+      return 'Money at Stake';
+    })();
+
+    const showEnded = getQueryString('e') === '1';
+
     this.state = {
-      category: MarketCategory.All,
+      category,
       paginationLimit,
       paginationOffset,
       searchQuery: '',
-      showEnded: false,
-      sortOrder: 'Money at Stake',
+      showEnded,
+      sortOrder,
       topOfMarketList: React.createRef(),
     };
   }
@@ -304,6 +326,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
         </div>
         <div className="market-list-controls columns is-centered is-vcentered">
+          {/* this spacer column causes "Show Ended Markets" and Search box to be left and right-aligned, respectively */}
+          <div className="column is-hidden-mobile is-3" />
           <div className="column has-text-centered">
             {
               this.state.paginationOffset > 0 && (
@@ -317,11 +341,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             </span>
             <label className="checkbox">
               Show Ended Markets&nbsp;
-              <input type="checkbox" onChange={this.setShowEnded} />
+              <input type="checkbox" onChange={this.setShowEnded} checked={this.state.showEnded}/>
             </label>
           </div>
-          {/* this spacer column causes "Show Ended Markets" and Search box to be left and right-aligned, respectively */}
-          <div className="column is-hidden-mobile is-2" />
           <div className="column has-text-centered">
             <div className="search">
               <input className="input" type="text" placeholder="Search for market name or id" onChange={this.setSearchQuery} />
@@ -410,12 +432,14 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   }
 
   private setSortOrder = (sortOrder: sortKey) => {
+    updateQueryString('s', sortOrder);
     this.setState({
       sortOrder,
     });
   };
 
   private setCategory = (category: MarketCategory) => {
+    updateQueryString('c', category);
     this.setState({
       category,
     });
@@ -429,7 +453,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setPaginationOffset = (paginationOffset: number) => {
-    updateQueryString('page', paginationOffset + 1);
+    updateQueryString('p', paginationOffset + 1);
     this.setState({
       paginationOffset,
     });
@@ -446,9 +470,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setShowEnded = () => {
-    this.setState(prevState => ({
-      showEnded: !prevState.showEnded,
-    }));
+    const newShowEnded = !this.state.showEnded;
+    updateQueryString('e', newShowEnded ? '1' : '0');
+    this.setState({
+      showEnded: newShowEnded,
+    });
   };
 
   private setSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -460,7 +486,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   private resetFilters = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    updateQueryString('page', 1);
+    window.history.pushState({}, '', '/'); // remove all query strings, which right now is the same thing as resetting filters.
     this.setState({
       category: MarketCategory.All,
       paginationOffset: 0,

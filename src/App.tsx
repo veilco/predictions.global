@@ -9,10 +9,9 @@ import { Market, MarketsSummary } from './generated/markets_pb';
 import Header, { HasMarketsSummary } from './Header';
 import { makeObserverOwner, ObserverOwner, Observer } from './observer';
 import OneMarketSummary from './OneMarketSummary';
-import Selector from './selector';
+import { Dropdown } from './Dropdown';
 import * as classNames from 'classnames';
 import { getQueryString, updateQueryString } from "./url";
-import OldSelector from './oldSelector';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -272,10 +271,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             <p><strong>Prediction Markets</strong></p>
           </div>
           <div className="column is-narrow">
-            <Selector
-              currentValueObserver={currencySelectionObserver}
+            <Dropdown
               renderValue={renderCurrency}
-              setValue={this.setCurrency}
+              onChange={this.setCurrency}
               values={[Currency.USD, Currency.ETH, Currency.BTC]} />
           </div>
           <div className="column is-narrow">
@@ -287,16 +285,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               </div>
               <div className="level-right" >
                 <div className="level-item sort-by-box">
-                  <OldSelector
-                    currentValue={sortOrder}
-                    currentRendered={sortOrder}
-                    setValue={this.setSortOrder}
-                    values={Array.from(sortOrders.keys()).map(key => {
-                      return {
-                        rendered: key,
-                        value: key,
-                      }
-                    })} />
+                  <Dropdown
+                    defaultValue={sortOrder}
+                    onChange={this.setSortOrder}
+                    values={Array.from(sortOrders.keys())} />
                 </div>
               </div>
             </div>
@@ -310,16 +302,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               </div>
               <div className="level-right" >
                 <div className="level-item category-box">
-                  <OldSelector
-                    currentValue={category}
-                    currentRendered={category}
-                    setValue={this.setCategory}
-                    values={Object.keys(MarketCategory).map(key => {
-                      return {
-                        rendered: MarketCategory[key],
-                        value: MarketCategory[key],
-                      }
-                    })} />
+                  <Dropdown
+                    defaultValue={category}
+                    onChange={this.setCategory}
+                    values={Object.keys(MarketCategory).map(key => MarketCategory[key])} />
                 </div>
               </div>
             </div>
@@ -380,16 +366,11 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 </div>
                 <div className="column is-narrow is-paddingless">
                   <div className="column is-narrow">
-                    <OldSelector
-                      currentValue={paginationLimit}
-                      currentRendered={paginationLimit}
-                      setValue={this.setPaginationLimit}
-                      values={paginationLimits.map(l => {
-                        return {
-                          rendered: l,
-                          value: l,
-                        }
-                      })} />
+                    <Dropdown
+                      defaultValue={paginationLimit}
+                      onChange={this.setPaginationLimit}
+                      values={paginationLimits}
+                    />
                   </div>
                 </div>
               </div>

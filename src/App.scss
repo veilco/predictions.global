@@ -198,3 +198,30 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
     width: 10rem; // prevent category box from resizing when changing selected value, which causes page to jank
   }
 }
+
+.page-number {
+  padding-right: $canonical-bulma-padding;
+}
+
+.reset-filters {
+  $black: #000;
+  padding-right: $canonical-bulma-padding;
+  a {
+    color: $black;
+    text-decoration: underline;
+    &:visited {
+      color: $black;
+    }
+  }
+}
+
+.pagination-ellipsis {
+  @media(max-width: 769px) {
+    // bulma is-mobile stops at 768px.
+    // margin-left: 0;
+    // margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+
+  }
+}

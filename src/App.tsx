@@ -307,11 +307,14 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           <div className="column has-text-centered">
             {
               this.state.paginationOffset > 0 && (
-                <span style={{paddingRight: "3em"}}>
+                <span className="page-number">
                   Page {this.state.paginationOffset+1}
                 </span>
               )
             }
+            <span className="reset-filters" onClick={this.resetFilters}>
+              <a>reset</a>
+            </span>
             <label className="checkbox">
               Show Ended Markets&nbsp;
               <input type="checkbox" onChange={this.setShowEnded} />
@@ -321,7 +324,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           <div className="column is-hidden-mobile is-2" />
           <div className="column has-text-centered">
             <div className="search">
-              <input className="input" type="text" placeholder="Search" onChange={this.setSearchQuery} />
+              <input className="input" type="text" placeholder="Search for market name or id" onChange={this.setSearchQuery} />
               <i className="fas fa-search" />
             </div>
           </div>
@@ -345,23 +348,29 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index} />)
             )}
-          <div className="columns is-vcentered">
+          <div className="columns is-vcentered is-centered">
             <div className="column is-narrow is-paddingless">
-              <label>
-                Markets Per Page
-              </label>
-            </div>
-            <div className="column is-narrow">
-              <OldSelector
-                currentValue={paginationLimit}
-                currentRendered={paginationLimit}
-                setValue={this.setPaginationLimit}
-                values={paginationLimits.map(l => {
-                  return {
-                    rendered: l,
-                    value: l,
-                  }
-                })} />
+              <div className="columns is-vcentered is-mobile is-centered">
+                <div className="column is-narrow is-paddingless">
+                  <label>
+                    Markets Per Page
+                  </label>
+                </div>
+                <div className="column is-narrow is-paddingless">
+                  <div className="column is-narrow">
+                    <OldSelector
+                      currentValue={paginationLimit}
+                      currentRendered={paginationLimit}
+                      setValue={this.setPaginationLimit}
+                      values={paginationLimits.map(l => {
+                        return {
+                          rendered: l,
+                          value: l,
+                        }
+                      })} />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="column">
               <nav className="pagination" role="navigation" aria-label="pagination">
@@ -429,8 +438,6 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     }
   };
 
-  private renderPaginationLimit = (paginationLimit: number) => (paginationLimit);
-
   private setPaginationLimit = (paginationLimit: number) => {
     localStorage.setItem('paginationLimit', paginationLimit.toString());
     this.setState({
@@ -449,6 +456,18 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       searchQuery,
     })
+  };
+
+  private resetFilters = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    updateQueryString('page', 1);
+    this.setState({
+      category: MarketCategory.All,
+      paginationOffset: 0,
+      searchQuery: '',
+      showEnded: false,
+      sortOrder: 'Money at Stake',
+    });
   };
 }
 

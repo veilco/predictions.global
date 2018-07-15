@@ -62,7 +62,7 @@ body {
 }
 
 .market-controls {
-  $control-padding-not-mobile: 9.5481px; // small golden ratio^2 * 25px square length of twitter icon
+  $control-padding-not-mobile: 3.6466px; // small golden ratio^4 * 25px square length of twitter icon
   $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
 
   &.not-mobile {

@@ -261,7 +261,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       )}
     </div>;
     const notMobileControls = controls("not-mobile");
-    const mobileControls = controls("mobile", 'column is-paddingless is-12');
+    const mobileControls = controls("mobile", 'column is-paddingless is-12 is-hidden-tablet');
     return <div className="market columns is-centered">
       <div className="column box">
         <div className="columns">

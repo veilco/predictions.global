@@ -1,17 +1,64 @@
 .market {
+  margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
+
   .badge {
     padding: 0.4rem 0.6rem;
     color: white;
-    background-color: #0ad136;
+    background-color: #0ad136; // this is $tetrad-green-3, TODO import variables
     border-radius: 2rem;
   }
 }
 
 .market > .column {
-  border-left: 6px solid #0D9BB6;
+  border-left: 6px solid #0d9bb6; // this is blue-3, TODO import variables
   border-radius: 4px;
 }
 
-.market-controls > .column {
-  cursor: pointer;
+.market-controls {
+  $control-padding-not-mobile: 3.6466px; // small golden ratio^4 * 25px square length of twitter icon
+  $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
+
+  & > .column {
+    cursor: pointer;
+  }
+
+  &.not-mobile {
+    .column {
+      &:not(:first-child) {
+        padding-top: 0;
+      }
+
+      &:not(:last-child) {
+        padding-bottom: $control-padding-not-mobile;
+      }
+    }
+  }
+
+  &.mobile {
+    .column {
+      &:not(:first-child) {
+        padding-left: 0;
+      }
+
+      &:not(:last-child) {
+        padding-right: $control-padding-mobile;
+      }
+    }
+  }
+  // TwitterIcon (inside TwitterShareButton) uses a div where the icon will be left-aligned if there's margin to spare; this causes the icon to be horizontally centered.
+  .SocialMediaShareButton {
+    // sass-lint:disable-line class-name-format
+    // prevent ugly outline from showing after clicking tweet button
+    outline: none !important; // sass-lint:disable-line no-important
+
+    & > div {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .augur-logo {
+    height: 25px; // same dimension as twitter logo
+    width: 25px;
+  }
 }

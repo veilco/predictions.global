@@ -99,6 +99,7 @@ export class Routes extends React.Component<any, RoutesState> {
       <Router>
         <div>
           <Route exact={true} path="/" render={renderHome}/>
+          <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
           <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
         </div>
       </Router>

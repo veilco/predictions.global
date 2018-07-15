@@ -360,7 +360,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
   private getMarketEmbedCode = (marketID: string) => {
     const width = 320;
     const height = 340;
-    return `<iframe width="${width}" height="${height}" src="${window.location.protocol}//${window.location.host}/e/${marketID}" frameborder="0"></iframe>`;
+    return `<iframe width="${width}" height="${height}" src="${window.location.protocol}//${window.location.host}/e/v1/${marketID}" frameborder="0"></iframe>`;
   };
 }
 

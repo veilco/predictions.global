@@ -29,7 +29,11 @@
     $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
 
     & > .column {
-      cursor: pointer;
+      @media(min-width: 769px) {
+        // bulma is-mobile stops at 768px.
+        // when cursor is pointer, this results ugly blue click box on mobile, which is fixed by only using cursor: pointer on desktop.
+        cursor: pointer;
+      }
     }
 
     &.not-mobile {

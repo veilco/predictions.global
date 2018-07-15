@@ -239,8 +239,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
           <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
             <span>
-            <i className="fas fa-code is-hidden-mobile" data-tip="Copy HTML to embed market summary"/>
-            <i className="fas fa-code is-hidden-tablet" data-tip="Copied HTML to embed market summary"/>
+            <i className="fas fa-code is-hidden-mobile" data-multiline={true} data-tip="Copy HTML to embed market<br>summary in your webpage"/>
+            <i className="fas fa-code is-hidden-tablet" data-multiline={true} data-tip="Copied HTML to embed market<br>summary in your webpage"/>
             </span>
           </CopyToClipboard>
         </div>
@@ -277,29 +277,23 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     <strong className="orange">#{props.index + 1}</strong>
                   )}
                   {" "}<strong>{name}</strong>
-                  {/*{*/}
-                  {/*resolutionSource.length > 0 && (*/}
-                  {/*<span data-multiline={true}*/}
-                  {/*data-tip="Used by Augur Reporters<br>to determine market outcome"><br/>source: {renderCappedLength(28, resolutionSource)}</span>*/}
-                  {/*)*/}
-                  {/*}*/}
                 </Dotdotdot>
               </div>
               <div
-                className="column is-two-thirds-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+                className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
                 <div className="columns is-multiline">
-                  <div className="column content is-12 is-marginless">
+                  <div className="middle-column-left column content is-12 is-marginless">
                     {prediction.node}
                   </div>
-                  <div className="column content is-12">
+                  <div className="middle-column-left column content is-12">
                     <p className="is-italic comment-link is-marginless"
                        data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
                   </div>
                 </div>
               </div>
-              <div className="column is-one-third-mobile has-text-right">
+              <div className="column is-half-mobile has-text-right">
                 <div className="columns is-multiline">
-                  <div className="column content is-12 is-marginless is-centered">
+                  <div className="middle-column-right column content is-12 is-marginless is-centered">
                     {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}
                     {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
                       : <strong><Price2
@@ -308,7 +302,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     }
                     <br/>at stake
                   </div>
-                  <div className="column content is-12">
+                  <div className="middle-column-right column content is-12">
                     {renderEndDate()}
                   </div>
                 </div>

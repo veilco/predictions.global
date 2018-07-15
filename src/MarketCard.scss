@@ -1,6 +1,17 @@
 .market {
   margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
 
+  // The "data part" of the market card (containing prediction, $ at stake, end time, and comments) has a lot of whitespace in the middle on mobile, which causes the data to wrap lines, whereas the preferred display is to push closer to whitespace in middle and avoid making card taller by wrapping lines.
+  @media(max-width: 769px) {
+    // bulma is-mobile stops at 768px.
+    .middle-column-left {
+      padding-right: 0;
+    }
+    .middle-column-right {
+      padding-left: 0;
+    }
+  }
+
   .badge {
     padding: 0.4rem 0.6rem;
     color: white;

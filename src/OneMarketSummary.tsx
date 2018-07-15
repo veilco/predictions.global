@@ -196,9 +196,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                          onCopy={this.marketSummaryCopiedToClipboard}>
           <i className={
             (this.state.isMarketSummaryCopiedToClipboard ? 'fas' : 'far') + ' fa-copy'}
+             data-place={isEmbedded && 'right' /* while embedded, the market controls are pushed to left due to our logo, so this tooltip needs to be right or it's off the side of iframe */}
              data-tip={
-               /* mobile tooltips don't display until clicked */
-               type === 'mobile' ? "Copied market summary to clipboard" : "Copy market summary to clipboard"
+               /* mobile tooltips don't display until clicked, but embedded is mobile view by default, so we'll show desktop tooltip */
+               type === 'mobile' && !isEmbedded ? "Copied market summary to clipboard" : "Copy market summary to clipboard"
              }/>
         </CopyToClipboard>
       </div>
@@ -206,8 +207,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
         <CopyToClipboard text={props.m.getId()}
                          onCopy={this.marketIdCopiedToClipboard}>
           <div data-tip={
-            /* mobile tooltips don't display until clicked */
-            type === 'mobile' ? "Copied Augur market ID to clipboard" : "Copy Augur market ID to clipboard"
+            /* mobile tooltips don't display until clicked, but embedded is mobile view by default, so we'll show desktop tooltip */
+            type === 'mobile' && !isEmbedded ? "Copied Augur market ID to clipboard" : "Copy Augur market ID to clipboard"
           }>
             {
               /* idea here is we just want <span> to become <strong> during isMarketIdCopiedToClipboard==true, not sure how to do this without copypasta */
@@ -225,13 +226,13 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
             <img className="augur-logo"
                  src="/augur-logo.svg"
                  data-multiline={true}
-                 data-tip='View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of this page.'/>
+                 data-tip={`View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`}/>
             : <a target="blank"
                  href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
               <img className="augur-logo"
                    src="/augur-logo.svg"
                    data-multiline={true}
-                   data-tip='View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of this page.'/>
+                   data-tip={`View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`}/>
             </a>
         }
       </div>

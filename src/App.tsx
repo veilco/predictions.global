@@ -55,7 +55,9 @@ export class Home extends React.Component<HasMarketsSummary, State> {
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
             <div className="column is-12-mobile is-5-tablet is-5-desktop">
               {/* NB logo is fixed width and column must be larger than this or logo column will bleed into next column. The fixed width value in App.scss was chosen to make logo look good responsively. */}
-              <img className="logo" src="logo.png" />
+              <a href={`${window.location.protocol}//${window.location.host}`}>
+                <img className="logo" src="logo.png" />
+              </a>
             </div>
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>

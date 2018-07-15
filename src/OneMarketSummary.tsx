@@ -9,7 +9,6 @@ import {Market, MarketType, Prediction, Price} from './generated/markets_pb';
 import {Observer} from './observer';
 import Price2, {usdFormat, numberFormat} from "./Price";
 import * as classNames from 'classnames';
-import * as ReactTooltip from "react-tooltip";
 import './MarketCard.css';
 
 interface HasMarket {
@@ -158,7 +157,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const name = props.m.getName();
     const ps = props.m.getPredictionsList();
     const mt = props.m.getMarketType();
-    const resolutionSource = props.m.getResolutionSource();
     const isFeatured = props.m.getIsFeatured();
     const prediction = renderPrediction(mt, ps);
     const openInterest = props.m.getMarketCapitalization();
@@ -228,10 +226,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
             </a>
         }
       </div>
-      {isEmbedded && (
-        <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-          <a target="_parent" href={`${window.location.protocol}//${window.location.host}`}>
-            <img style={{width: '25px', display: 'inline-block'}} src="/logo-globe.png"/>
+      {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
+      {isEmbedded && type === 'mobile' && (
+        <div className={"column is-narrow"}>
+          <a target="blank" href={`${window.location.protocol}//${window.location.host}`}>
+            {/* paddingTop: 5px is because we want this logo to be vertically centered, but if we add is-vcentered to these columns, then the augur-logo.svg is positioned awkwardly relative to twitter icon. */}
+            <img style={{width: '115px', paddingTop: '5px'}} className="logo" src="/logo.png"/>
           </a>
         </div>
       )}
@@ -263,12 +263,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     {' '}<i className="fas fa-star"/>
                     <br/>
                   </strong>
-                </div>
-              )}
-              { isEmbedded && (
-                <div
-                  className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless has-text-centered is-paddingless">
-                  <img style={{width: '115px', marginTop: '1rem'}} className="logo" src="/logo.png"/>
                 </div>
               )}
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
@@ -331,6 +325,14 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 </div>
                 <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed}/>
               </div>
+              {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
+              {isEmbedded && (
+                <div className="column content is-12 is-marginless is-hidden-mobile no-padding-top no-padding-bottom">
+                  <a className="is-pulled-right" target="blank" href={`${window.location.protocol}//${window.location.host}`}>
+                    <img style={{width: '115px'}} className="logo" src="/logo.png"/>
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -51,27 +51,31 @@ function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction 
     case MarketType.CATEGORICAL:
       text += `${r} ${name}`;
       return {
-        node: <Dotdotdot clamp={2}>
+        node: <span>
           {prefix}
           <br/>
-          <strong className="orange" data-multiline={true}
-                  data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
-            {r} {name}
-          </strong>
-        </Dotdotdot>,
+          <Dotdotdot clamp={2}>
+            <strong className="orange" data-multiline={true}
+                    data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+              {r} {name}
+            </strong>
+          </Dotdotdot>
+        </span>,
         text,
       };
     case MarketType.SCALAR:
       text += `${v} ${name}`;
       return {
-        node: <Dotdotdot clamp={2}>
+        node: <span>
           {prefix}
           <br/>
-          <strong className="orange" data-multiline={true}
-                  data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
-            {v} {name}
-          </strong>
-        </Dotdotdot>,
+          <Dotdotdot clamp={2}>
+            <strong className="orange" data-multiline={true}
+                    data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+              {v} {name}
+            </strong>
+          </Dotdotdot>
+        </span>,
         text,
       };
   }

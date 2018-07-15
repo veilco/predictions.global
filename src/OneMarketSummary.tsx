@@ -239,8 +239,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
           <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
             <span>
-            <i className="fas fa-code is-hidden-mobile" data-tip="Copy HTML to embed market summary"/>
-            <i className="fas fa-code is-hidden-tablet" data-tip="Copied HTML to embed market summary"/>
+            <i className="fas fa-code is-hidden-mobile" data-multiline={true} data-tip="Copy HTML to embed market<br>summary in your webpage"/>
+            <i className="fas fa-code is-hidden-tablet" data-multiline={true} data-tip="Copied HTML to embed market<br>summary in your webpage"/>
             </span>
           </CopyToClipboard>
         </div>

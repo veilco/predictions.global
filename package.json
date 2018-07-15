@@ -38,7 +38,8 @@
     "serve-fake-data": "export DATA_FILE=$(npx ts-node -O '{\"module\": \"commonjs\"}' scripts/make-fake-data.ts) && cp scripts/serve.json $(dirname $DATA_FILE) && cd $(dirname $DATA_FILE) && npx serve -c serve.json -l 48773",
     "upload-fake-data:staging": "export DATA_FILE=$(npx ts-node -O '{\"module\": \"commonjs\"}' scripts/make-fake-data.ts) && gsutil -h \"Content-Type:application/octet-stream\" -h \"Cache-Control:public, max-age=15\" cp -a public-read $DATA_FILE gs://predictions-global-staging",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "prettier": "prettier --parser typescript --single-quote --trailing-comma --write \"./**/*.tsx\""
   },
   "devDependencies": {
     "@types/classnames": "^2.2.4",
@@ -54,6 +55,7 @@
     "@types/react-tooltip": "^3.3.5",
     "env-cmd": "^8.0.2",
     "mkdirp": "^0.5.1",
+    "prettier": "1.13.7",
     "serve": "^9.1.2",
     "sponge": "^0.1.0",
     "ts-node": "^7.0.0",

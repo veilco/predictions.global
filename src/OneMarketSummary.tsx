@@ -280,20 +280,20 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 </Dotdotdot>
               </div>
               <div
-                className="column is-two-thirds-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
+                className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
                 <div className="columns is-multiline">
-                  <div className="column content is-12 is-marginless">
+                  <div className="middle-column-left column content is-12 is-marginless">
                     {prediction.node}
                   </div>
-                  <div className="column content is-12">
+                  <div className="middle-column-left column content is-12">
                     <p className="is-italic comment-link is-marginless"
                        data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
                   </div>
                 </div>
               </div>
-              <div className="column is-one-third-mobile has-text-right">
+              <div className="column is-half-mobile has-text-right">
                 <div className="columns is-multiline">
-                  <div className="column content is-12 is-marginless is-centered">
+                  <div className="middle-column-right column content is-12 is-marginless is-centered">
                     {/* // TODO consider rendering "at stake" differently if market has ended or resolved; could say "total payout" etc. */}
                     {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
                       : <strong><Price2
@@ -302,7 +302,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     }
                     <br/>at stake
                   </div>
-                  <div className="column content is-12">
+                  <div className="middle-column-right column content is-12">
                     {renderEndDate()}
                   </div>
                 </div>

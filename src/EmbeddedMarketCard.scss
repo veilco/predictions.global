@@ -5,6 +5,10 @@
 
   .market {
     margin: 0;
-    height: 100%;
+
+    .market-content {
+      height: 100vh;
+      justify-content: space-between;
+    }
   }
 }

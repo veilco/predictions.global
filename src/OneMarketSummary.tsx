@@ -102,12 +102,14 @@ type OneMarketSummaryProps = HasMarket & {
 
 interface OneMarketSummaryState {
   // used to show visual feedback that user copied to clipboard
+  isEmbedHTMLCopiedToClipboard: boolean,
   isMarketIdCopiedToClipboard: boolean,
   isMarketSummaryCopiedToClipboard: boolean,
   showEmbed: boolean,
 }
 
 const oneMarketSummaryInitialState: OneMarketSummaryState = {
+  isEmbedHTMLCopiedToClipboard: false,
   isMarketIdCopiedToClipboard: false,
   isMarketSummaryCopiedToClipboard: false,
   showEmbed: false,
@@ -124,9 +126,11 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     document.removeEventListener("keydown", this.handleEscapeKey, false);
   }
 
-  public copiedToClipboard = (type: "isMarketIdCopiedToClipboard" | "isMarketSummaryCopiedToClipboard") => {
+  public copiedToClipboard = (type: "isMarketIdCopiedToClipboard" | "isMarketSummaryCopiedToClipboard" | "isEmbedHTMLCopiedToClipboard") => {
     // weird if statement required for typescript to recognize type is valid key of state
     if (type === "isMarketIdCopiedToClipboard") {
+      this.setState({[type]: true});
+    } else if (type === "isMarketSummaryCopiedToClipboard") {
       this.setState({[type]: true});
     } else {
       this.setState({[type]: true});
@@ -135,12 +139,17 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       if (this.state[type]) {
         if (type === "isMarketIdCopiedToClipboard") {
           this.setState({[type]: false});
+        } else if (type === "isMarketSummaryCopiedToClipboard") {
+          this.setState({[type]: false});
         } else {
           this.setState({[type]: false});
         }
       }
     }, 100);
   }
+
+  // tslint:disable-next-line
+  public embedHTMLCopiedToClipboard = this.copiedToClipboard.bind(this, "isEmbedHTMLCopiedToClipboard")
 
   // tslint:disable-next-line
   public marketIdCopiedToClipboard = this.copiedToClipboard.bind(this, "isMarketIdCopiedToClipboard")
@@ -237,10 +246,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       )}
       {!isEmbedded && (
         <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-          <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
-            <span>
-            <i className="fas fa-code is-hidden-mobile" data-multiline={true} data-tip="Copy HTML to embed market<br>summary in your webpage"/>
-            <i className="fas fa-code is-hidden-tablet" data-multiline={true} data-tip="Copied HTML to embed market<br>summary in your webpage"/>
+          <CopyToClipboard text={this.getMarketEmbedCode(marketID)} onCopy={this.embedHTMLCopiedToClipboard}>
+            <span className={this.state.isEmbedHTMLCopiedToClipboard ? "embed-copied" : ""}>
+              <i className="fas fa-code is-hidden-mobile"
+                data-multiline={true} data-tip="Copy HTML to embed market<br>summary in your webpage"/>
+              <i className="fas fa-code is-hidden-tablet"
+                data-multiline={true} data-tip="Copied HTML to embed market<br>summary in your webpage"/>
             </span>
           </CopyToClipboard>
         </div>

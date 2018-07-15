@@ -177,9 +177,11 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       return (<span>{props.now.isBefore(endDate) ? 'Ends' : 'Ended'} <strong>{props.now.to(endDate)}</strong></span>);
     }
 
-    const controls = (type: "mobile" | "not-mobile") => <div
-      className={"columns market-controls has-text-centered is-centered " + (
-        type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline"
+    const controls = (type: "mobile" | "not-mobile", className?: string) => <div
+      className={classNames(
+        "columns market-controls has-text-centered is-centered",
+        type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline",
+        className,
       )}>
       <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
         <TwitterShareButton url={callToActionURL} title={marketSummary}>
@@ -259,7 +261,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       )}
     </div>;
     const notMobileControls = controls("not-mobile");
-    const mobileControls = controls("mobile");
+    const mobileControls = controls("mobile", 'column is-paddingless is-12');
     return <div className="market columns is-centered">
       <div className="column box">
         <div className="columns">
@@ -313,9 +315,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   </div>
                 </div>
               </div>
-              <div className="column is-12 is-hidden-tablet">
                 {mobileControls}
-              </div>
 
               <div className={classNames('modal has-text-left', showEmbed && 'is-active')}>
                 <div className="modal-background"/>

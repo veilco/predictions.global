@@ -6,9 +6,12 @@ $tetrad-green-5: #008a1f;
 $tetrad-blue-3: #0d9bb6;
 $tetrad-blue-4: #037b91;
 $tetrad-blue-5: #025f71;
-$tetrad-orange: #ff830c;
+$tetrad-orange: #ff830c; // this is orange-3, but named orange for backwards compatibility
+$tetrad-orange-3: #ff830c;
 $tetrad-red-1: #ff7668;
+$tetrad-red-2: #ff4f3c;
 $tetrad-red-3: #ff230c;
+$tetrad-red-4: #ec1600;
 $tetrad-red-5: #b71100;
 
 .green-3 {
@@ -43,12 +46,46 @@ $tetrad-red-5: #b71100;
   color: $tetrad-orange;
 }
 
+.orange-3 {
+  color: $tetrad-orange-3;
+}
+
+.orange-3-bg {
+  background-color: $tetrad-orange-3;
+}
+
+.red-2 {
+  color: $tetrad-red-2;
+}
+
+.red-2-bg {
+  background-color: $tetrad-red-2;
+}
+
+
 .red-3 {
   color: $tetrad-red-3;
 }
 
+.red-3-bg {
+  background-color: $tetrad-red-3;
+}
+
+.red-4 {
+  color: $tetrad-red-4;
+}
+
+.red-4-bg {
+  background-color: $tetrad-red-4;
+}
+
+
 .red-5 {
   color: $tetrad-red-5;
+}
+
+.red-5-bg {
+  background-color: $tetrad-red-5;
 }
 
 body {

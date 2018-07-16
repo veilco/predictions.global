@@ -164,6 +164,12 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
       }
     }
   }
+  .market-creator-signup {
+    @media(max-width: 768px) {
+      // bulma is-mobile stops at 768px.
+      font-size: 0.618em;
+    }
+  }
 }
 
 .comment-link {

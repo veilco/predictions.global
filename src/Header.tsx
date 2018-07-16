@@ -4,6 +4,7 @@ import { MarketsSummary } from './generated/markets_pb';
 import { Observer } from './observer';
 import OldSelector from './oldSelector';
 import Price2, { numberFormat } from './Price';
+import MarketCreatorSignup from './MarketCreatorSignup';
 
 export const feedbackFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSdTCmsQH3EUKOaIeV1ECA124iLZMB5GiHby7XtRj19glqtNRw/viewform";
 
@@ -59,7 +60,7 @@ const Header: React.SFC<HeaderProps> = (props) => {
   return <section className="header section">
     <div className="container">
       <div className="columns is-mobile">
-        <div className="column is-9">
+        <div className="column is-9-mobile is-8-tablet is-8-desktop">
           <div className="columns is-vcentered">
             <div className="datum column is-narrow">
               <span className="content">
@@ -81,17 +82,17 @@ const Header: React.SFC<HeaderProps> = (props) => {
             </div>
           </div>
         </div>
-        <div className="column is-3">
+        <div className="column is-3-mobile is-4-tablet is-4-desktop">
           <div className="is-clearfix">
             <div className="is-pulled-left is-hidden-touch">
-              <a href={feedbackFormURL} target="blank">Send Feedback</a>
+              <MarketCreatorSignup />
             </div>
             <div className="is-pulled-right">
               {languageSelector}
             </div>
           </div>
           <div style={{ paddingTop: "0.75rem" }} className="is-pulled-right is-hidden-desktop has-text-centered">
-            <a href={feedbackFormURL} target="blank">Send Feedback</a>
+            <MarketCreatorSignup />
           </div>
         </div>
       </div>

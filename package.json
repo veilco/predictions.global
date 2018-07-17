@@ -20,7 +20,7 @@
     "react-tooltip": "^3.6.1"
   },
   "scripts": {
-    "build-protobuf": "mkdir -p src/generated && npx protoc-gen-grpc-ts --ts_out=service=true:src/generated --proto_path=../interfaces ../interfaces/*.proto && npx protoc-gen-grpc --js_out=import_style=commonjs,binary:src/generated --grpc_out=src/generated --proto_path=../interfaces ../interfaces/*.proto && find src/generated/ -type f | xargs -n1 sed -i '' '1s;^;/* tslint:disable */\\\n;'",
+    "build-protobuf": "mkdir -p src/generated && npx protoc-gen-grpc-ts --ts_out=service=true:src/generated --proto_path=../interfaces ../interfaces/markets.proto && npx protoc-gen-grpc --js_out=import_style=commonjs,binary:src/generated --grpc_out=src/generated --proto_path=../interfaces ../interfaces/markets.proto && find src/generated/ -type f | xargs -n1 sed -i '' '1s;^;/* tslint:disable */\\\n;'",
     "build-css": "node-sass-chokidar src/ -o src/ --include-path=node_modules",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive --include-path=node_modules",
     "start-js": "react-scripts-ts start",

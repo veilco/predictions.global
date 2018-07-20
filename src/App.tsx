@@ -63,7 +63,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
               <p><strong>See What the World Thinks.</strong></p>
               <p>
                 Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
-                                                                                  target="blank">Augur</a>
+                target="blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>
@@ -91,9 +91,16 @@ function isFeaturedGoesFirst(a: Market, b: Market): number {
   return 0;
 }
 
-type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
+type sortKey = 'Recently Traded' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
 const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
+  ['Recently Traded', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return b.getLastTradeTime() - a.getLastTradeTime();
+  }],
   ['Money at Stake', (a: Market, b: Market) => {
     const maybeFeatured = isFeaturedGoesFirst(a, b);
     if (maybeFeatured !== 0) {
@@ -196,8 +203,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         return sortOrderQuery;
       } else if (sortOrderQuery === 'Ending Soon') {
         return sortOrderQuery;
+      } else if (sortOrderQuery === 'Money at Stake') {
+        return sortOrderQuery;
       }
-      return 'Money at Stake';
+      return 'Recently Traded';
     })();
 
     const showEnded = getQueryString('e') === '1';

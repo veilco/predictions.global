@@ -132,7 +132,6 @@ const paginationLimits = [10, 20, 50];
 // Example of strong typed array of MarketCategory: `Object.keys(MarketCategory).map(key => MarketCategory[key]) as MarketCategory[]`
 enum MarketCategory {
   All = 'All', // Wildcard category that matches any and all categories
-  WorldCup = 'World Cup',
   Sports = 'Sports',
   Cryptocurrency = 'Cryptocurrency',
   Finance = 'Finance',
@@ -141,14 +140,11 @@ enum MarketCategory {
 
 const cryptocurrencyMarketCategoryRegexp = /ethereum| ether|ether |bitcoin|btc| crypto|crypto |cryptocurrenc|flippening/;
 const financeMarketCategoryRegexp = / trade|trade | trading|trading | price|price | credit|credit /;
-const fifaRegexp = / fifa|fifa |world cup/;
 
 function getMarketCategory(m: Market): MarketCategory {
   const c = m.getCategory().toLowerCase();
   const n = m.getName().toLowerCase();
-  if (c === 'world cup' || n.search(fifaRegexp) > -1) {
-    return MarketCategory.WorldCup;
-  } else if (c === 'sports' || c === 'sport') {
+  if (c === 'sports' || c === 'sport') {
     return MarketCategory.Sports;
   } else if (c === 'cryptocurrency' || c === 'cryptocurrencies' || n.search(cryptocurrencyMarketCategoryRegexp) > -1) {
     return MarketCategory.Cryptocurrency;

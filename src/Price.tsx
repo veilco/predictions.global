@@ -8,6 +8,14 @@ export const numberFormat = new Intl.NumberFormat('en-US');
 export const usdFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 export const cryptocurrencyFormat = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 8 });
 
+// This "smart" rounding function attempts to show useful precision based on magnitude of passed number.
+export function smartRound(n: number): number {
+  if (n >= 1000) {
+    return Math.round(n);
+  }
+  return Math.round(n * 100) / 100; // ghetto way to round to 2 decimals because toFixed(2) returns a string
+}
+
 interface PriceProps {
   p: Price | undefined,
   o: Observer<Currency>, // observe changes in user's selected Currency.
@@ -40,19 +48,13 @@ class Price2 extends React.Component<PriceProps, PriceState> {
 }
 
 function renderPrice(c: Currency, p: Price | undefined): React.ReactNode {
-  function round(n: number): number {
-    if (n >= 1000) {
-      return Math.round(n);
-    }
-    return Math.round(n * 100) / 100; // ghetto way to round to 2 decimals because toFixed(2) returns a string
-  }
   if (p === undefined) {
     return '?';
   }
   switch (c) {
     case Currency.ETH:
       return <span>
-        {cryptocurrencyFormat.format(round(p.getEth()))}Ξ
+        {cryptocurrencyFormat.format(smartRound(p.getEth()))}Ξ
       </span>;
     case Currency.USD:
       return <span>
@@ -60,7 +62,7 @@ function renderPrice(c: Currency, p: Price | undefined): React.ReactNode {
       </span>;
     case Currency.BTC:
       return <span>
-        {cryptocurrencyFormat.format(round(p.getBtc()))}Ƀ
+        {cryptocurrencyFormat.format(smartRound(p.getBtc()))}Ƀ
       </span>;
   }
 }

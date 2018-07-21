@@ -5,9 +5,9 @@ import * as CopyToClipboard from 'react-copy-to-clipboard';
 import Dotdotdot from 'react-dotdotdot';
 import {TwitterIcon, TwitterShareButton} from 'react-share';
 import {Currency} from './Currency';
-import {Market, MarketType, Prediction, Price} from './generated/markets_pb';
+import {Market, MarketType, Prediction, Price, LiquidityAtPrice} from './generated/markets_pb';
 import {Observer} from './observer';
-import Price2, {usdFormat, numberFormat} from "./Price";
+import Price2, {usdFormat, numberFormat, smartRound} from "./Price";
 import * as classNames from 'classnames';
 import './MarketCard.css';
 
@@ -118,6 +118,34 @@ const oneMarketSummaryInitialState: OneMarketSummaryState = {
   isMarketSummaryCopiedToClipboard: false,
   showEmbed: false,
 };
+
+function renderBidAsk(m: Market): React.ReactNode {
+  let topOutcomeBestBid: LiquidityAtPrice | undefined;
+  let topOutcomeBestAsk: LiquidityAtPrice | undefined;
+  const predictions = m.getPredictionsList();
+  if (predictions.length > 0) {
+    topOutcomeBestBid = m.getBestBidsMap().get(predictions[0].getOutcomeId());
+    topOutcomeBestAsk = m.getBestAsksMap().get(predictions[0].getOutcomeId());
+  }
+  return <div className="columns is-mobile has-text-centered is-vcentered is-centered">
+    <div className="column">
+      <strong>Qty:</strong><br/> {/* best bid quantity */}
+      {topOutcomeBestBid && topOutcomeBestBid.getAmount() !== 0 ? numberFormat.format(smartRound(topOutcomeBestBid.getAmount())) : '-'}
+    </div>
+    <div className="column">
+      <strong>Bid:</strong><br/>
+      {topOutcomeBestBid && topOutcomeBestBid.getPrice() !== 0 ? numberFormat.format(smartRound(topOutcomeBestBid.getPrice())) : '-'}
+    </div>
+    <div className="column">
+      <strong>Ask:</strong><br/>
+      {topOutcomeBestAsk && topOutcomeBestAsk.getPrice() !== 0 ? numberFormat.format(smartRound(topOutcomeBestAsk.getPrice())) : '-'}
+    </div>
+    <div className="column">
+      <strong>Qty:</strong><br/> {/* best ask quantity */}
+      {topOutcomeBestAsk && topOutcomeBestAsk.getAmount() !== 0 ? numberFormat.format(smartRound(topOutcomeBestAsk.getAmount())) : '-'}
+    </div>
+  </div>;
+}
 
 class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketSummaryState> {
   public readonly state: OneMarketSummaryState = oneMarketSummaryInitialState
@@ -266,6 +294,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     </div>;
     const notMobileControls = controls("not-mobile");
     const mobileControls = controls("mobile", 'column is-paddingless is-12 is-hidden-tablet');
+    const bidAsk = renderBidAsk(m);
     return <div className="market columns is-centered">
       <div className="column box">
         <div className="columns">
@@ -284,12 +313,19 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 </div>
               )}
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
-                <Dotdotdot clamp={4}>
-                  {!isEmbedded && (
-                    <strong className="orange">#{props.index + 1}</strong>
-                  )}
-                  {" "}<strong>{name}</strong>
-                </Dotdotdot>
+                <div className="columns is-multiline">
+                  <div className="column is-12">
+                    <Dotdotdot clamp={3}>
+                      {!isEmbedded && (
+                        <strong className="orange">#{props.index + 1}</strong>
+                      )}
+                      {" "}<strong>{name}</strong>
+                    </Dotdotdot>
+                  </div>
+                  <div className="column is-12 is-hidden-mobile">
+                    {bidAsk}
+                  </div>
+                </div>
               </div>
               <div
                 className="column is-half-mobile has-text-left-mobile has-text-centered-tablet has-text-centered-desktop">
@@ -318,6 +354,9 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     {renderEndDate()}
                   </div>
                 </div>
+              </div>
+              <div className="column is-12 is-hidden-tablet">
+                {bidAsk}
               </div>
                 {mobileControls}
 

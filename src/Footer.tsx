@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { feedbackFormURL } from './Header';
 import MarketCreatorSignup from './MarketCreatorSignup';
 
@@ -18,6 +19,9 @@ const Footer = <footer className="footer">
           </div>
           <div className="column is-12 is-paddingless">
             <a href="https://twitter.com/PredictionsGlbl" target="blank">Twitter</a>
+          </div>
+          <div className="column is-12 is-paddingless">
+            <Link to="/augur-public-ethereum-nodes">List of Public Ethereum Nodes</Link>
           </div>
         </div>
       </div>

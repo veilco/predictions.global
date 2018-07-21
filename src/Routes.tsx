@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {BrowserRouter as Router, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
 import {Home} from './App';
 import {EmbeddedMarketCard} from './EmbeddedMarketCard';
 import {MarketsSummary} from "./generated/markets_pb";
@@ -101,6 +101,7 @@ export class Routes extends React.Component<any, RoutesState> {
           <Route exact={true} path="/" render={renderHome}/>
           <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
           <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
+          <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
         </div>
       </Router>
     );
@@ -116,4 +117,48 @@ export class Routes extends React.Component<any, RoutesState> {
       marketsSummary,
     });
   };
+}
+
+function renderPublicEthereumNodes(): React.ReactNode {
+  return <section className="section">
+    <div className="container">
+      <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
+        <div className="column is-12">
+          <Link to="/"><img className="logo" src="logo.png" /></Link>
+        </div>
+        <div className="column is-12">
+          <h3 className="title">Public Ethereum Nodes</h3>
+           {/* for use in <a href="https://github.com/AugurProject/augur-app/releases" target="blank">Augur App</a></strong> */}
+           <p>These nodes can be used as the back end for <a href="https://github.com/AugurProject/augur-app/releases" target="blank">Augur App</a>. (Eg. as an alternative to Infura.)</p>
+           <p>This list is provided by Predictions.Global for your convenience.<br/>We trust the community members hosting these nodes,<br/>but make no security guarantees.</p>
+        </div>
+        <div className="column is-12">
+          <Link to="/">Back to Homepage</Link>
+        </div>
+        <div className="column is-narrow">
+          <table>
+            <thead>
+              <tr>
+                <th />
+                <th>HTTP Endpoint</th>
+                <th>Websocket Endpoint</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>#1</strong></td>
+                <td><code>http://megageth.com/ethereum-http</code></td>
+                <td><code>ws://megageth.com/ethereum-ws</code></td>
+              </tr>
+              <tr>
+                <td><strong>#2</strong></td>
+                <td><code>http://gethstar.com/ethereum-http</code></td>
+                <td><code>ws://gethstar.com/ethereum-ws</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>;
 }

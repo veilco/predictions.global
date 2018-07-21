@@ -8,3 +8,4 @@ rules:
   empty-line-between-blocks: 0
   class-name-format: 0
   final-newline: 0
+  shorthand-values: 0

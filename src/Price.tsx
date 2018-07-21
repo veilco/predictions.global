@@ -16,6 +16,14 @@ export function smartRound(n: number): number {
   return Math.round(n * 100) / 100; // ghetto way to round to 2 decimals because toFixed(2) returns a string
 }
 
+// TODO better/consolidated number rendering library
+export function smartRoundThreeDecimals(n: number): number {
+  if (n >= 1000) {
+    return Math.round(n);
+  }
+  return Math.round(n * 1000) / 1000; // ghetto way to round to 3 decimals because toFixed(2) returns a string
+}
+
 interface PriceProps {
   p: Price | undefined,
   o: Observer<Currency>, // observe changes in user's selected Currency.

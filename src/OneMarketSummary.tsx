@@ -1,15 +1,15 @@
+import * as classNames from 'classnames';
 import * as moment from 'moment';
 import * as React from 'react';
 import * as CopyToClipboard from 'react-copy-to-clipboard';
 // @ts-ignore for Dotdotdot
 import Dotdotdot from 'react-dotdotdot';
-import {TwitterIcon, TwitterShareButton} from 'react-share';
-import {Currency} from './Currency';
-import {Market, MarketType, Prediction, Price, LiquidityAtPrice} from './generated/markets_pb';
-import {Observer} from './observer';
-import Price2, {usdFormat, numberFormat, smartRound} from "./Price";
-import * as classNames from 'classnames';
+import { TwitterIcon, TwitterShareButton } from 'react-share';
+import { Currency } from './Currency';
+import { LiquidityAtPrice, Market, MarketType, Prediction, Price } from './generated/markets_pb';
 import './MarketCard.css';
+import { Observer } from './observer';
+import Price2, { numberFormat, usdFormat, smartRoundThreeDecimals } from "./Price";
 
 interface HasMarket {
   m: Market
@@ -130,19 +130,19 @@ function renderBidAsk(m: Market): React.ReactNode {
   return <div className="columns is-mobile has-text-centered is-vcentered is-centered">
     <div className="column">
       <strong>Qty:</strong><br/> {/* best bid quantity */}
-      {topOutcomeBestBid && topOutcomeBestBid.getAmount() !== 0 ? numberFormat.format(smartRound(topOutcomeBestBid.getAmount())) : '-'}
+      {topOutcomeBestBid && topOutcomeBestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestBid.getAmount())) : '-'}
     </div>
     <div className="column">
       <strong>Bid:</strong><br/>
-      {topOutcomeBestBid && topOutcomeBestBid.getPrice() !== 0 ? numberFormat.format(smartRound(topOutcomeBestBid.getPrice())) : '-'}
+      {topOutcomeBestBid && topOutcomeBestBid.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestBid.getPrice())) : '-'}
     </div>
     <div className="column">
       <strong>Ask:</strong><br/>
-      {topOutcomeBestAsk && topOutcomeBestAsk.getPrice() !== 0 ? numberFormat.format(smartRound(topOutcomeBestAsk.getPrice())) : '-'}
+      {topOutcomeBestAsk && topOutcomeBestAsk.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestAsk.getPrice())) : '-'}
     </div>
     <div className="column">
       <strong>Qty:</strong><br/> {/* best ask quantity */}
-      {topOutcomeBestAsk && topOutcomeBestAsk.getAmount() !== 0 ? numberFormat.format(smartRound(topOutcomeBestAsk.getAmount())) : '-'}
+      {topOutcomeBestAsk && topOutcomeBestAsk.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestAsk.getAmount())) : '-'}
     </div>
   </div>;
 }

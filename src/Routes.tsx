@@ -128,7 +128,6 @@ function renderPublicEthereumNodes(): React.ReactNode {
         </div>
         <div className="column is-12">
           <h3 className="title">Public Ethereum Nodes</h3>
-           {/* for use in <a href="https://github.com/AugurProject/augur-app/releases" target="blank">Augur App</a></strong> */}
            <p>These nodes can be used as the back end for <a href="https://github.com/AugurProject/augur-app/releases" target="blank">Augur App</a>. (Eg. as an alternative to Infura.)</p>
            <p>This list is provided by Predictions.Global for your convenience.<br/>We trust the community members hosting these nodes,<br/>but make no security guarantees.</p>
         </div>

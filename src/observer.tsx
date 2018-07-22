@@ -16,7 +16,7 @@ export function isObserver<T>(o: T | Observer<T>): o is Observer<T> {
 // TODO also there can be tools for being an observer, e.g. subscribe/auto unsubscribe on componentWillUnmount.
 export interface ObserverOwner<T> {
   getCurrentValue: () => T,
-  o: Observer<T>, // Observer to pass to descendants who want to observe this state
+  observer: Observer<T>, // Observer to pass to descendants who want to observe this state
   setValueAndNotifyObservers: (t: T) => void, // cause all registered observers to see a new observation
 }
 
@@ -33,7 +33,10 @@ export function makeObserverOwner<T>(initialValue: T): ObserverOwner<T> {
   }
   return {
     getCurrentValue: () => currentValue,
-    o: subscribe,
+    observer: {
+      isObserver: true,
+      subscribe,
+    },
     setValueAndNotifyObservers: (newT: T) => {
       currentValue = newT;
       subs.forEach(s => s(newT));

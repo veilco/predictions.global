@@ -32,7 +32,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     const currency: Currency = new Set(Object.keys(Currency).map(k => Currency[k])).has(localStorageCurrency) ? (localStorageCurrency as Currency) : Currency.USD;
 
     const o = makeObserverOwner(currency);
-    o.o((newCurrency) => localStorage.setItem('currency', newCurrency));
+    o.observer.subscribe((newCurrency) => localStorage.setItem('currency', newCurrency));
     this.state = {
       currencySelectionObserverOwner: o,
     };
@@ -45,7 +45,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     }
 
     const { currencySelectionObserverOwner } = this.state;
-    const currencySelectionObserver = this.state.currencySelectionObserverOwner.o;
+    const currencySelectionObserver = this.state.currencySelectionObserverOwner.observer;
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
@@ -272,8 +272,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
           <div className="column is-narrow">
             <Dropdown
-              renderValue={renderCurrency}
+              currentValueOrObserver={currencySelectionObserver}
               onChange={this.setCurrency}
+              renderValue={renderCurrency}
               values={[Currency.USD, Currency.ETH, Currency.BTC]} />
           </div>
           <div className="column is-narrow">
@@ -286,7 +287,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item sort-by-box">
                   <Dropdown
-                    defaultValue={sortOrder}
+                    currentValueOrObserver={sortOrder}
                     onChange={this.setSortOrder}
                     values={Array.from(sortOrders.keys())} />
                 </div>
@@ -303,7 +304,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item category-box">
                   <Dropdown
-                    defaultValue={category}
+                    currentValueOrObserver={category}
                     onChange={this.setCategory}
                     values={Object.keys(MarketCategory).map(key => MarketCategory[key])} />
                 </div>
@@ -367,7 +368,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 <div className="column is-narrow is-paddingless">
                   <div className="column is-narrow">
                     <Dropdown
-                      defaultValue={paginationLimit}
+                      currentValueOrObserver={paginationLimit}
                       onChange={this.setPaginationLimit}
                       values={paginationLimits}
                     />

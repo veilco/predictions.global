@@ -22,7 +22,7 @@ interface PriceState {
 class Price2 extends React.Component<PriceProps, PriceState> {
   public constructor(props: PriceProps) {
     super(props);
-    const sub = this.props.o(this.setCurrency);
+    const sub = this.props.o.subscribe(this.setCurrency);
     this.state = {
       c: sub.initialValue,
       u: sub.unsubscribe,

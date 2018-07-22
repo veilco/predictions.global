@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Currency } from './Currency';
 import { MarketsSummary } from './generated/markets_pb';
 import { Observer } from './observer';
-import OldSelector from './oldSelector';
 import Price2, { numberFormat } from './Price';
+import { Dropdown } from './Dropdown';
 
 export const feedbackFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSdTCmsQH3EUKOaIeV1ECA124iLZMB5GiHby7XtRj19glqtNRw/viewform";
 
@@ -35,26 +35,25 @@ type Language = "English" |
 const languageNoop = () => {/* no-op for now */ };
 
 const Header: React.SFC<HeaderProps> = (props) => {
-  const languageSelector = <OldSelector<Language>
-    currentValue={'English'}
-    currentRendered={'English'}
+  const languageSelector = <Dropdown<Language>
+    currentValueOrObserver={'English'}
     buttonClassNameSuffix={'is-small'}
-    setValue={languageNoop}
+    onChange={languageNoop}
     values={[
-      { value: 'English', rendered: 'English' },
-      { value: 'Coming Soon!', rendered: 'Coming Soon!' },
-      { value: "快来了", rendered: '快来了"' },
-      { value: "Próximamente", rendered: 'Próximamente' },
-      { value: "قريبا", rendered: "قريبا" },
-      { value: "Em breve", rendered: 'Em breve' },
-      { value: "Prossimamente", rendered: 'Prossimamente' },
-      { value: "Скоро", rendered: 'Скоро' },
-      { value: "Demnächst", rendered: 'Demnächst' },
-      { value: "곧 출시 예정", rendered: '곧 출시 예정' },
-      { value: "近日公開", rendered: '近日公開' },
-      { value: "Arrive bientôt", rendered: 'Arrive bientôt' },
-      { value: "Sắp có", rendered: 'Sắp có' },
-      { value: "जल्द आ रहा है", rendered: 'जल्द आ रहा है' },
+      'English',
+      'Coming Soon!',
+      "快来了",
+      "Próximamente",
+      "قريبا",
+      "Em breve",
+      "Prossimamente",
+      "Скоро",
+      "Demnächst",
+      "곧 출시 예정",
+      "近日公開",
+      "Arrive bientôt",
+      "Sắp có",
+      "जल्द आ रहा है",
     ]} />;
   return <section className="header section">
     <div className="container">

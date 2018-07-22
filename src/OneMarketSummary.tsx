@@ -315,7 +315,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
                 <div className="columns is-multiline">
                   <div className="column is-12">
-                    <Dotdotdot clamp={3}>
+                    <Dotdotdot clamp={4}>
                       {!isEmbedded && (
                         <strong className="orange">#{props.index + 1}</strong>
                       )}

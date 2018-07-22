@@ -489,7 +489,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       paginationOffset: 0,
       searchQuery: '',
       showEnded: false,
-      sortOrder: 'Money at Stake',
+      sortOrder: 'Recently Traded',
     });
   };
 }

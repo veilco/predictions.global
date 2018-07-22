@@ -449,7 +449,12 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       paginationOffset,
     });
-    if (opts && opts.scrollIntoView && this.state.topOfMarketList.current !== null) {
+    let scrollIntoView: boolean = true; // ie. by default scroll into view
+    // WARNING setPaginationOffset() is used in function.bind(), and bind() causes TypeScript to lose all typing information, so we do an explicit check for opts.
+    if (typeof opts === 'object' && typeof opts.scrollIntoView === 'boolean') {
+      scrollIntoView = opts.scrollIntoView;
+    }
+    if (scrollIntoView && this.state.topOfMarketList.current !== null) {
       this.state.topOfMarketList.current.scrollIntoView(true);
     }
   };

@@ -25,7 +25,7 @@ class Price2 extends React.Component<PriceProps, PriceState> {
     const sub = this.props.o(this.setCurrency);
     this.state = {
       c: sub.initialValue,
-      u: sub.u,
+      u: sub.unsubscribe,
     };
   }
   public componentWillUnmount() {

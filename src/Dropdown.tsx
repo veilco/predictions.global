@@ -1,122 +1,102 @@
-import * as React from 'react';
 import * as classNames from "classnames";
+import * as React from 'react';
 import './Dropdown.css';
+import { isObserver, Observer, Unsubscribe } from './observer';
 
-interface DropdownProps<T> {
-  renderValue?: (t: T) => React.ReactNode, // Render values with custom logic
-  onChange: (t: T) => void,
-  defaultValue?: T,
-  values: T[],
+interface Props<T> {
   buttonClassNameSuffix?: string,
+  currentValueOrObserver: T | Observer<T>, // currentValue is set either as a (static) prop or via an Observer which allows currentValue to vary without re-rendering ancestor components that don't depend on current value.
+  onChange: (t: T) => void, // onChange() is expected to feed back into props.currentValue, such that the dropdown updates the value shown (be that because props.currentValue is a literal T or Observer<T>)
+  renderValue?: (t: T) => React.ReactNode, // Render values with custom logic
+  values: T[],
 }
 
-interface DropdownState<T> {
-  isActive: boolean,
-  currentValue: T, // TODO drop hack dependency on Observer
-  defaultValue: T,
+interface State<T> {
+  currentValue: T, // current selected value in this Dropdown
+  isActive: boolean, // true iff this dropdown is open/expanded
+  unsubscribe?: Unsubscribe, // Observer unsubscribe if props.currentValueOrObserver is an Observer
+  renderValue: (t: T) => React.ReactNode, // used to render each value; can be passed with props.renderValue or defaults to value.toString()
 }
 
-interface DropdownDerivedStateProps {
-  defaultValue?: any,
-}
-
-interface DropdownDerivedStateState {
-  currentValue: any,
-  defaultValue: any,
-}
-
-export class Dropdown<T> extends React.Component<DropdownProps<T>, DropdownState<T>> {
-  public static getDerivedStateFromProps(props: DropdownDerivedStateProps, state: DropdownDerivedStateState) {
-    // Set the dropdown value to the defaultValue prop if it changes
-    if(props.defaultValue != null && props.defaultValue !== state.defaultValue) {
-      return {
-        currentValue: props.defaultValue,
-        defaultValue: props.defaultValue,
+export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
+  private dropdownContainer: React.RefObject<HTMLDivElement>;
+  public constructor(props: Props<T>) {
+    super(props);
+    this.dropdownContainer = React.createRef();
+    const renderValue: (t: T) => React.ReactNode = this.props.renderValue !== undefined ? this.props.renderValue : (t: T) => t.toString();
+    if (isObserver(props.currentValueOrObserver)) {
+      const sub = props.currentValueOrObserver.subscribe((newValue: T) => this.setState({ currentValue: newValue }));
+      this.state = {
+        currentValue: sub.initialValue,
+        isActive: false,
+        renderValue,
+        unsubscribe: sub.unsubscribe,
+      };
+    } else {
+      this.state = {
+        currentValue: props.currentValueOrObserver,
+        isActive: false,
+        renderValue,
       };
     }
-
-    return null;
   }
-
-  private dropdownContainer: React.RefObject<HTMLDivElement>;
-
-  public constructor(props: DropdownProps<T>) {
-    super(props);
-
-    const currentValue = props.defaultValue == null ? props.values[0] : props.defaultValue;
-
-    this.dropdownContainer = React.createRef();
-    this.state = {
-      currentValue,
-      defaultValue: currentValue,
-      isActive: false,
-    };
-  }
-
   public componentDidMount(): void {
-    document.addEventListener('click', this.handleDocumentClick.bind(this), false);
+    document.addEventListener('click', this.handleDocumentClick, false);
   }
-
   public componentWillUnmount(): void {
-    document.removeEventListener('click', this.handleDocumentClick.bind(this));
+    document.removeEventListener('click', this.handleDocumentClick);
+    if (this.state.unsubscribe !== undefined) {
+      this.state.unsubscribe();
+    }
   }
-
   public render() {
     const {values} = this.props;
-    const {isActive, currentValue} = this.state;
-
+    const {isActive, currentValue, renderValue} = this.state;
     return <div className={classNames('dropdown', isActive && 'is-active')} ref={this.dropdownContainer}>
       <div className="dropdown-trigger" onClick={this.toggleIsActive}>
         <button className={classNames('button', this.props.buttonClassNameSuffix)} aria-haspopup="true"
                 aria-controls="dropdown-menu">
-          <span>{this.props.renderValue == null ? currentValue.toString() : this.props.renderValue(currentValue)}</span>
+          <span>{renderValue(currentValue)}</span>
           <span className="icon is-small">
             <i className="fas fa-angle-down" aria-hidden="true"/>
           </span>
         </button>
       </div>
-      <div className="dropdown-menu" id="dropdown-menu" role="menu">
+      <div className="dropdown-menu" role="menu">
         {values
           .filter(value => value !== currentValue)
-          .map(value => (
-            <div className="dropdown-content" key={value.toString()} onClick={this.setValue.bind(this, value)}>
+          .map((value, index) => (
+            <div className="dropdown-content" key={index} onClick={this.userSelectedDropdownValue.bind(this, value)}>
               <span
-                className="dropdown-item">{this.props.renderValue == null ? value.toString() : this.props.renderValue(value)}</span>
+                className="dropdown-item">{renderValue(value)}</span>
             </div>
           ))
         }
       </div>
     </div>;
   }
-
-  private setValue = (value: T) => {
+  private userSelectedDropdownValue = (value: T) => {
     this.setState({
-      currentValue: value,
+      // WARNING - we do not set state.currentValue here because either props.currentValueOrObserver is T and parent will re-render this comp with new T, xor currentValueOrObserver is Observer<T> and currentValue will get updated by observation callback (which is setup in this constructor).
       isActive: false,
     });
-
     this.props.onChange(value);
   };
-
   private toggleIsActive = () => {
     this.setState({isActive: !this.state.isActive});
   };
-
   private handleDocumentClick = (e: MouseEvent) => {
     const dropdownContainer = this.dropdownContainer && this.dropdownContainer.current;
     if (!dropdownContainer) {
       return;
     }
-
     const target = e.target;
     if (!(target instanceof Node)) {
       return;
     }
-
     if (target === dropdownContainer || dropdownContainer.contains(target)) {
       return;
     }
-
     this.setState({isActive: false});
   };
 }

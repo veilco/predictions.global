@@ -33,7 +33,7 @@ export default class Selector<T> extends React.Component<Props<T>, SelectorState
     this.state = {
       currentValue: sub.initialValue,
       isActive: false,
-      u: sub.u,
+      u: sub.unsubscribe,
     };
   }
   public componentWillUnmount() {

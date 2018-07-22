@@ -426,7 +426,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       sortOrder,
     });
-    this.setPaginationOffset(0); // go back to first page of results when switching sort order
+    this.setPaginationOffset(0, { scrollIntoView: false }); // go back to first page of results when switching sort order
   };
 
   private setCategory = (category: MarketCategory) => {
@@ -434,7 +434,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       category,
     });
-    this.setPaginationOffset(0); // go back to first page of results when switching category
+    this.setPaginationOffset(0, { scrollIntoView: false }); // go back to first page of results when switching category
   };
 
   // https://reactjs.org/docs/faq-functions.html
@@ -444,12 +444,12 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     }
   };
 
-  private setPaginationOffset = (paginationOffset: number) => {
+  private setPaginationOffset = (paginationOffset: number, opts?: { scrollIntoView: boolean }) => {
     updateQueryString('p', paginationOffset + 1);
     this.setState({
       paginationOffset,
     });
-    if (this.state.topOfMarketList.current !== null) {
+    if (opts && opts.scrollIntoView && this.state.topOfMarketList.current !== null) {
       this.state.topOfMarketList.current.scrollIntoView(true);
     }
   };

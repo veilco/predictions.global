@@ -18,7 +18,16 @@ interface State<T> {
   renderValue: (t: T) => React.ReactNode, // used to render each value; can be passed with props.renderValue or defaults to value.toString()
 }
 
+// WARNING - Dropdown doesn't support changing value of `props.currentValueOrObserver` after construction, unless the old and new values are T (and not Observer<T>).
 export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
+  public static getDerivedStateFromProps<T>(nextProps: Props<T>, _PREV_STATE: State<T>): Partial<State<T>> {
+    const nextState: Partial<State<T>> = {};
+    if (!isObserver(nextProps.currentValueOrObserver)) {
+      // If currentValueOrObserver is a T, then we want state.currentValue to just be currentValueOrObserver. If currentValueOrObserver is an Observer<T>, then state.currentValue is set in the observation callback (which is setup in Dropdown constructor).
+      nextState.currentValue = nextProps.currentValueOrObserver;
+    }
+    return nextState;
+  }
   private dropdownContainer: React.RefObject<HTMLDivElement>;
   public constructor(props: Props<T>) {
     super(props);
@@ -77,7 +86,7 @@ export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
   }
   private userSelectedDropdownValue = (value: T) => {
     this.setState({
-      // WARNING - we do not set state.currentValue here because either props.currentValueOrObserver is T and parent will re-render this comp with new T, xor currentValueOrObserver is Observer<T> and currentValue will get updated by observation callback (which is setup in this constructor).
+      // WARNING - we do not set state.currentValue here because either props.currentValueOrObserver is T and parent will re-render this comp with updated prop T (which is then converted to state in getDerivedStateFromProps), xor currentValueOrObserver is Observer<T> and currentValue will get updated by observation callback (which is setup in this constructor).
       isActive: false,
     });
     this.props.onChange(value);

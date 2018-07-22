@@ -280,7 +280,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
           <div className="column is-narrow">
             <Dropdown
-              initialValueOrObserver={currencySelectionObserver}
+              currentValueOrObserver={currencySelectionObserver}
               onChange={this.setCurrency}
               renderValue={renderCurrency}
               values={[Currency.USD, Currency.ETH, Currency.BTC]} />
@@ -295,7 +295,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item sort-by-box">
                   <Dropdown
-                    initialValueOrObserver={sortOrder}
+                    currentValueOrObserver={sortOrder}
                     onChange={this.setSortOrder}
                     values={Array.from(sortOrders.keys())} />
                 </div>
@@ -312,7 +312,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item category-box">
                   <Dropdown
-                    initialValueOrObserver={category}
+                    currentValueOrObserver={category}
                     onChange={this.setCategory}
                     values={Object.keys(MarketCategory).map(key => MarketCategory[key])} />
                 </div>
@@ -376,7 +376,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 </div>
                 <div className="column is-narrow is-paddingless">
                   <Dropdown
-                    initialValueOrObserver={paginationLimit}
+                    currentValueOrObserver={paginationLimit}
                     onChange={this.setPaginationLimit}
                     values={paginationLimits}
                   />

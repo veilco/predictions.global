@@ -37,7 +37,7 @@ const languageNoop = () => {/* no-op for now */ };
 
 const Header: React.SFC<HeaderProps> = (props) => {
   const languageSelector = <Dropdown<Language>
-    initialValueOrObserver={'English'}
+    currentValueOrObserver={'English'}
     buttonClassNameSuffix={'is-small'}
     onChange={languageNoop}
     values={[

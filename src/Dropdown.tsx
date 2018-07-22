@@ -5,8 +5,8 @@ import { isObserver, Observer, Unsubscribe } from './observer';
 
 interface Props<T> {
   buttonClassNameSuffix?: string,
-  initialValueOrObserver: T | Observer<T>, // if T, state.currentValue will be this initial value, and thereafter currentValue is updated when user changes the dropdown; if Observer<T>, currentValue is initialized and updated from Observer callback.
-  onChange: (t: T) => void, // onChange() is called when user selects a value from this dropdown; if initialValueOrObserver is an Observer, then onChange() (within parent) must feed back into the Observer so that state.currentValue is updated by observation callback.
+  currentValueOrObserver: T | Observer<T>, // currentValue is set either as a (static) prop or via an Observer which allows currentValue to vary without re-rendering ancestor components that don't depend on current value.
+  onChange: (t: T) => void, // onChange() is expected to feed back into props.currentValue, such that the dropdown updates the value shown (be that because props.currentValue is a literal T or Observer<T>)
   renderValue?: (t: T) => React.ReactNode, // Render values with custom logic
   values: T[],
 }
@@ -14,19 +14,18 @@ interface Props<T> {
 interface State<T> {
   currentValue: T, // current selected value in this Dropdown
   isActive: boolean, // true iff this dropdown is open/expanded
-  unsubscribe?: Unsubscribe, // Observer unsubscribe if props.initialValueOrObserver is an Observer
+  unsubscribe?: Unsubscribe, // Observer unsubscribe if props.currentValueOrObserver is an Observer
   renderValue: (t: T) => React.ReactNode, // used to render each value; can be passed with props.renderValue or defaults to value.toString()
 }
 
-// WARNING - Dropdown doesn't support modifying `props.initialValueOrObserver` after initial construction. If we wanted to support this, we'll have to handle replacing/removing props.Observer<T>.
 export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
   private dropdownContainer: React.RefObject<HTMLDivElement>;
   public constructor(props: Props<T>) {
     super(props);
     this.dropdownContainer = React.createRef();
     const renderValue: (t: T) => React.ReactNode = this.props.renderValue !== undefined ? this.props.renderValue : (t: T) => t.toString();
-    if (isObserver(props.initialValueOrObserver)) {
-      const sub = props.initialValueOrObserver.subscribe((newValue: T) => this.setState({ currentValue: newValue }));
+    if (isObserver(props.currentValueOrObserver)) {
+      const sub = props.currentValueOrObserver.subscribe((newValue: T) => this.setState({ currentValue: newValue }));
       this.state = {
         currentValue: sub.initialValue,
         isActive: false,
@@ -35,7 +34,7 @@ export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
       };
     } else {
       this.state = {
-        currentValue: props.initialValueOrObserver,
+        currentValue: props.currentValueOrObserver,
         isActive: false,
         renderValue,
       };
@@ -77,17 +76,10 @@ export class Dropdown<T> extends React.Component<Props<T>, State<T>> {
     </div>;
   }
   private userSelectedDropdownValue = (value: T) => {
-    // If props.initialValueOrObserver is an Observer<T>, then currentValue will be updated by the observer's callback (as setup in this constructor). Otherwise, props.initialValueOrObserver is a T and we'll set currentValue internally. (Ie. if initialValueOrObserver is a T, there is no support to set state.currentValue from outside this component.)
-    if (isObserver(this.props.initialValueOrObserver)) {
-      this.setState({
-        isActive: false,
-      });
-    } else {
-      this.setState({
-        currentValue: value, // ie. set currentValue only when initialValueOrObserver is not an Observer<T>
-        isActive: false,
-      });
-    }
+    this.setState({
+      // WARNING - we do not set state.currentValue here because either props.currentValueOrObserver is T and parent will re-render this comp with new T, xor currentValueOrObserver is Observer<T> and currentValue will get updated by observation callback (which is setup in this constructor).
+      isActive: false,
+    });
     this.props.onChange(value);
   };
   private toggleIsActive = () => {

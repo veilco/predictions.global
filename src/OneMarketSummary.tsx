@@ -284,9 +284,9 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           <CopyToClipboard text={this.getMarketEmbedCode(marketID)} onCopy={this.embedHTMLCopiedToClipboard}>
             <span className={this.state.isEmbedHTMLCopiedToClipboard ? "embed-copied" : ""}>
               <i className="fas fa-code is-hidden-mobile"
-                data-multiline={true} data-tip='Copy HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="144".'/>
+                data-multiline={true} data-tip='Copy HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="192".'/>
               <i className="fas fa-code is-hidden-tablet"
-                data-multiline={true} data-tip='Copied HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="144".'/>
+                data-multiline={true} data-tip='Copied HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="192".'/>
             </span>
           </CopyToClipboard>
         </div>

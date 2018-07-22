@@ -46,7 +46,7 @@ export class EmbeddedMarketCard extends React.Component<EmbeddedMarketCardProps,
           m={market}
           now={moment()}
           index={0}
-          currencySelectionObserver={currencyObserverOwner.o}
+          currencySelectionObserver={currencyObserverOwner.observer}
           isEmbedded={true}
         />
       </div>

@@ -426,6 +426,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       sortOrder,
     });
+    this.setPaginationOffset(0); // go back to first page of results when switching sort order
   };
 
   private setCategory = (category: MarketCategory) => {
@@ -433,6 +434,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       category,
     });
+    this.setPaginationOffset(0); // go back to first page of results when switching category
   };
 
   // https://reactjs.org/docs/faq-functions.html

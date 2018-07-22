@@ -1,0 +1,21 @@
+.embedded-market-card {
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+
+  .market {
+    margin: 0;
+
+    .market-content {
+      height: 100vh;
+      justify-content: space-between;
+    }
+  }
+}
+
+@media (min-width: 769px) {
+  // bulma is-mobile stops at 768px.
+  .embedded-market-card .market {
+    height: 100vh;
+  }
+}

@@ -6,13 +6,20 @@ $tetrad-green-5: #008a1f;
 $tetrad-blue-3: #0d9bb6;
 $tetrad-blue-4: #037b91;
 $tetrad-blue-5: #025f71;
-$tetrad-orange: #ff830c;
+$tetrad-orange: #ff830c; // this is orange-3, but named orange for backwards compatibility
+$tetrad-orange-3: #ff830c;
 $tetrad-red-1: #ff7668;
+$tetrad-red-2: #ff4f3c;
 $tetrad-red-3: #ff230c;
+$tetrad-red-4: #ec1600;
 $tetrad-red-5: #b71100;
 
 .green-3 {
   color: $tetrad-green-3;
+}
+
+.green-3-bg {
+  background-color: $tetrad-green-3;
 }
 
 .green-4 {
@@ -39,63 +46,56 @@ $tetrad-red-5: #b71100;
   color: $tetrad-orange;
 }
 
+.orange-3 {
+  color: $tetrad-orange-3;
+}
+
+.orange-3-bg {
+  background-color: $tetrad-orange-3;
+}
+
+.red-2 {
+  color: $tetrad-red-2;
+}
+
+.red-2-bg {
+  background-color: $tetrad-red-2;
+}
+
+
 .red-3 {
   color: $tetrad-red-3;
 }
 
+.red-3-bg {
+  background-color: $tetrad-red-3;
+}
+
+.red-4 {
+  color: $tetrad-red-4;
+}
+
+.red-4-bg {
+  background-color: $tetrad-red-4;
+}
+
+
 .red-5 {
   color: $tetrad-red-5;
+}
+
+.red-5-bg {
+  background-color: $tetrad-red-5;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
 }
 
 .__react_component_tooltip {
   // There's currently no way to configure tooltip opacity https://github.com/wwayne/react-tooltip/issues/241
   // default is 0.262458
   opacity: 0.95 !important; // sass-lint:disable-line no-important
-}
-
-.market-controls {
-  $control-padding-not-mobile: 9.5481px; // small golden ratio^2 * 25px square length of twitter icon
-  $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
-
-  &.not-mobile {
-    .column {
-      &:not(:first-child) {
-        padding-top: 0;
-      }
-
-      &:not(:last-child) {
-        padding-bottom: $control-padding-not-mobile;
-      }
-    }
-  }
-
-  &.mobile {
-    .column {
-      &:not(:first-child) {
-        padding-left: 0;
-      }
-
-      &:not(:last-child) {
-        padding-right: $control-padding-mobile;
-      }
-    }
-  }
-  // TwitterIcon (inside TwitterShareButton) uses a div where the icon will be left-aligned if there's margin to spare; this causes the icon to be horizontally centered.
-  .SocialMediaShareButton {
-    // sass-lint:disable-line class-name-format
-    // prevent ugly outline from showing after clicking tweet button
-    outline: none !important; // sass-lint:disable-line no-important
-
-    & > div {
-      margin-left: auto;
-      margin-right: auto;
-    }
-  }
-
-  .augur-logo {
-    height: 25px; // same dimension as twitter logo
-    width: 25px;
-  }
 }
 
 .market-list-controls {
@@ -107,8 +107,20 @@ $tetrad-red-5: #b71100;
   }
 }
 
+.no-padding-top {
+  padding-top: 0;
+}
+
+.no-padding-right {
+  padding-right: 0;
+}
+
 .no-padding-bottom {
   padding-bottom: 0;
+}
+
+.no-padding-left {
+  padding-left: 0;
 }
 
 .section {
@@ -152,9 +164,12 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
       }
     }
   }
-}
-.market {
-  margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
+  .market-creator-signup {
+    @media(max-width: 768px) {
+      // bulma is-mobile stops at 768px.
+      font-size: 0.618em;
+    }
+  }
 }
 
 .comment-link {
@@ -164,6 +179,7 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
 .search {
   margin-left: auto;
   margin-right: auto;
+  max-width: 100%;
   position: relative;
   width: 20rem;
 

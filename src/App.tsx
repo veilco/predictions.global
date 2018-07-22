@@ -21,7 +21,7 @@ interface State {
   currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
 }
 
-class App extends React.Component<HasMarketsSummary, State> {
+export class Home extends React.Component<HasMarketsSummary, State> {
   public readonly state: State;
 
   public constructor(props: HasMarketsSummary) {
@@ -38,7 +38,7 @@ class App extends React.Component<HasMarketsSummary, State> {
     };
   }
 
-  public render() {
+  public render(): JSX.Element {
     if (this.state.currencySelectionObserverOwner === undefined) {
       // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
       return <div />;
@@ -54,12 +54,15 @@ class App extends React.Component<HasMarketsSummary, State> {
           <div className="columns is-centered is-marginless is-paddingless is-vcentered">
             <div className="column is-12-mobile is-5-tablet is-5-desktop">
               {/* NB logo is fixed width and column must be larger than this or logo column will bleed into next column. The fixed width value in App.scss was chosen to make logo look good responsively. */}
-              <img className="logo" src="logo.png" />
+              <a href={`${window.location.protocol}//${window.location.host}`}>
+                <img className="logo" src="logo.png" />
+              </a>
             </div>
             <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
               <p><strong>See What the World Thinks.</strong></p>
               <p>
-                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net" target="blank">Augur</a>
+                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
+                target="blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>
@@ -87,9 +90,16 @@ function isFeaturedGoesFirst(a: Market, b: Market): number {
   return 0;
 }
 
-type sortKey = 'Money at Stake' | 'New Markets' | 'Ending Soon';
+type sortKey = 'Recently Traded' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
 const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
+  ['Recently Traded', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    return b.getLastTradeTime() - a.getLastTradeTime();
+  }],
   ['Money at Stake', (a: Market, b: Market) => {
     const maybeFeatured = isFeaturedGoesFirst(a, b);
     if (maybeFeatured !== 0) {
@@ -128,7 +138,6 @@ const paginationLimits = [10, 20, 50];
 // Example of strong typed array of MarketCategory: `Object.keys(MarketCategory).map(key => MarketCategory[key]) as MarketCategory[]`
 enum MarketCategory {
   All = 'All', // Wildcard category that matches any and all categories
-  WorldCup = 'World Cup',
   Sports = 'Sports',
   Cryptocurrency = 'Cryptocurrency',
   Finance = 'Finance',
@@ -137,14 +146,11 @@ enum MarketCategory {
 
 const cryptocurrencyMarketCategoryRegexp = /ethereum| ether|ether |bitcoin|btc| crypto|crypto |cryptocurrenc|flippening/;
 const financeMarketCategoryRegexp = / trade|trade | trading|trading | price|price | credit|credit /;
-const fifaRegexp = / fifa|fifa |world cup/;
 
 function getMarketCategory(m: Market): MarketCategory {
   const c = m.getCategory().toLowerCase();
   const n = m.getName().toLowerCase();
-  if (c === 'world cup' || n.search(fifaRegexp) > -1) {
-    return MarketCategory.WorldCup;
-  } else if (c === 'sports' || c === 'sport') {
+  if (c === 'sports' || c === 'sport') {
     return MarketCategory.Sports;
   } else if (c === 'cryptocurrency' || c === 'cryptocurrencies' || n.search(cryptocurrencyMarketCategoryRegexp) > -1) {
     return MarketCategory.Cryptocurrency;
@@ -196,8 +202,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         return sortOrderQuery;
       } else if (sortOrderQuery === 'Ending Soon') {
         return sortOrderQuery;
+      } else if (sortOrderQuery === 'Money at Stake') {
+        return sortOrderQuery;
       }
-      return 'Money at Stake';
+      return 'Recently Traded';
     })();
 
     const showEnded = getQueryString('e') === '1';
@@ -324,7 +332,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               )
             }
             <span className="reset-filters" onClick={this.resetFilters}>
-              <a>reset</a>
+              <a>Reset</a>
             </span>
             <label className="checkbox">
               Show Ended Markets&nbsp;
@@ -357,22 +365,21 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 m={m}
                 index={paginationStart + index} />)
             )}
-          <div className="columns is-vcentered is-centered">
-            <div className="column is-narrow is-paddingless">
-              <div className="columns is-vcentered is-mobile is-centered">
-                <div className="column is-narrow is-paddingless">
+          <br/>
+          <div className="columns is-vcentered">
+            <div className="column is-narrow">
+              <div className="columns is-vcentered is-mobile">
+                <div className="column is-narrow">
                   <label>
                     Markets Per Page
                   </label>
                 </div>
                 <div className="column is-narrow is-paddingless">
-                  <div className="column is-narrow">
-                    <Dropdown
-                      currentValueOrObserver={paginationLimit}
-                      onChange={this.setPaginationLimit}
-                      values={paginationLimits}
-                    />
-                  </div>
+                  <Dropdown
+                    currentValueOrObserver={paginationLimit}
+                    onChange={this.setPaginationLimit}
+                    values={paginationLimits}
+                  />
                 </div>
               </div>
             </div>
@@ -384,24 +391,25 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
                 {paginationIndex > 0 && (
                   <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
                 {paginationIndex < numberOfPages - 1 && (
-                  <a className="pagination-next" onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                  <a className="pagination-next"
+                     onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
                 <ul className="pagination-list">
                   {paginationIndices.map((page: number) => page < 0 ? (
                     <li key={page}>
                       <span className="pagination-ellipsis">&hellip;</span>
                     </li>
                   ) : (
-                      <li key={page}>
-                        <a
-                          className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                          aria-label={`Goto page ${page}`}
-                          aria-current="page"
-                          onClick={this.setPaginationOffset.bind(this, page - 1)}
-                        >
-                          {page}
-                        </a>
-                      </li>
-                    ))
+                    <li key={page}>
+                      <a
+                        className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                        aria-label={`Goto page ${page}`}
+                        aria-current="page"
+                        onClick={this.setPaginationOffset.bind(this, page - 1)}
+                      >
+                        {page}
+                      </a>
+                    </li>
+                  ))
                   }
                 </ul>
               </nav>
@@ -409,7 +417,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
         </div>
     }
-      </section >
+      </section>
     );
   }
 
@@ -478,5 +486,3 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     });
   };
 }
-
-export default App;

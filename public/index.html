@@ -2,66 +2,67 @@
 <html lang="en">
 
 <head>
-  <!-- google analytics code snippet from https://analytics.google.com/analytics/web/?authuser=1#/a122045630w180067630p178268569/admin/tracking/tracking-code/ -->
-  %REACT_APP_GOOGLE_ANALYTICS%
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="theme-color" content="#000000">
-  <!--
-      manifest.json provides metadata used when your web app is added to the
-      homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
-    -->
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-  <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-16x16.png" sizes="16x16">
-  <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32">
-  <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-96x96.png" sizes="96x96">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-  <link rel="preload" href="logo.png" as="image">
-  <link rel="preload" href="augur-logo.svg" as="image">
-  <!--
-    This preload link will cause the MarketsSummary data to be preloaded in parallel with javascript parse. In chrome devtools, you know this is working when the network request for the DATA_URI happens only once at start of page load. The browser will also warn when a preloaded resource isn't used. In order for this to work and prevent javascript from fetching DATA_URI, I needed to use crossorigin="use-credentials" and then use { credentials "include" } in the javascript fetch(). Chrome seems unable to respect a preload unless crossorigin="use-credentails" (ie. crossorigin="anonymous" preloads the resource, but then it's loaded again in JS.) DATA_URI from google storage bucket doesn't support crossorigin="use-credentials" because Google omits the "Access-Control-Allow-Credentials" header (in which case the preload is cancelled with on explanation in the devtools network panel.)
-    We can retry this preload once the data file is served in production from a location other than CORS google bucket. -->
-  <!-- <link rel="preload" href="%REACT_APP_DATA_URI%" as="fetch" crossorigin="use-credentials"> -->
-  <script>
-    window.DATA_URI = "%REACT_APP_DATA_URI%";
-  </script>
-  <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+    <!-- google analytics code snippet from https://analytics.google.com/analytics/web/?authuser=1#/a122045630w180067630p178268569/admin/tracking/tracking-code/ -->
+    %REACT_APP_GOOGLE_ANALYTICS%
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+    <!--
+        manifest.json provides metadata used when your web app is added to the
+        homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
+      -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-16x16.png" sizes="16x16">
+    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/favicon-96x96.png" sizes="96x96">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="preload" href="logo.png" as="image">
+    <link rel="preload" href="augur-logo.svg" as="image">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <!--
+      This preload link will cause the MarketsSummary data to be preloaded in parallel with javascript parse. In chrome devtools, you know this is working when the network request for the DATA_URI happens only once at start of page load. The browser will also warn when a preloaded resource isn't used. In order for this to work and prevent javascript from fetching DATA_URI, I needed to use crossorigin="use-credentials" and then use { credentials "include" } in the javascript fetch(). Chrome seems unable to respect a preload unless crossorigin="use-credentails" (ie. crossorigin="anonymous" preloads the resource, but then it's loaded again in JS.) DATA_URI from google storage bucket doesn't support crossorigin="use-credentials" because Google omits the "Access-Control-Allow-Credentials" header (in which case the preload is cancelled with on explanation in the devtools network panel.)
+      We can retry this preload once the data file is served in production from a location other than CORS google bucket. -->
+    <!-- <link rel="preload" href="%REACT_APP_DATA_URI%" as="fetch" crossorigin="use-credentials"> -->
+    <script>
+      window.DATA_URI = "%REACT_APP_DATA_URI%";
+    </script>
+    <!--
+        Notice the use of %PUBLIC_URL% in the tags above.
+        It will be replaced with the URL of the `public` folder during the build.
+        Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-  <title>Prediction Markets | Predictions.Global</title>
+        Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+        work correctly both with client-side routing and a non-root public URL.
+        Learn how to configure a non-root public URL by running `npm run build`.
+      -->
+    <title>Augur Prediction Market Data & Statistics | Predictions.Global</title>
 </head>
 
 <body>
-  <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-  <div id="root">
+<noscript>
+    You need to enable JavaScript to run this app.
+</noscript>
+<div id="root">
     <div>
-      <img style="width: 230px; display: block; margin: auto; margin-top: 40px;" class="logo" src="logo.png" />
-      <div style="text-align: center; margin-top: 40px;">
-        <div style="display: inline-block;">
-          <i class="fas fa-sync fa-spin fa-2x"></i>
+        <img style="width: 230px; display: block; margin: auto; margin-top: 40px;" class="logo" src="logo.png"/>
+        <div style="text-align: center; margin-top: 40px;">
+            <div style="display: inline-block;">
+                <i class="fas fa-sync fa-spin fa-2x"></i>
+            </div>
         </div>
-      </div>
-
     </div>
-  </div>
-  <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+</div>
+<!--
+    This HTML file is a template.
+    If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    You can add webfonts, meta tags, or analytics to this file.
+    The build step will place the bundled scripts into the <body> tag.
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    To begin the development, run `npm start` or `yarn start`.
+    To create a production bundle, use `npm run build` or `yarn build`.
+  -->
 </body>
 
 </html>

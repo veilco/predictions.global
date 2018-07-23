@@ -127,7 +127,7 @@ function renderPublicEthereumNodes(): React.ReactNode {
           <Link to="/"><img className="logo" src="logo.png" /></Link>
         </div>
         <div className="column is-12">
-          <h3 className="title">Public Ethereum Nodes</h3>
+          <h3 className="title">Public Ethereum &amp; Augur Nodes</h3>
         </div>
         <div className="column is-12">
           <div className="columns is-centered is-vcentered has-text-centered">
@@ -145,8 +145,8 @@ function renderPublicEthereumNodes(): React.ReactNode {
             <thead>
               <tr>
                 <th />
-                <th>HTTP Endpoint</th>
-                <th>Websocket Endpoint</th>
+                <th>Ethereum HTTP Endpoint</th>
+                <th>Ethereum Websocket Endpoint</th>
               </tr>
             </thead>
             <tbody>
@@ -159,6 +159,22 @@ function renderPublicEthereumNodes(): React.ReactNode {
                 <td><strong>#2</strong></td>
                 <td><code>http://gethstar.com/ethereum-http</code></td>
                 <td><code>ws://gethstar.com/ethereum-ws</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="column is-narrow">
+          <table>
+            <thead>
+              <tr>
+                <th />
+                <th>Augur Node Websocket Endpoint</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>#1</strong></td>
+                <td><code>ws://augur.gethstar.com</code></td>
               </tr>
             </tbody>
           </table>

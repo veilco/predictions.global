@@ -152,13 +152,13 @@ function renderPublicEthereumNodes(): React.ReactNode {
             <tbody>
               <tr>
                 <td><strong>#1</strong></td>
-                <td><code>http://megageth.com/ethereum-http</code></td>
-                <td><code>ws://megageth.com/ethereum-ws</code></td>
+                <td><code>https://megageth.com/</code></td>
+                <td><code>wss://megageth.com/ws</code></td>
               </tr>
               <tr>
                 <td><strong>#2</strong></td>
-                <td><code>http://gethstar.com/ethereum-http</code></td>
-                <td><code>ws://gethstar.com/ethereum-ws</code></td>
+                <td><code>https://gethstar.com/</code></td>
+                <td><code>wss://gethstar.com/ws</code></td>
               </tr>
             </tbody>
           </table>
@@ -174,7 +174,7 @@ function renderPublicEthereumNodes(): React.ReactNode {
             <tbody>
               <tr>
                 <td><strong>#1</strong></td>
-                <td><code>ws://augur.gethstar.com</code></td>
+                <td><code>wss://augur.gethstar.com</code></td>
               </tr>
             </tbody>
           </table>

@@ -261,7 +261,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                  src="/augur-logo.svg"
                  data-multiline={true}
                  data-tip={`View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`}/>
-            : <a target="blank"
+            : <a target="_blank"
                  href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
               <img className="augur-logo"
                    src="/augur-logo.svg"
@@ -273,7 +273,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
       {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
       {isEmbedded && type === 'mobile' && (
         <div className={"column is-narrow"}>
-          <a target="blank" href={`${window.location.protocol}//${window.location.host}`}>
+          <a target="_blank" href={`${window.location.protocol}//${window.location.host}`}>
             {/* paddingTop: 5px is because we want this logo to be vertically centered, but if we add is-vcentered to these columns, then the augur-logo.svg is positioned awkwardly relative to twitter icon. */}
             <img style={{width: '115px', paddingTop: '5px'}} className="logo" src="/logo.png"/>
           </a>
@@ -383,7 +383,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
               {isEmbedded && (
                 <div className="column content is-12 is-marginless is-hidden-mobile no-padding-top no-padding-bottom">
-                  <a className="is-pulled-right" target="blank" href={`${window.location.protocol}//${window.location.host}`}>
+                  <a className="is-pulled-right" target="_blank" href={`${window.location.protocol}//${window.location.host}`}>
                     <img style={{width: '115px'}} className="logo" src="/logo.png"/>
                   </a>
                 </div>

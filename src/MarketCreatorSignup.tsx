@@ -4,7 +4,7 @@ const marketCreatorBetaSignupFormURL = "https://docs.google.com/forms/d/e/1FAIpQ
 
 
 const MarketCreatorSignup: React.SFC<{}> = (_) => {
-  return <a href={marketCreatorBetaSignupFormURL} target="blank">
+  return <a href={marketCreatorBetaSignupFormURL} target="_blank">
     <div className="market-creator-signup red-3 content">
       <strong>Want Market Creator Tools?</strong>
     </div>

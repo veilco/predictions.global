@@ -12,13 +12,13 @@ const Footer = <footer className="footer">
             <strong>Links</strong>
           </div>
           <div className="column is-12 is-paddingless">
-            <a href="https://augur.net" target="blank">Augur</a>
+            <a href="https://augur.net" target="_blank">Augur</a>
           </div>
           <div className="column is-12 is-paddingless">
-            <a href="https://github.com/AugurProject/augur-app/releases" target="blank">Download Augur App</a>
+            <a href="https://github.com/AugurProject/augur-app/releases" target="_blank">Download Augur App</a>
           </div>
           <div className="column is-12 is-paddingless">
-            <a href="https://twitter.com/PredictionsGlbl" target="blank">Twitter</a>
+            <a href="https://twitter.com/PredictionsGlbl" target="_blank">Twitter</a>
           </div>
           <div className="column is-12 is-paddingless">
             <Link to="/augur-public-ethereum-nodes">List of Public Ethereum Nodes</Link>
@@ -35,7 +35,7 @@ const Footer = <footer className="footer">
             <MarketCreatorSignup />
           </div>
           <div className="column is-12">
-            <a href={feedbackFormURL} target="blank">Send Feedback</a>
+            <a href={feedbackFormURL} target="_blank">Send Feedback</a>
           </div>
         </div>
       </div>

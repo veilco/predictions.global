@@ -62,7 +62,7 @@ export class Home extends React.Component<HasMarketsSummary, State> {
               <p><strong>See What the World Thinks.</strong></p>
               <p>
                 Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
-                target="blank">Augur</a>
+                target="_blank">Augur</a>
                 {' decentralized prediction market platform, built on the Ethereum blockchain.'}
               </p>
             </div>

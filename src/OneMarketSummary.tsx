@@ -20,17 +20,22 @@ interface RenderedPrediction {
   text: string, // rendered prediction text, expected to correspond to what human would see when `node` is rendered. Used for tweet generation.
 }
 
+const noPredictions = {
+  node: <span>No predictions</span>,
+  text: 'No predictions',
+};
+
 function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction {
   if (ps.length < 1) {
-    return {
-      node: <span>No predictions</span>,
-      text: 'No predictions',
-    };
+    return noPredictions;
+  }
+  const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
+  if (p === 0) {
+    return noPredictions;
   }
   const prefix = "Augur predicts: ";
   let text = prefix; // see note on RenderedPrediction
   // TODO these locals are never all required
-  const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
   const r = `${Math.round(p)}%`; // assume 0 <= p < 100 (as opposed to p < 1.0)
   const name = ps[0].getName();
   const v = numberFormat.format(ps[0].getValue());

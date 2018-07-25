@@ -64,7 +64,10 @@ export class MarketDetailPage extends React.Component<Props, State> {
   public static getDerivedStateFromProps(props: Props, state: State): State | null {
     const newMarketId = getMarketIdFromDetailPageURL(props.match.params.url);
     if (newMarketId !== state.marketId) {
-      return Object.assign({}, state, { marketId: newMarketId });
+      return Object.assign({}, state, {
+        marketDetail: undefined, // destroy marketDetail when marketId changes; it will be refetched in componentDidUpdate
+        marketId: newMarketId,
+      });
     }
     return null;
   }

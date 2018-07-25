@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
-import { Currency, renderCurrency } from './Currency';
+import { Currency, renderCurrency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
 import Footer from './Footer';
 import { Market, MarketsSummary } from './generated/markets_pb';
 import Header, { HasMarketsSummary } from './Header';
@@ -27,12 +27,10 @@ export class Home extends React.Component<HasMarketsSummary, State> {
   public constructor(props: HasMarketsSummary) {
     super(props);
 
-    // Cache currency in localStorage as is most likely long term preference
-    const localStorageCurrency = localStorage.getItem('currency');
-    const currency: Currency = new Set(Object.keys(Currency).map(k => Currency[k])).has(localStorageCurrency) ? (localStorageCurrency as Currency) : Currency.USD;
+    const currency: Currency = getSavedCurrencyPreference();
 
     const o = makeObserverOwner(currency);
-    o.observer.subscribe((newCurrency) => localStorage.setItem('currency', newCurrency));
+    o.observer.subscribe((newCurrency) => saveCurrencyPreference(newCurrency));
     this.state = {
       currencySelectionObserverOwner: o,
     };

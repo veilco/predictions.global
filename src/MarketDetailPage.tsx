@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
-import { Currency } from "./Currency";
+import { Currency, getSavedCurrencyPreference } from "./Currency";
 import { Market, MarketDetail } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 // import './MarketDetailPage.css';
@@ -71,7 +71,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      currency: Currency.USD, // TODO from localStorage
+      currency: getSavedCurrencyPreference(),
       marketDetail: undefined,
       marketId: undefined,
     };

@@ -4,13 +4,17 @@ import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
 import { Market, MarketDetail } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
+import Header, { HasMarketsSummary } from './Header';
+import { Observer } from './observer';
 // import './MarketDetailPage.css';
 
-interface URLParams {
+export interface URLParams {
   url: string // market detail page url
 }
 
-type Props = RouteComponentProps<URLParams>;
+type Props = RouteComponentProps<URLParams> & HasMarketsSummary & {
+  currencySelectionObserver: Observer<Currency>,
+};
 
 interface State {
   currency: Currency,
@@ -94,12 +98,15 @@ export class MarketDetailPage extends React.Component<Props, State> {
     if (this.state.marketDetail === undefined) {
       return LoadingHTML;
     }
-    return <div className="container">
-      <Link to="/">Back to Homepage</Link>
-      <div className="content">
-        <pre>
-          {JSON.stringify(this.state.marketDetail.toObject(), null, 2)}
-        </pre>
+    return <div>
+      <Header ms={this.props.ms} currencySelectionObserver={this.props.currencySelectionObserver} />
+      <div className="container">
+        <Link to="/">Back to Homepage</Link>
+        <div className="content">
+          <pre>
+            {JSON.stringify(this.state.marketDetail.toObject(), null, 2)}
+          </pre>
+        </div>
       </div>
     </div>;
   }

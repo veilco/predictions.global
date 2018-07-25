@@ -17,33 +17,18 @@ import { getQueryString, updateQueryString } from "./url";
 // import 'moment/locale/fr';
 // moment.locale('fr');
 
-interface State {
-  currencySelectionObserverOwner: ObserverOwner<Currency> | undefined
+type Props = HasMarketsSummary & {
+  currencySelectionObserverOwner: ObserverOwner<Currency>
 }
 
-export class Home extends React.Component<HasMarketsSummary, State> {
-  public readonly state: State;
-
-  public constructor(props: HasMarketsSummary) {
+export class Home extends React.Component<Props> {
+  public constructor(props: Props) {
     super(props);
-
-    const currency: Currency = getSavedCurrencyPreference();
-
-    const o = makeObserverOwner(currency);
-    o.observer.subscribe((newCurrency) => saveCurrencyPreference(newCurrency));
-    this.state = {
-      currencySelectionObserverOwner: o,
-    };
   }
 
   public render(): JSX.Element {
-    if (this.state.currencySelectionObserverOwner === undefined) {
-      // this never occurs because currencySelectionObserverOwner is synchronously constructed in the constructor.
-      return <div />;
-    }
-
-    const { currencySelectionObserverOwner } = this.state;
-    const currencySelectionObserver = this.state.currencySelectionObserverOwner.observer;
+    const { currencySelectionObserverOwner } = this.props;
+    const currencySelectionObserver = currencySelectionObserverOwner.observer;
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>

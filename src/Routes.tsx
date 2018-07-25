@@ -1,11 +1,15 @@
 import * as React from 'react';
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
-import {Home} from './App';
-import {EmbeddedMarketCard} from './EmbeddedMarketCard';
-import {MarketsSummary} from "./generated/markets_pb";
-import {RouteComponentProps} from "react-router";
-import { MarketDetailPage, marketDetailPageURLPrefix } from './MarketDetailPage';
+import { RouteComponentProps } from "react-router";
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { Home } from './App';
+import { Currency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
+import { EmbeddedMarketCard } from './EmbeddedMarketCard';
+import { MarketsSummary } from "./generated/markets_pb";
+import Header, { HasMarketsSummary } from './Header';
 import { LoadingHTML } from './Loading';
+import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
+import { makeObserverOwner, ObserverOwner, Observer } from './observer';
+import PublicEthereumNodes from './PublicEthereumNodes';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -55,6 +59,7 @@ const cancelFetchMarketsSummary = periodic(fetchMarketsSummary.bind(null, (windo
 
 interface RoutesState {
   marketsSummary?: MarketsSummary,
+  currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
 
 export class Routes extends React.Component<any, RoutesState> {
@@ -64,10 +69,14 @@ export class Routes extends React.Component<any, RoutesState> {
   constructor(props: any) {
     super(props);
 
+    const o = makeObserverOwner(getSavedCurrencyPreference());
+    o.observer.subscribe((newCurrency) => saveCurrencyPreference(newCurrency));
+
     this.cancelFetchMarketsSummary = cancelFetchMarketsSummary;
     marketsSummaryCallback = (marketsSummary: MarketsSummary) => this.setMarketsSummary(marketsSummary);
 
     this.state = {
+      currencySelectionObserverOwner: o,
       marketsSummary: undefined,
     };
   }
@@ -79,22 +88,33 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const {marketsSummary} = this.state;
+    const { marketsSummary } = this.state;
     if (marketsSummary == null) {
       return LoadingHTML;
     }
 
-    const renderHome = (props: object) => (<Home ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+    const renderHome = (props: object) => (<Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner} ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     const renderEmbeddedMarketCard = (props: object) => (
       <EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+    const renderPublicEthereumNodes = () => <PublicEthereumNodes
+      ms={marketsSummary}
+      currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+    />;
+    const renderMarketDetailPage = (props: RouteComponentProps<URLParams>) => <MarketDetailPage
+      ms={marketsSummary}
+      currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+      {...props}
+    />;
     return (
       <Router>
         <div>
-          <Route exact={true} path="/" render={renderHome}/>
-          <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
-          <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
-          <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} component={MarketDetailPage}/>
-          <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
+          <Switch>
+            <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard} />
+            <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard} />
+            <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage} />
+            <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes} />
+            <Route exact={true} path="/" render={renderHome} />
+          </Switch>
         </div>
       </Router>
     );
@@ -110,69 +130,4 @@ export class Routes extends React.Component<any, RoutesState> {
       marketsSummary,
     });
   };
-}
-
-function renderPublicEthereumNodes(): React.ReactNode {
-  return <section className="section">
-    <div className="container">
-      <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
-        <div className="column is-12">
-          <Link to="/"><img className="logo" src="logo.png" /></Link>
-        </div>
-        <div className="column is-12">
-          <h3 className="title">Public Ethereum &amp; Augur Nodes</h3>
-        </div>
-        <div className="column is-12">
-          <div className="columns is-centered is-vcentered has-text-centered">
-            <div className="column is-5-tablet is-5-desktop">
-              <p>These nodes can be used as the back end for <a href="https://github.com/AugurProject/augur-app/releases" target="_blank">Augur App</a>. (Eg. as an alternative to Infura.)</p>
-              <p>This list is provided by Predictions.Global for your convenience. We trust the community members hosting these nodes, but make no security guarantees.</p>
-            </div>
-          </div>
-        </div>
-        <div className="column is-12">
-          <Link to="/">Back to Homepage</Link>
-        </div>
-        <div className="column is-narrow">
-          <table>
-            <thead>
-              <tr>
-                <th />
-                <th>Ethereum HTTP Endpoint</th>
-                <th>Ethereum Websocket Endpoint</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>#1</strong></td>
-                <td><code>https://megageth.com/</code></td>
-                <td><code>wss://megageth.com/ws</code></td>
-              </tr>
-              <tr>
-                <td><strong>#2</strong></td>
-                <td><code>https://gethstar.com/</code></td>
-                <td><code>wss://gethstar.com/ws</code></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="column is-narrow">
-          <table>
-            <thead>
-              <tr>
-                <th />
-                <th>Augur Node Websocket Endpoint</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>#1</strong></td>
-                <td><code>wss://augur.gethstar.com</code></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>;
 }

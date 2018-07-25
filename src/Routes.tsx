@@ -4,6 +4,8 @@ import {Home} from './App';
 import {EmbeddedMarketCard} from './EmbeddedMarketCard';
 import {MarketsSummary} from "./generated/markets_pb";
 import {RouteComponentProps} from "react-router";
+import { MarketDetailPage, marketDetailPageURLPrefix } from './MarketDetailPage';
+import { LoadingHTML } from './Loading';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -79,17 +81,7 @@ export class Routes extends React.Component<any, RoutesState> {
   public render(): JSX.Element {
     const {marketsSummary} = this.state;
     if (marketsSummary == null) {
-      return (
-        <div>
-          <img style={{width: '230px', display: 'block', margin: 'auto', marginTop: '40px'}} className="logo"
-               src="/logo.png"/>
-          <div style={{textAlign: 'center', marginTop: '40px'}}>
-            <div style={{display: 'inline-block'}}>
-              <i className="fas fa-sync fa-spin fa-2x"/>
-            </div>
-          </div>
-        </div>
-      );
+      return LoadingHTML;
     }
 
     const renderHome = (props: object) => (<Home ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
@@ -101,6 +93,7 @@ export class Routes extends React.Component<any, RoutesState> {
           <Route exact={true} path="/" render={renderHome}/>
           <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
           <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
+          <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} component={MarketDetailPage}/>
           <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
         </div>
       </Router>

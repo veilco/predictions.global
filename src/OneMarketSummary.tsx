@@ -10,6 +10,8 @@ import { LiquidityAtPrice, Market, MarketType, Prediction, Price } from './gener
 import './MarketCard.css';
 import { Observer } from './observer';
 import Price2, { numberFormat, usdFormat, smartRoundThreeDecimals } from "./Price";
+import { Link } from 'react-router-dom';
+import { makeMarketDetailPageURL } from './MarketDetailPage';
 
 interface HasMarket {
   m: Market
@@ -319,7 +321,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                       {!isEmbedded && (
                         <strong className="orange">#{props.index + 1}</strong>
                       )}
-                      {" "}<strong>{name}</strong>
+                      {" "}<strong><Link to={makeMarketDetailPageURL(m)}>{name}</Link></strong>
                     </Dotdotdot>
                   </div>
                   <div className="column is-12 is-hidden-mobile">

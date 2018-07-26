@@ -1,16 +1,16 @@
 import 'bulma/css/bulma.css';
+import * as classNames from 'classnames';
 import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
-import { Currency, renderCurrency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
+import { Currency, renderCurrency } from './Currency';
+import { Dropdown } from './Dropdown';
 import Footer from './Footer';
 import { Market, MarketsSummary } from './generated/markets_pb';
 import Header, { HasMarketsSummary } from './Header';
-import { makeObserverOwner, ObserverOwner, Observer } from './observer';
+import { Observer, ObserverOwner } from './observer';
 import OneMarketSummary from './OneMarketSummary';
-import { Dropdown } from './Dropdown';
-import * as classNames from 'classnames';
 import { getQueryString, updateQueryString } from "./url";
 
 // example of changing moment language globally to fr; only works since fr was imported.
@@ -32,25 +32,18 @@ export class Home extends React.Component<Props> {
     const ms: MarketsSummary = this.props.ms;
     return (
       <div>
-        <Header ms={ms} currencySelectionObserver={currencySelectionObserver} />
-        <section className="less-padding-bottom section">
-          <div className="columns is-centered is-marginless is-paddingless is-vcentered">
-            <div className="column is-12-mobile is-5-tablet is-5-desktop">
-              {/* NB logo is fixed width and column must be larger than this or logo column will bleed into next column. The fixed width value in App.scss was chosen to make logo look good responsively. */}
-              <a href={`${window.location.protocol}//${window.location.host}`}>
-                <img className="logo" src="logo.png" />
-              </a>
-            </div>
-            <div className="column is-12-mobile is-5-tablet is-5-desktop has-text-centered content">
-              <p><strong>See What the World Thinks.</strong></p>
-              <p>
-                Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
+        <Header ms={ms} currencySelectionObserver={currencySelectionObserver}
+          doesClickingLogoReloadPage={true}
+          headerContent={
+          <div className="has-text-centered content">
+            <p><strong>See What the World Thinks.</strong></p>
+            <p>
+              Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
                 target="_blank">Augur</a>
-                {' decentralized prediction market platform, built on the Ethereum blockchain.'}
-              </p>
-            </div>
+              {' decentralized prediction market platform, built on the Ethereum blockchain.'}
+            </p>
           </div>
-        </section>
+        } />
         <div className="container">
           <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
             currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()} />
@@ -310,7 +303,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             {
               this.state.paginationOffset > 0 && (
                 <span className="page-number">
-                  Page {this.state.paginationOffset+1}
+                  Page {this.state.paginationOffset + 1}
                 </span>
               )
             }
@@ -319,7 +312,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             </span>
             <label className="checkbox">
               Show Ended Markets&nbsp;
-              <input type="checkbox" onChange={this.setShowEnded} checked={this.state.showEnded}/>
+              <input type="checkbox" onChange={this.setShowEnded} checked={this.state.showEnded} />
             </label>
           </div>
           <div className="column has-text-centered">
@@ -330,76 +323,76 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           </div>
         </div>
         {
-      filteredMarketList.length < 1 ?
-        <div className="columns is-vcentered">
-          <div className="column content has-text-centered">
-            <strong>No Search Results</strong>
-            <p>Please search on market name or id.</p>
-          </div>
-        </div> :
-        <div>
-          {filteredMarketList
-            .slice(paginationStart, paginationEnd)
-            .map((m: Market, index: number) => (
-              <OneMarketSummary
-                key={paginationStart + index}
-                now={now}
-                currencySelectionObserver={currencySelectionObserver}
-                m={m}
-                index={paginationStart + index} />)
-            )}
-          <br/>
-          <div className="columns is-vcentered">
-            <div className="column is-narrow">
-              <div className="columns is-vcentered is-mobile">
+          filteredMarketList.length < 1 ?
+            <div className="columns is-vcentered">
+              <div className="column content has-text-centered">
+                <strong>No Search Results</strong>
+                <p>Please search on market name or id.</p>
+              </div>
+            </div> :
+            <div>
+              {filteredMarketList
+                .slice(paginationStart, paginationEnd)
+                .map((m: Market, index: number) => (
+                  <OneMarketSummary
+                    key={paginationStart + index}
+                    now={now}
+                    currencySelectionObserver={currencySelectionObserver}
+                    m={m}
+                    index={paginationStart + index} />)
+                )}
+              <br />
+              <div className="columns is-vcentered">
                 <div className="column is-narrow">
-                  <label>
-                    Markets Per Page
+                  <div className="columns is-vcentered is-mobile">
+                    <div className="column is-narrow">
+                      <label>
+                        Markets Per Page
                   </label>
+                    </div>
+                    <div className="column is-narrow is-paddingless">
+                      <Dropdown
+                        currentValueOrObserver={paginationLimit}
+                        onChange={this.setPaginationLimit}
+                        values={paginationLimits}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="column is-narrow is-paddingless">
-                  <Dropdown
-                    currentValueOrObserver={paginationLimit}
-                    onChange={this.setPaginationLimit}
-                    values={paginationLimits}
-                  />
+                <div className="column">
+                  <nav className="pagination" role="navigation" aria-label="pagination">
+                    <label>
+                      &nbsp;&nbsp;Page&nbsp;
+                </label>
+                    {paginationIndex > 0 && (
+                      <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
+                    {paginationIndex < numberOfPages - 1 && (
+                      <a className="pagination-next"
+                        onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
+                    <ul className="pagination-list">
+                      {paginationIndices.map((page: number) => page < 0 ? (
+                        <li key={page}>
+                          <span className="pagination-ellipsis">&hellip;</span>
+                        </li>
+                      ) : (
+                          <li key={page}>
+                            <a
+                              className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
+                              aria-label={`Goto page ${page}`}
+                              aria-current="page"
+                              onClick={this.setPaginationOffset.bind(this, page - 1)}
+                            >
+                              {page}
+                            </a>
+                          </li>
+                        ))
+                      }
+                    </ul>
+                  </nav>
                 </div>
               </div>
             </div>
-            <div className="column">
-              <nav className="pagination" role="navigation" aria-label="pagination">
-                <label>
-                  &nbsp;&nbsp;Page&nbsp;
-                </label>
-                {paginationIndex > 0 && (
-                  <a className="pagination-previous" onClick={this.setPaginationOffset.bind(this, paginationIndex - 1)}>Prev</a>)}
-                {paginationIndex < numberOfPages - 1 && (
-                  <a className="pagination-next"
-                     onClick={this.setPaginationOffset.bind(this, paginationIndex + 1)}>Next</a>)}
-                <ul className="pagination-list">
-                  {paginationIndices.map((page: number) => page < 0 ? (
-                    <li key={page}>
-                      <span className="pagination-ellipsis">&hellip;</span>
-                    </li>
-                  ) : (
-                    <li key={page}>
-                      <a
-                        className={classNames('pagination-link', page === (paginationIndex + 1) && 'is-current')}
-                        aria-label={`Goto page ${page}`}
-                        aria-current="page"
-                        onClick={this.setPaginationOffset.bind(this, page - 1)}
-                      >
-                        {page}
-                      </a>
-                    </li>
-                  ))
-                  }
-                </ul>
-              </nav>
-            </div>
-          </div>
-        </div>
-    }
+        }
       </section>
     );
   }

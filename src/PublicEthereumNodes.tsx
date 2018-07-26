@@ -10,27 +10,17 @@ type Props = HasMarketsSummary & {
 
 const PublicEthereumNodes: React.SFC<Props> = (props) => {
   return <div>
-    <Header ms={props.ms} currencySelectionObserver={props.currencySelectionObserver} />
+    <Header ms={props.ms} currencySelectionObserver={props.currencySelectionObserver} doesClickingLogoReloadPage={false} headerContent={
+      <div className="has-text-centered content">
+        <h3 className="title">Public Ethereum &amp; Augur Nodes</h3>
+        <p>These nodes can be used as the back end for <a href="https://github.com/AugurProject/augur-app/releases" target="_blank">Augur App</a>. (Eg. as an alternative to Infura.)</p>
+        <p>This list is provided by Predictions.Global for your convenience. We trust the community members hosting these nodes, but make no security guarantees.</p>
+      </div>
+    }
+    />
     <section className="section">
       <div className="container">
         <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
-          <div className="column is-12">
-            <Link to="/"><img className="logo" src="logo.png" /></Link>
-          </div>
-          <div className="column is-12">
-            <h3 className="title">Public Ethereum &amp; Augur Nodes</h3>
-          </div>
-          <div className="column is-12">
-            <div className="columns is-centered is-vcentered has-text-centered">
-              <div className="column is-5-tablet is-5-desktop">
-                <p>These nodes can be used as the back end for <a href="https://github.com/AugurProject/augur-app/releases" target="_blank">Augur App</a>. (Eg. as an alternative to Infura.)</p>
-                <p>This list is provided by Predictions.Global for your convenience. We trust the community members hosting these nodes, but make no security guarantees.</p>
-              </div>
-            </div>
-          </div>
-          <div className="column is-12">
-            <Link to="/">Back to Homepage</Link>
-          </div>
           <div className="column is-narrow">
             <table>
               <thead>

@@ -92,22 +92,42 @@ export class MarketDetailPage extends React.Component<Props, State> {
     }
   }
   public render() {
-    if (this.state.marketId === undefined) {
+    const marketId = this.state.marketId;
+    if (marketId === undefined) {
       return <Redirect to="/" />;
     }
-    if (this.state.marketDetail === undefined) {
+    const md = this.state.marketDetail;
+    if (md === undefined) {
       return LoadingHTML;
     }
+    const ms = md.getMarketSummary();
+    if (ms === undefined) {
+      // unexpected; marketDetail is defined but its marketSummary is undefined.
+      return <Redirect to="/" />;
+    }
+    const mi = md.getMarketInfo();
+    if (mi === undefined) {
+      // unexpected; marketDetail is defined but its marketInfo is undefined.
+      return <Redirect to="/" />;
+    }
     return <div>
-      <Header ms={this.props.ms} currencySelectionObserver={this.props.currencySelectionObserver} />
-      <div className="container">
-        <Link to="/">Back to Homepage</Link>
-        <div className="content">
-          <pre>
-            {JSON.stringify(this.state.marketDetail.toObject(), null, 2)}
-          </pre>
+      <Header ms={this.props.ms} currencySelectionObserver={this.props.currencySelectionObserver} doesClickingLogoReloadPage={false} headerContent={
+        <div className="has-text-centered content">
+          <h3 className="title">{ms.getName()}</h3>
+          {renderResolutionSource(ms)}
         </div>
-      </div>
+      } />
+      <section className="section">
+        <div className="container">
+          <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
+            <div className="column is-12">
+              <pre>
+                {JSON.stringify(md.toObject(), null, 2)}
+              </pre>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>;
   }
   private doFetchMarketDetail() {
@@ -123,4 +143,35 @@ export class MarketDetailPage extends React.Component<Props, State> {
         }
       }).catch(console.error.bind(console));
   }
+}
+
+function renderDatum(label: React.ReactNode, datum: React.ReactNode): React.ReactNode {
+  return <div className="level">
+    <div className="level-item has-text-centered">
+      <div>
+        {label}:
+      </div>
+    </div>
+    <div className="level-item has-text-centered">
+      <div>
+        {datum}
+      </div>
+    </div>
+  </div>;
+}
+
+function renderResolutionSource(ms: Market): React.ReactNode {
+  // ?? TODO make this two columns so that "resolution source" never has a line break
+  const rs = ms.getResolutionSource().trim();
+  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs));
+}
+
+// https://www.regextester.com/93652
+const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;
+
+function tryToMakeLink(s: string): React.ReactNode {
+  if (urlRegexp.test(s)) {
+    return <a href={s}>{s}</a>;
+  }
+  return s;
 }

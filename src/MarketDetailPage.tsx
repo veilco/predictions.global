@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { Redirect, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketType, MarketInfo } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
@@ -125,19 +125,25 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
+              {renderDatum(ethereumAddressLink(ms.getId(), "view market contract"))}
+              {renderDatum("volume", mi.getVolume())}
+              {renderLastTradedDate(now, ms)}
               {renderResolutionSource(ms)}
               {renderMarketType(ms)}
               {renderDatum("open interest", <Price2 p={ms.getMarketCapitalization()} o={this.props.currencyObserver} />)}
+              {renderScalarDetail(ms, mi)}
               {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
               {renderEndDate(now, ms)}
               {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
               {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
+              {renderDatum("universe", ethereumAddressLink(mi.getUniverse()))}
+              {renderFeeWindow(mi)}
             </div>
             <div className="column is-half-desktop is-half-tablet is-12-mobile content">
               details:
               {ms.getDetails()}
             </div>
-            <div className="column is-12">
+            <div className="column is-12 has-text-left">
               <pre>
                 {JSON.stringify(md.toObject(), null, 2)}
               </pre>
@@ -163,18 +169,20 @@ export class MarketDetailPage extends React.Component<Props, State> {
   }
 }
 
-function renderDatum(label: React.ReactNode, datum: React.ReactNode): React.ReactNode {
-  return <div className="level">
+function renderDatum(label: React.ReactNode, datum?: React.ReactNode): React.ReactNode {
+  return <div className="level is-mobile">
     <div className="level-item has-text-centered">
       <div>
-        {label}:
+        {label}{datum !== undefined && datum !== null && ": "}
       </div>
     </div>
-    <div className="level-item has-text-centered">
-      <div>
-        {datum}
+    {datum !== undefined && datum !== null &&
+      <div className="level-item has-text-centered">
+        <div>
+          {datum}
+        </div>
       </div>
-    </div>
+    }
   </div>;
 }
 
@@ -206,8 +214,8 @@ function renderMarketType(ms: Market): React.ReactNode {
   return renderDatum("market type", parse(ms.getMarketType()));
 }
 
-function ethereumAddressLink(address: string): React.ReactNode {
-  return <a target="_blank" href={`https://etherscan.io/address/${address}`}>{address}</a>;
+function ethereumAddressLink(address: string, text?: string): React.ReactNode {
+  return <a target="_blank" href={`https://etherscan.io/address/${address}`}>{text === undefined ? address : text}</a>;
 }
 
 function ethereumBlockLink(blockNumber: number): React.ReactNode {
@@ -219,10 +227,30 @@ function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat));
 }
 
+function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
+  const lastTraded = moment.unix(ms.getLastTradeTime());
+  return renderDatum("last traded", now.to(lastTraded));
+}
+
 function renderResolutionSource(ms: Market): React.ReactNode {
   // ?? TODO make this two columns so that "resolution source" never has a line break
   const rs = ms.getResolutionSource().trim();
   return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs));
+}
+
+function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
+  if (ms.getMarketType() !== MarketType.SCALAR) {
+    return;
+  }
+  return renderDatum('Scalar market scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} (tick size ${mi.getTickSize()})`);
+}
+
+function renderFeeWindow(mi: MarketInfo): React.ReactNode {
+  const f = mi.getFeeWindow();
+  if (f === '0x0000000000000000000000000000000000000000') {
+    return;
+  }
+  return renderDatum("fee window", ethereumAddressLink(f));
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state

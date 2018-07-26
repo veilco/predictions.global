@@ -9,7 +9,7 @@ import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
 import Footer from './Footer';
 import Price2 from './Price';
-// import './MarketDetailPage.css';
+import './MarketDetailPage.css';
 
 export interface URLParams {
   url: string // market detail page url
@@ -118,6 +118,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
           <h3 className="title">{ms.getName()}</h3>
+          {renderForking(mi)}
+          {renderNeedsMigration(mi)}
           {renderCategoryAndTags(ms)}
         </div>
       } />
@@ -125,15 +127,17 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
+              {renderLastTradedDate(now, ms)}
+              {renderEndDate(now, ms)}
+              {renderFinalizationBlockNumber(mi)}
+              {renderFinalizationTime(mi)}
               {renderDatum(ethereumAddressLink(ms.getId(), "view market contract"))}
               {renderDatum("volume", mi.getVolume())}
-              {renderLastTradedDate(now, ms)}
               {renderResolutionSource(ms)}
               {renderMarketType(ms)}
               {renderDatum("open interest", <Price2 p={ms.getMarketCapitalization()} o={this.props.currencyObserver} />)}
               {renderScalarDetail(ms, mi)}
               {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
-              {renderEndDate(now, ms)}
               {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
               {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
               {renderDatum("universe", ethereumAddressLink(mi.getUniverse()))}
@@ -251,6 +255,36 @@ function renderFeeWindow(mi: MarketInfo): React.ReactNode {
     return;
   }
   return renderDatum("fee window", ethereumAddressLink(f));
+}
+
+function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
+  const n = mi.getFinalizationBlockNumber();
+  if (n === 0) {
+    return;
+  }
+  return renderDatum("finalization block", ethereumBlockLink(n));
+}
+
+function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
+  const t = mi.getFinalizationTime();
+  if (t === 0) {
+    return;
+  }
+ return renderDatum("finalization time", moment.unix(t).format(detailPageDateFormat));
+}
+
+function renderForking(mi: MarketInfo): React.ReactNode {
+  if (!mi.getForking()) {
+    return;
+  }
+  return renderDatum(<strong className="red-3">FORKING</strong>);
+}
+
+function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
+  if (!mi.getNeedsMigration()) {
+    return;
+  }
+  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state

@@ -10,6 +10,7 @@ import { LoadingHTML } from './Loading';
 import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
 import { makeObserverOwner, ObserverOwner, Observer } from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
+import ScrollToTop from './ScrollToTop';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -108,13 +109,15 @@ export class Routes extends React.Component<any, RoutesState> {
     return (
       <Router>
         <div>
-          <Switch>
-            <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard} />
-            <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard} />
-            <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage} />
-            <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes} />
-            <Route exact={true} path="/" render={renderHome} />
-          </Switch>
+          <ScrollToTop>
+            <Switch>
+              <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard} />
+              <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard} />
+              <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage} />
+              <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes} />
+              <Route exact={true} path="/" render={renderHome} />
+            </Switch>
+          </ScrollToTop>
         </div>
       </Router>
     );

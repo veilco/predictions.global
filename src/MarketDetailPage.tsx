@@ -1,12 +1,14 @@
 import * as React from 'react';
+import * as moment from 'moment';
 import { Redirect, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketType } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
 import Footer from './Footer';
+import Price2 from './Price';
 // import './MarketDetailPage.css';
 
 export interface URLParams {
@@ -14,7 +16,7 @@ export interface URLParams {
 }
 
 type Props = RouteComponentProps<URLParams> & HasMarketsSummary & {
-  currencySelectionObserver: Observer<Currency>,
+  currencyObserver: Observer<Currency>,
 };
 
 interface State {
@@ -111,16 +113,30 @@ export class MarketDetailPage extends React.Component<Props, State> {
       // unexpected; marketDetail is defined but its marketInfo is undefined.
       return <Redirect to="/" />;
     }
+    const now = moment();
     return <div>
-      <Header ms={this.props.ms} currencySelectionObserver={this.props.currencySelectionObserver} doesClickingLogoReloadPage={false} headerContent={
+      <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
           <h3 className="title">{ms.getName()}</h3>
-          {renderResolutionSource(ms)}
+          {renderCategoryAndTags(ms)}
         </div>
       } />
       <section className="section">
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
+            <div className="column is-half-desktop is-half-tablet is-12-mobile">
+              {renderResolutionSource(ms)}
+              {renderMarketType(ms)}
+              {renderDatum("open interest", <Price2 p={ms.getMarketCapitalization()} o={this.props.currencyObserver} />)}
+              {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
+              {renderEndDate(now, ms)}
+              {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
+              {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
+            </div>
+            <div className="column is-half-desktop is-half-tablet is-12-mobile content">
+              details:
+              {ms.getDetails()}
+            </div>
             <div className="column is-12">
               <pre>
                 {JSON.stringify(md.toObject(), null, 2)}
@@ -162,18 +178,62 @@ function renderDatum(label: React.ReactNode, datum: React.ReactNode): React.Reac
   </div>;
 }
 
+function capitalizeNonAcronym(s: string): string {
+  if (s.length < 4) { return s };
+  return s[0].toUpperCase() + s.substring(1).toLowerCase();
+}
+
+function renderCategoryAndTags(ms: Market): React.ReactNode {
+  return <p>
+    {[ms.getCategory(), ...ms.getTagsList()]
+      .map(s => s.trim())
+      .map(s => capitalizeNonAcronym(s))
+      .filter(s => s.length > 0).join(", ")}
+  </p>;
+}
+
+function renderMarketType(ms: Market): React.ReactNode {
+  function parse(mt: MarketType): string {
+    switch (mt) {
+      case MarketType.YESNO:
+        return "Yes/No";
+      case MarketType.CATEGORICAL:
+        return "Categorical";
+      case MarketType.SCALAR:
+        return "Scalar";
+    }
+  }
+  return renderDatum("market type", parse(ms.getMarketType()));
+}
+
+function ethereumAddressLink(address: string): React.ReactNode {
+  return <a target="_blank" href={`https://etherscan.io/address/${address}`}>{address}</a>;
+}
+
+function ethereumBlockLink(blockNumber: number): React.ReactNode {
+  return <a target="_blank" href={`https://etherscan.io/block/${blockNumber}`}>{blockNumber}</a>;
+}
+
+function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
+  const endDate = moment.unix(ms.getEndDate());
+  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat));
+}
+
 function renderResolutionSource(ms: Market): React.ReactNode {
   // ?? TODO make this two columns so that "resolution source" never has a line break
   const rs = ms.getResolutionSource().trim();
   return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs));
 }
 
+// TODO render dates when marketDetail is fetched and cache the date rendering in state
+const detailPageDateFormat = "LLL [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
+
 // https://www.regextester.com/93652
 const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;
 
 function tryToMakeLink(s: string): React.ReactNode {
   if (urlRegexp.test(s)) {
-    return <a href={s}>{s}</a>;
+    return <a target="_blank" href={s}>{s}</a>;
   }
   return s;
 }

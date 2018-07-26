@@ -26,7 +26,8 @@ const Footer = <footer className="footer">
         </div>
       </div>
       <div className="column is-4 has-text-centered is-centered is-vcentered content">
-        <img className="logo" src="logo.png" />
+        {/* TODO use something like Header.doesClickingLogoReloadPage so that clicking Footer logo doesn't always do a hard reload */}
+        <a href="/"><img className="logo" src="/logo.png" /></a>
         <p><em>© 2018 Predictions.Global</em></p>
       </div>
       <div className="column is-4 has-text-centered is-centered is-vcentered content">

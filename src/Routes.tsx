@@ -103,7 +103,7 @@ export class Routes extends React.Component<any, RoutesState> {
     />;
     const renderMarketDetailPage = (props: RouteComponentProps<URLParams>) => <MarketDetailPage
       ms={marketsSummary}
-      currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+      currencyObserver={this.state.currencySelectionObserverOwner.observer}
       {...props}
     />;
     return (

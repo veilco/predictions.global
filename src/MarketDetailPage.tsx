@@ -6,6 +6,7 @@ import { Market, MarketDetail } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
+import Footer from './Footer';
 // import './MarketDetailPage.css';
 
 export interface URLParams {
@@ -128,6 +129,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
           </div>
         </div>
       </section>
+      {Footer}
     </div>;
   }
   private doFetchMarketDetail() {

@@ -3,6 +3,7 @@ import Header, { HasMarketsSummary } from "./Header";
 import { Observer } from "./observer";
 import { Currency } from './Currency';
 import { Link } from 'react-router-dom';
+import Footer from './Footer';
 
 type Props = HasMarketsSummary & {
   currencySelectionObserver: Observer<Currency>;
@@ -63,6 +64,7 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
         </div>
       </div>
     </section>
+    {Footer}
   </div>;
 };
 

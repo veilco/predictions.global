@@ -4,14 +4,14 @@ import * as React from 'react';
 import * as CopyToClipboard from 'react-copy-to-clipboard';
 // @ts-ignore for Dotdotdot
 import Dotdotdot from 'react-dotdotdot';
-import { TwitterIcon, TwitterShareButton } from 'react-share';
+import { Link } from 'react-router-dom';
 import { Currency } from './Currency';
 import { LiquidityAtPrice, Market, MarketType, Prediction, Price } from './generated/markets_pb';
 import './MarketCard.css';
-import { Observer } from './observer';
-import Price2, { numberFormat, usdFormat, smartRoundThreeDecimals } from "./Price";
-import { Link } from 'react-router-dom';
+import MarketControls, { getMarketEmbedCode } from './MarketControls';
 import { makeMarketDetailPageURL } from './MarketDetailPage';
+import { Observer } from './observer';
+import Price2, { numberFormat, smartRoundThreeDecimals, usdFormat } from "./Price";
 
 interface HasMarket {
   m: Market
@@ -43,7 +43,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPred
       return {
         node: <span>
           {prefix}
-          <br/>
+          <br />
           <strong
             className={p < 50 ? "red-3" : "green-3"}
             data-tip={`${r} chance to be a Yes. (${p < 50 ? 'Unlikely' : 'Likely'})`}>{r} Yes</strong>
@@ -55,10 +55,10 @@ export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPred
       return {
         node: <span>
           {prefix}
-          <br/>
+          <br />
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-                    data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+              data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
               {r} {name}
             </strong>
           </Dotdotdot>
@@ -70,10 +70,10 @@ export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPred
       return {
         node: <span>
           {prefix}
-          <br/>
+          <br />
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-                    data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+              data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
               {v} {name}
             </strong>
           </Dotdotdot>
@@ -91,7 +91,7 @@ function renderCappedLength(l: number, s: string): React.ReactNode {
 }
 
 export function getMarketSummaryString(name: string, openInterest: Price | undefined,
-                                prediction: RenderedPrediction): string {
+  prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {
     name += '?';
   }
@@ -107,17 +107,10 @@ type OneMarketSummaryProps = HasMarket & {
 };
 
 interface OneMarketSummaryState {
-  // used to show visual feedback that user copied to clipboard
-  isEmbedHTMLCopiedToClipboard: boolean,
-  isMarketIdCopiedToClipboard: boolean,
-  isMarketSummaryCopiedToClipboard: boolean,
   showEmbed: boolean,
 }
 
 const oneMarketSummaryInitialState: OneMarketSummaryState = {
-  isEmbedHTMLCopiedToClipboard: false,
-  isMarketIdCopiedToClipboard: false,
-  isMarketSummaryCopiedToClipboard: false,
   showEmbed: false,
 };
 
@@ -131,19 +124,19 @@ function renderBidAsk(m: Market): React.ReactNode {
   }
   return <div className="columns is-mobile has-text-centered is-vcentered is-centered">
     <div className="column">
-      <strong>Qty:</strong><br/> {/* best bid quantity */}
+      <strong>Qty:</strong><br /> {/* best bid quantity */}
       {topOutcomeBestBid && topOutcomeBestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestBid.getAmount())) : '-'}
     </div>
     <div className="column">
-      <strong>Bid:</strong><br/>
+      <strong>Bid:</strong><br />
       {topOutcomeBestBid && topOutcomeBestBid.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestBid.getPrice())) : '-'}
     </div>
     <div className="column">
-      <strong>Ask:</strong><br/>
+      <strong>Ask:</strong><br />
       {topOutcomeBestAsk && topOutcomeBestAsk.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestAsk.getPrice())) : '-'}
     </div>
     <div className="column">
-      <strong>Qty:</strong><br/> {/* best ask quantity */}
+      <strong>Qty:</strong><br /> {/* best ask quantity */}
       {topOutcomeBestAsk && topOutcomeBestAsk.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestAsk.getAmount())) : '-'}
     </div>
   </div>;
@@ -151,50 +144,16 @@ function renderBidAsk(m: Market): React.ReactNode {
 
 class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketSummaryState> {
   public readonly state: OneMarketSummaryState = oneMarketSummaryInitialState
-
   public componentDidMount(): void {
     document.addEventListener("keydown", this.handleEscapeKey, false);
   }
-
   public componentWillUnmount(): void {
     document.removeEventListener("keydown", this.handleEscapeKey, false);
   }
-
-  public copiedToClipboard = (type: "isMarketIdCopiedToClipboard" | "isMarketSummaryCopiedToClipboard" | "isEmbedHTMLCopiedToClipboard") => {
-    // weird if statement required for typescript to recognize type is valid key of state
-    if (type === "isMarketIdCopiedToClipboard") {
-      this.setState({[type]: true});
-    } else if (type === "isMarketSummaryCopiedToClipboard") {
-      this.setState({[type]: true});
-    } else {
-      this.setState({[type]: true});
-    }
-    setTimeout(() => {
-      if (this.state[type]) {
-        if (type === "isMarketIdCopiedToClipboard") {
-          this.setState({[type]: false});
-        } else if (type === "isMarketSummaryCopiedToClipboard") {
-          this.setState({[type]: false});
-        } else {
-          this.setState({[type]: false});
-        }
-      }
-    }, 100);
-  }
-
-  // tslint:disable-next-line
-  public embedHTMLCopiedToClipboard = this.copiedToClipboard.bind(this, "isEmbedHTMLCopiedToClipboard")
-
-  // tslint:disable-next-line
-  public marketIdCopiedToClipboard = this.copiedToClipboard.bind(this, "isMarketIdCopiedToClipboard")
-
-  // tslint:disable-next-line
-  public marketSummaryCopiedToClipboard = this.copiedToClipboard.bind(this, "isMarketSummaryCopiedToClipboard")
-
   public render() {
     const props = this.props;
-    const {m, isEmbedded} = this.props;
-    const {showEmbed} = this.state;
+    const { m, isEmbedded } = this.props;
+    const { showEmbed } = this.state;
 
     const marketID = m.getId();
     const name = props.m.getName();
@@ -203,99 +162,15 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const isFeatured = props.m.getIsFeatured();
     const prediction = renderPrediction(mt, ps);
     const openInterest = props.m.getMarketCapitalization();
-    const callToActionURL = "https://predictions.global" // TODO link to this market directly once that's possible
+    const callToActionURL = "https://predictions.global" // TODO   link to this market directly once that's possible
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
 
     function renderEndDate(): React.ReactNode {
       const endDate = moment.unix(props.m.getEndDate());
       return (<span>{props.now.isBefore(endDate) ? 'Ends' : 'Ended'} <strong>{props.now.to(endDate)}</strong></span>);
     }
-
-    const controls = (type: "mobile" | "not-mobile", className?: string) => <div
-      className={classNames(
-        "columns market-controls has-text-centered is-centered",
-        type === "mobile" ? "mobile is-mobile" : "not-mobile is-multiline",
-        className,
-      )}>
-      <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-        <TwitterShareButton url={callToActionURL} title={marketSummary}>
-          <TwitterIcon
-            size={
-              /* Size 25 produces a twitter bird the same size as the official twitter bird in the official (but shitty) tweet generator https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/overview */
-              25}
-            round={true}
-          />
-        </TwitterShareButton>
-      </div>
-      <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-        <CopyToClipboard text={`${marketSummary} ${callToActionURL}`}
-                         onCopy={this.marketSummaryCopiedToClipboard}>
-          <i className={
-            (this.state.isMarketSummaryCopiedToClipboard ? 'fas' : 'far') + ' fa-copy'}
-             data-place={isEmbedded && 'right' /* while embedded, the market controls are pushed to left due to our logo, so this tooltip needs to be right or it's off the side of iframe */}
-             data-tip={
-               /* mobile tooltips don't display until clicked, but embedded is mobile view by default, so we'll show desktop tooltip */
-               type === 'mobile' && !isEmbedded ? "Copied market summary to clipboard" : "Copy market summary to clipboard"
-             }/>
-        </CopyToClipboard>
-      </div>
-      <div className={"column content is-marginless " + (type === "mobile" ? "is-narrow" : "is-12")}>
-        <CopyToClipboard text={props.m.getId()}
-                         onCopy={this.marketIdCopiedToClipboard}>
-          <div data-tip={
-            /* mobile tooltips don't display until clicked, but embedded is mobile view by default, so we'll show desktop tooltip */
-            type === 'mobile' && !isEmbedded ? "Copied Augur market ID to clipboard" : "Copy Augur market ID to clipboard"
-          }>
-            {
-              /* idea here is we just want <span> to become <strong> during isMarketIdCopiedToClipboard==true, not sure how to do this without copypasta */
-              this.state.isMarketIdCopiedToClipboard ?
-                <strong className="is-unselectable">id</strong>
-                : <span className="is-unselectable">id</span>
-            }
-          </div>
-        </CopyToClipboard>
-      </div>
-      <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-        {/* for link href, the &description on querystring must be non-empty for Augur UI to correctly load the market, and the market does load correctly even with a bogus description */}
-        {
-          type === 'mobile' ?
-            <img className="augur-logo"
-                 src="/augur-logo.svg"
-                 data-multiline={true}
-                 data-tip={`View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`}/>
-            : <a target="_blank"
-                 href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + props.m.getId()}>
-              <img className="augur-logo"
-                   src="/augur-logo.svg"
-                   data-multiline={true}
-                   data-tip={`View market in Augur App.<br>NOTE: You must run Augur App yourself.<br>To get started, click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`}/>
-            </a>
-        }
-      </div>
-      {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
-      {isEmbedded && type === 'mobile' && (
-        <div className={"column is-narrow"}>
-          <a target="_blank" href={`${window.location.protocol}//${window.location.host}`}>
-            {/* paddingTop: 5px is because we want this logo to be vertically centered, but if we add is-vcentered to these columns, then the augur-logo.svg is positioned awkwardly relative to twitter icon. */}
-            <img style={{width: '115px', paddingTop: '5px'}} className="logo" src="/logo.png"/>
-          </a>
-        </div>
-      )}
-      {!isEmbedded && (
-        <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
-          <CopyToClipboard text={this.getMarketEmbedCode(marketID)} onCopy={this.embedHTMLCopiedToClipboard}>
-            <span className={this.state.isEmbedHTMLCopiedToClipboard ? "embed-copied" : ""}>
-              <i className="fas fa-code is-hidden-mobile"
-                data-multiline={true} data-tip='Copy HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="192".'/>
-              <i className="fas fa-code is-hidden-tablet"
-                data-multiline={true} data-tip='Copied HTML to embed market<br>summary in your webpage.<br>Please use default dimensions<br>or width="800" height="192".'/>
-            </span>
-          </CopyToClipboard>
-        </div>
-      )}
-    </div>;
-    const notMobileControls = controls("not-mobile");
-    const mobileControls = controls("mobile", 'column is-paddingless is-12 is-hidden-tablet');
+    const notMobileControls = <MarketControls type="not-mobile" callToActionURL={callToActionURL} isEmbedded={isEmbedded} marketId={marketID} marketSummary={marketSummary} />;
+    const mobileControls = <MarketControls type="mobile" callToActionURL={callToActionURL} isEmbedded={isEmbedded} marketId={marketID} marketSummary={marketSummary} className="column is-paddingless is-12 is-hidden-tablet" />;
     const bidAsk = renderBidAsk(m);
     return <div className="market columns is-centered">
       <div className="column box">
@@ -309,8 +184,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                 <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3-bg badge" key="featured">
                     Featured
-                    {' '}<i className="fas fa-star"/>
-                    <br/>
+                    {' '}<i className="fas fa-star" />
+                    <br />
                   </strong>
                 </div>
               )}
@@ -337,7 +212,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   </div>
                   <div className="middle-column-left column content is-12">
                     <p className="is-italic comment-link is-marginless"
-                       data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
+                      data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
                   </div>
                 </div>
               </div>
@@ -348,9 +223,9 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     {openInterest === undefined || openInterest.getUsd() === 0 ? "No money"
                       : <strong><Price2
                         p={props.m.getMarketCapitalization()}
-                        o={props.currencySelectionObserver}/></strong>
+                        o={props.currencySelectionObserver} /></strong>
                     }
-                    <br/>at stake
+                    <br />at stake
                   </div>
                   <div className="middle-column-right column content is-12">
                     {renderEndDate()}
@@ -360,19 +235,19 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column is-12 is-hidden-tablet">
                 {bidAsk}
               </div>
-                {mobileControls}
+              {mobileControls}
 
               <div className={classNames('modal has-text-left', showEmbed && 'is-active')}>
-                <div className="modal-background"/>
+                <div className="modal-background" />
                 <div className="modal-card">
                   <header className="modal-card-head">
                     <p className="modal-card-title">Embed Market</p>
                   </header>
                   <section className="modal-card-body">
                     <p>Embed the following HTML code:</p>
-                    <CopyToClipboard text={this.getMarketEmbedCode(marketID)}>
+                    <CopyToClipboard text={getMarketEmbedCode(marketID)}>
                       <pre data-tip="Click to copy to your clipboard">
-                        {this.getMarketEmbedCode(marketID)}
+                        {getMarketEmbedCode(marketID)}
                       </pre>
                     </CopyToClipboard>
                   </section>
@@ -380,13 +255,13 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     <button className="button is-success" onClick={this.closeEmbed}>Done</button>
                   </footer>
                 </div>
-                <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed}/>
+                <button className="modal-close is-large" aria-label="close" onClick={this.closeEmbed} />
               </div>
               {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
               {isEmbedded && (
                 <div className="column content is-12 is-marginless is-hidden-mobile no-padding-top no-padding-bottom">
                   <a className="is-pulled-right" target="_blank" href={`${window.location.protocol}//${window.location.host}`}>
-                    <img style={{width: '115px'}} className="logo" src="/logo.png"/>
+                    <img style={{ width: '115px' }} className="logo" src="/logo.png" />
                   </a>
                 </div>
               )}
@@ -398,7 +273,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
   }
 
   private toggleEmbed = () => {
-    this.setState(({showEmbed}) => ({
+    this.setState(({ showEmbed }) => ({
       showEmbed: !showEmbed,
     }));
   };
@@ -414,12 +289,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     if (e.keyCode === 27) {
       this.closeEmbed();
     }
-  };
-
-  private getMarketEmbedCode = (marketID: string) => {
-    const width = 320;
-    const height = 340;
-    return `<iframe width="${width}" height="${height}" src="${window.location.protocol}//${window.location.host}/e/v1/${marketID}" frameborder="0"></iframe>`;
   };
 }
 

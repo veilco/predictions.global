@@ -13,6 +13,7 @@ import Price2, { smartRoundThreeDecimals } from './Price';
 import './MarketDetailPage.css';
 import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
 import MarketControls from './MarketControls';
+import AllOutcomesSummary from './AllOutcomesSummary';
 
 export interface URLParams {
   url: string // market detail page url
@@ -151,6 +152,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
+              <AllOutcomesSummary m={m} mi={mi} />
               {renderDatum(prediction.node)}
               {renderLastTradedDate(now, m)}
               {renderEndDate(now, m)}

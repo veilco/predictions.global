@@ -324,10 +324,12 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
   return renderDatum(label, now.to(lastTraded));
 }
 
-function renderResolutionSource(ms: Market): React.ReactNode {
-  // ?? TODO make this two columns so that "resolution source" never has a line break
+function renderResolutionSource(ms: Market): [React.ReactNode, React.ReactNode] {
   const rs = ms.getResolutionSource().trim();
-  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs), { className: "is-12", isNotMobile: true });
+  return [
+    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
+    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 32), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
+  ];
 }
 
 function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
@@ -398,11 +400,11 @@ const detailPageDateFormat = "LLL [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/d
 // https://www.regextester.com/93652
 const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;
 
-function tryToMakeLink(s: string): React.ReactNode {
+function tryToMakeLink(s: string, linkTextMaxLen?: number): React.ReactNode {
   if (urlRegexp.test(s)) {
     const href = s.toLowerCase().startsWith('http') ? s : 'http://' + s;
     // TODO a better truncation method is to truncate for mobile and less so for table/desktop, similar to renderEthereumAddressLink.
-    return <a target="_blank" href={href}>{renderCappedLength(32, s)}</a>;
+    return <a target="_blank" href={href}>{linkTextMaxLen !== undefined ? renderCappedLength(linkTextMaxLen, s) : s}</a>;
   }
   return s;
 }

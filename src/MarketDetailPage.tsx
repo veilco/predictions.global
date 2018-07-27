@@ -164,6 +164,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
               {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
               {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
               {renderDatum("universe", ethereumAddressLink(mi.getUniverse()))}
+              {renderDatum("creator mailbox", ethereumAddressLink(mi.getMarketCreatorMailbox()))}
+              {renderDatum("creator mailbox owner", ethereumAddressLink(mi.getMarketCreatorMailboxOwner()))}
               {renderFeeWindow(mi)}
             </div>
             <div className="column is-half-desktop is-half-tablet is-12-mobile content">

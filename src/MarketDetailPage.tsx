@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { Redirect, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType, MarketInfo } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketType, MarketInfo, Price } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
@@ -136,6 +136,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
               {renderResolutionSource(ms)}
               {renderMarketType(ms)}
               {renderDatum("open interest", <Price2 p={ms.getMarketCapitalization()} o={this.props.currencyObserver} />)}
+              {renderDatum("designated reporter", ethereumAddressLink(mi.getDesignatedReporter()))}
+              {renderDesignatedReporterStake(ms, mi, this.props.currencyObserver)}
               {renderScalarDetail(ms, mi)}
               {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
               {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
@@ -285,6 +287,39 @@ function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
     return;
   }
   return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
+}
+
+// getExchangeRatesRelativeToETH uses an existing Price to compute exchange rates because we don't yet have explicit exchange rates in our data model.
+function getExchangeRatesRelativeToETH(p?: Price): {[key in Currency]: number } | undefined {
+  if (p === undefined) {
+    return;
+  }
+  const eth = p.getEth();
+  if (eth === 0) {
+    return;
+  }
+  return {
+    [Currency.ETH]: 1,
+    [Currency.BTC]: p.getBtc()/eth,
+    [Currency.USD]: p.getUsd()/eth,
+  };
+}
+
+function renderDesignatedReporterStake(ms: Market, mi: MarketInfo, o: Observer<Currency>): React.ReactNode {
+  // TODO can pull this exchange rate stuff out into something like `getPriceFromReferencePrice(eth, price): Price | undefined`
+  const stakeETh = parseFloat(mi.getDesignatedReportStake());
+  if (isNaN(stakeETh)) {
+    return;
+  }
+  const ex = getExchangeRatesRelativeToETH(ms.getMarketCapitalization());
+  if (ex === undefined) {
+    return;
+  }
+  const stakePrice = new Price();
+  stakePrice.setEth(stakeETh);
+  stakePrice.setBtc(stakeETh * ex[Currency.BTC]);
+  stakePrice.setUsd(stakeETh * ex[Currency.USD]);
+  return renderDatum("designated reporter stake", <Price2 p={stakePrice} o={o} />);
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state

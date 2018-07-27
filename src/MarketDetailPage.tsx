@@ -4,7 +4,7 @@ import { Redirect, RouteComponentProps } from 'react-router';
 import * as ReactTooltip from "react-tooltip";
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType, MarketInfo, Price } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketType, MarketInfo, Price, ReportingState } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
@@ -62,7 +62,7 @@ export function makeMarketDetailPageURL(m: Market): URL {
     .replace(validCharactersRegexp, '')
     .substring(0, 120)
     .toLowerCase();
-  const relative =  `${marketDetailPageURLPrefix}/${urlName}-${m.getId()}`.replace(collapseDashesRegexp, '-');
+  const relative = `${marketDetailPageURLPrefix}/${urlName}-${m.getId()}`.replace(collapseDashesRegexp, '-');
   return {
     absolute: `${window.location.protocol}//${window.location.host}${relative}`,
     relative,
@@ -133,16 +133,16 @@ export class MarketDetailPage extends React.Component<Props, State> {
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
-          <ReactTooltip/> {/* ReactTooltip is extremely non-performant; we try to have at most one of these, but we want Header to be the first child of outermost <div> (for consistency with other pages, since Header isn't yet rendered in one place only), so we'll just have two ReactTooltip on detail page for now. 2 is okay, but eg. O(markets) of ReactTooltip will brick the page. */}
+          <ReactTooltip /> {/* ReactTooltip is extremely non-performant; we try to have at most one of these, but we want Header to be the first child of outermost <div> (for consistency with other pages, since Header isn't yet rendered in one place only), so we'll just have two ReactTooltip on detail page for now. 2 is okay, but eg. O(markets) of ReactTooltip will brick the page. */}
           <h3 className="title">{name}</h3>
           {renderForking(mi)}
           {renderNeedsMigration(mi)}
           {renderCategoryAndTags(ms)}
-          <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(ms).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true}/>
+          <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(ms).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true} />
         </div>
       } />
       <section className="section">
-        <ReactTooltip/>
+        <ReactTooltip />
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
@@ -156,6 +156,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
               {renderResolutionSource(ms)}
               {renderMarketType(mt)}
               {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
+              {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
               {renderDatum("designated reporter", ethereumAddressLink(mi.getDesignatedReporter()))}
               {renderDesignatedReporterStake(ms, mi, this.props.currencyObserver)}
               {renderScalarDetail(ms, mi)}
@@ -224,6 +225,31 @@ function renderCategoryAndTags(ms: Market): React.ReactNode {
       .map(s => capitalizeNonAcronym(s))
       .filter(s => s.length > 0).join(", ")}
   </p>;
+}
+
+function reportingStateToString(rs: ReportingState): React.ReactNode {
+    switch (rs) {
+      case ReportingState.PRE_REPORTING:
+        return "Pre-Reporting";
+      case ReportingState.DESIGNATED_REPORTING:
+        return "Designated Reporting";
+      case ReportingState.OPEN_REPORTING:
+        return "Open Reporting";
+      case ReportingState.CROWDSOURCING_DISPUTE:
+        return "Crowdsourcing Dispute";
+      case ReportingState.AWAITING_NEXT_WINDOW:
+        return "Awaiting Next Window";
+      case ReportingState.AWAITING_FINALIZATION:
+        return "Awaiting Finalization";
+      case ReportingState.FINALIZED:
+        return "Finalized";
+      case ReportingState.FORKING:
+        return "Forking";
+      case ReportingState.AWAITING_NO_REPORT_MIGRATION:
+        return "Awaiting No Report Migration";
+      case ReportingState.AWAITING_FORK_MIGRATION:
+        return "Awaiting Fork Migration";
+    }
 }
 
 function renderMarketType(mtIn: MarketType): React.ReactNode {
@@ -297,7 +323,7 @@ function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
   if (t === 0) {
     return;
   }
- return renderDatum("finalization time", moment.unix(t).format(detailPageDateFormat));
+  return renderDatum("finalization time", moment.unix(t).format(detailPageDateFormat));
 }
 
 function renderForking(mi: MarketInfo): React.ReactNode {
@@ -315,7 +341,7 @@ function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
 }
 
 // getExchangeRatesRelativeToETH uses an existing Price to compute exchange rates because we don't yet have explicit exchange rates in our data model.
-function getExchangeRatesRelativeToETH(p?: Price): {[key in Currency]: number } | undefined {
+function getExchangeRatesRelativeToETH(p?: Price): { [key in Currency]: number } | undefined {
   if (p === undefined) {
     return;
   }
@@ -325,8 +351,8 @@ function getExchangeRatesRelativeToETH(p?: Price): {[key in Currency]: number } 
   }
   return {
     [Currency.ETH]: 1,
-    [Currency.BTC]: p.getBtc()/eth,
-    [Currency.USD]: p.getUsd()/eth,
+    [Currency.BTC]: p.getBtc() / eth,
+    [Currency.USD]: p.getUsd() / eth,
   };
 }
 

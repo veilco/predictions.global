@@ -28,7 +28,7 @@ export default class AllOutcomesSummary extends React.Component<Props> {
         const oi: OutcomeInfo | undefined = outcomesById[outcomeId];
         const volume: number | undefined = oi && parseVolume(oi);
         const last: number | undefined = oi && parseLast(oi);
-        return <div key={index} className="columns is-mobile has-text-centered is-centered">
+        return <div key={index} className="columns is-mobile has-text-centered is-centered content">
           <div className="column">
             {/* TODO renderPrediction() is tightly coupled to use-case of rendering only top prediction, needs refactoring to render an arbitrary predction. The text surrounding the prediction should be customizable, too, eg. 'No redictions' or 'Augur predicts:'. Perhaps this could be two separate functions, one to produce an opininated prediction for use in OneMarketSummary, and another lower level function to just produce the core "56% Yes | 250 Billions of USD" */}
             <strong>Prediction:</strong><br />

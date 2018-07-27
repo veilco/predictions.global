@@ -1,3 +1,4 @@
+import * as classNames from 'classnames';
 import * as React from 'react';
 import * as moment from 'moment';
 import { Redirect, RouteComponentProps } from 'react-router';
@@ -137,6 +138,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
     const openInterest = m.getMarketCapitalization();
     const prediction = renderPrediction(mt, m.getPredictionsList());
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
+    const details = m.getDetails().trim();
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
@@ -151,38 +153,37 @@ export class MarketDetailPage extends React.Component<Props, State> {
       <section className="detail section">
         <ReactTooltip />
         <div className="container">
-          <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
+          <div className="columns is-centered">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
-              <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver}/>
-              {renderLastTradedDate(now, m)}
-              {renderEndDate(now, m)}
-              {renderFinalizationBlockNumber(mi)}
-              {renderFinalizationTime(mi)}
-              {renderDatum(ethereumAddressLink(m.getId(), "view market contract"))}
-              {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
-              {renderResolutionSource(m)}
-              {renderMarketType(mt)}
-              {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
-              {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
-              {renderDatum("designated reporter", ethereumAddressLink(mi.getDesignatedReporter()))}
-              {renderDesignatedReporterStake(mi)}
-              {renderScalarDetail(m, mi)}
-              {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
-              {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
-              {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
-              {renderDatum("universe", ethereumAddressLink(mi.getUniverse()))}
-              {renderDatum("creator mailbox", ethereumAddressLink(mi.getMarketCreatorMailbox()))}
-              {renderDatum("creator mailbox owner", ethereumAddressLink(mi.getMarketCreatorMailboxOwner()))}
-              {renderFeeWindow(mi)}
+              <div className="columns is-vcentered is-multiline">
+                {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
+                {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
+                {renderLastTradedDate(now, m)}
+                {renderResolutionSource(m)}
+                {renderEndDate(now, m)}
+              </div>
+              <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver} />
+              <div className="columns is-vcentered is-multiline">
+                {renderMarketType(mt)}
+                {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
+                {renderScalarDetail(m, mi)}
+                {renderEthereumAddressLink("author", mi.getAuthor())}
+                {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
+                {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
+                {renderFinalizationBlockNumber(mi)}
+                {renderFinalizationTime(mi)}
+                {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
+                {renderDesignatedReporterStake(mi)}
+                {renderEthereumAddressLink("universe", mi.getUniverse())}
+                {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
+                {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
+                {renderFeeWindow(mi)}
+                {renderEthereumAddressLink(undefined, marketId, "view market contract")}
+              </div>
             </div>
             <div className="column is-half-desktop is-half-tablet is-12-mobile content">
-              details:
-              {m.getDetails()}
-            </div>
-            <div className="column is-12 has-text-left">
-              <pre>
-                {JSON.stringify(md.toObject(), null, 2)}
-              </pre>
+              <strong>Details:</strong><br />
+              {details.length < 1 ? "none" : details}
             </div>
           </div>
         </div>
@@ -205,18 +206,28 @@ export class MarketDetailPage extends React.Component<Props, State> {
   }
 }
 
-function renderDatum(label: React.ReactNode, datum?: React.ReactNode): React.ReactNode {
-  return <div className="level is-mobile">
-    <div className="level-item has-text-centered">
-      <div>
-        {label}{datum !== undefined && datum !== null && ": "}
-      </div>
+interface RenderDatumOpts {
+  className?: string,
+  isNotMobile?: true,
+  isLabelNotStrong?: true,
+  key?: string,
+}
+
+function renderDatum(label: React.ReactNode, datum?: React.ReactNode, opts?: RenderDatumOpts): React.ReactNode {
+  return <div key={opts && opts.key} className={classNames("columns column is-narrow is-marginless no-padding-bottom",
+    opts && opts.className,
+    (opts && opts.isNotMobile || "is-mobile")
+  )}>
+    <div className="column is-narrow is-paddingless">
+      {
+        opts && opts.isLabelNotStrong ?
+          <span>{label}{datum !== undefined && datum !== null && <span>:&nbsp;</span>}</span> :
+          <strong>{label}{datum !== undefined && datum !== null && <span>:&nbsp;</span>}</strong>
+      }
     </div>
     {datum !== undefined && datum !== null &&
-      <div className="level-item has-text-centered">
-        <div>
-          {datum}
-        </div>
+      <div className="column is-narrow is-paddingless">
+        {datum}
       </div>
     }
   </div>;
@@ -237,28 +248,28 @@ function renderCategoryAndTags(ms: Market): React.ReactNode {
 }
 
 function reportingStateToString(rs: ReportingState): React.ReactNode {
-    switch (rs) {
-      case ReportingState.PRE_REPORTING:
-        return "Pre-Reporting";
-      case ReportingState.DESIGNATED_REPORTING:
-        return "Designated Reporting";
-      case ReportingState.OPEN_REPORTING:
-        return "Open Reporting";
-      case ReportingState.CROWDSOURCING_DISPUTE:
-        return "Crowdsourcing Dispute";
-      case ReportingState.AWAITING_NEXT_WINDOW:
-        return "Awaiting Next Window";
-      case ReportingState.AWAITING_FINALIZATION:
-        return "Awaiting Finalization";
-      case ReportingState.FINALIZED:
-        return "Finalized";
-      case ReportingState.FORKING:
-        return "Forking";
-      case ReportingState.AWAITING_NO_REPORT_MIGRATION:
-        return "Awaiting No Report Migration";
-      case ReportingState.AWAITING_FORK_MIGRATION:
-        return "Awaiting Fork Migration";
-    }
+  switch (rs) {
+    case ReportingState.PRE_REPORTING:
+      return "Pre-Reporting";
+    case ReportingState.DESIGNATED_REPORTING:
+      return "Designated Reporting";
+    case ReportingState.OPEN_REPORTING:
+      return "Open Reporting";
+    case ReportingState.CROWDSOURCING_DISPUTE:
+      return "Crowdsourcing Dispute";
+    case ReportingState.AWAITING_NEXT_WINDOW:
+      return "Awaiting Next Window";
+    case ReportingState.AWAITING_FINALIZATION:
+      return "Awaiting Finalization";
+    case ReportingState.FINALIZED:
+      return "Finalized";
+    case ReportingState.FORKING:
+      return "Forking";
+    case ReportingState.AWAITING_NO_REPORT_MIGRATION:
+      return "Awaiting No Report Migration";
+    case ReportingState.AWAITING_FORK_MIGRATION:
+      return "Awaiting Fork Migration";
+  }
 }
 
 function renderMarketType(mtIn: MarketType): React.ReactNode {
@@ -275,8 +286,22 @@ function renderMarketType(mtIn: MarketType): React.ReactNode {
   return renderDatum("market type", parse(mtIn));
 }
 
-function ethereumAddressLink(address: string, text?: string): React.ReactNode {
-  return <a target="_blank" href={`https://etherscan.io/address/${address}`}>{text === undefined ? address : text}</a>;
+function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string): [React.ReactNode, React.ReactNode] {
+  // TODO we don't need to compute truncatedAddressLink at all if linkText is defined
+  // On mobile, display only first N characters of address because it's too long for iPhone5, even on its own row. Perhaps a preferable way to render this is adoption of <MediaQuery> react components which will render correct option, instead of rendering both and relegating visibility to CSS.
+  const fullAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? ethAddress : linkText}</a>;
+  const truncatedAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? <span>{ethAddress.substring(0, 30)}&hellip;</span> : linkText}</a>;
+  if (datumLabel !== undefined) {
+    return [
+      renderDatum(datumLabel, fullAddressLink, { className: "is-hidden-mobile", isNotMobile: true, key: "0" }),
+      renderDatum(datumLabel, truncatedAddressLink, { className: "is-hidden-tablet", isNotMobile: true, key: "1" }),
+    ];
+  } else {
+    return [
+      renderDatum(fullAddressLink, undefined, { className: "is-hidden-mobile", isNotMobile: true, key: "0", isLabelNotStrong: true, }),
+      renderDatum(truncatedAddressLink, undefined, { className: "is-hidden-tablet", isNotMobile: true, key: "1", isLabelNotStrong: true, }),
+    ];
+  }
 }
 
 function ethereumBlockLink(blockNumber: number): React.ReactNode {
@@ -285,7 +310,7 @@ function ethereumBlockLink(blockNumber: number): React.ReactNode {
 
 function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   const endDate = moment.unix(ms.getEndDate());
-  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat));
+  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12" });
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
@@ -301,7 +326,7 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
 function renderResolutionSource(ms: Market): React.ReactNode {
   // ?? TODO make this two columns so that "resolution source" never has a line break
   const rs = ms.getResolutionSource().trim();
-  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs));
+  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs), { className: "is-12" });
 }
 
 function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
@@ -316,7 +341,7 @@ function renderFeeWindow(mi: MarketInfo): React.ReactNode {
   if (f === '0x0000000000000000000000000000000000000000') {
     return;
   }
-  return renderDatum("fee window", ethereumAddressLink(f));
+  return renderEthereumAddressLink("fee window", f);
 }
 
 function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
@@ -355,7 +380,7 @@ function renderVolume(ex: ExchangeRates, mi: MarketInfo, o: Observer<Currency>):
   if (isNaN(volume)) {
     return;
   }
-  return renderDatum("volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o}/>);
+  return renderDatum("volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o} />);
 }
 
 function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
@@ -374,7 +399,8 @@ const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-
 
 function tryToMakeLink(s: string): React.ReactNode {
   if (urlRegexp.test(s)) {
-    return <a target="_blank" href={s}>{s}</a>;
+    const href = s.toLowerCase().startsWith('http') ? s : 'http://' + s;
+    return <a target="_blank" href={href}>{s}</a>;
   }
   return s;
 }

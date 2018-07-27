@@ -18,8 +18,57 @@ export default class AllOutcomesSummary extends React.Component<Props> {
     const { m, mi } = this.props;
     const bestBidsMap = m.getBestBidsMap();
     const bestAsksMap = m.getBestAsksMap();
-    const outcomesById: {[key: number]: OutcomeInfo} = {};
+    const outcomesById: { [key: number]: OutcomeInfo } = {};
     mi.getOutcomesList().forEach(o => outcomesById[o.getId()] = o);
+    // return <table className="table is-bordered is-narrow">
+    //   <thead>
+    //     <tr>
+    //       <th>Prediction</th>
+    //       <th>Qty {/* best bid quantity */}</th>
+    //       <th>Bid</th>
+    //       <th>Ask</th>
+    //       <th>Qty {/* best ask quantity */}</th>
+    //       <th>Last</th>
+    //       <th>Volume</th>
+    //     </tr>
+    //   </thead>
+    //   <tbody>
+    //     {m.getPredictionsList().map((p, index) => {
+    //       const outcomeId = p.getOutcomeId();
+    //       const bestBid = bestBidsMap.get(outcomeId);
+    //       const bestAsk = bestAsksMap.get(outcomeId);
+    //       const oi: OutcomeInfo | undefined = outcomesById[outcomeId];
+    //       const volume: number | undefined = oi && parseVolume(oi);
+    //       const last: number | undefined = oi && parseLast(oi);
+    //       return <tr key={index}>
+    //         <td>
+    //           {/* TODO renderPrediction() is tightly coupled to use-case of rendering only top prediction, needs refactoring to render an arbitrary predction. The text surrounding the prediction should be customizable, too, eg. 'No redictions' or 'Augur predicts:'. Perhaps this could be two separate functions, one to produce an opininated prediction for use in OneMarketSummary, and another lower level function to just produce the core "56% Yes | 250 Billions of USD" */}
+    //           {renderPrediction(m.getMarketType(), [p], { includePrefixInNode: false }).node}
+    //         </td>
+    //         <td>
+    //
+    //           {bestBid && bestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getAmount())) : '-'}
+    //         </td>
+    //         <td>
+    //           {bestBid && bestBid.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getPrice())) : '-'}
+    //         </td>
+    //         <td>
+    //           {bestAsk && bestAsk.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getPrice())) : '-'}
+    //         </td>
+    //         <td>
+    //           {bestAsk && bestAsk.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getAmount())) : '-'}
+    //         </td>
+    //         <td>
+    //           {last && last !== 0 ? numberFormat.format(smartRoundThreeDecimals(last)) : '-'}
+    //         </td>
+    //         <td>
+    //           {volume && volume !== 0 ?
+    //             <Price2 p={makePriceFromEthAmount(this.props.exchangeRates, volume)} o={this.props.currencyObserver} /> : '-'}
+    //         </td>
+    //       </tr>
+    //     })}
+    //   </tbody>
+    // </table>;
     return <div>{
       m.getPredictionsList().map((p, index) => {
         const outcomeId = p.getOutcomeId();

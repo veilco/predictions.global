@@ -22,7 +22,7 @@ interface RenderedPrediction {
   text: string, // rendered prediction text, expected to correspond to what human would see when `node` is rendered. Used for tweet generation.
 }
 
-function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction {
+export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction {
   if (ps.length < 1) {
     return {
       node: <span>No predictions</span>,
@@ -90,7 +90,7 @@ function renderCappedLength(l: number, s: string): React.ReactNode {
   return <span>{s.substring(0, l)}&hellip;</span>;
 }
 
-function getMarketSummaryString(name: string, openInterest: Price | undefined,
+export function getMarketSummaryString(name: string, openInterest: Price | undefined,
                                 prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {
     name += '?';

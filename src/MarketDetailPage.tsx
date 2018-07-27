@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as moment from 'moment';
 import { Redirect, RouteComponentProps } from 'react-router';
+import * as ReactTooltip from "react-tooltip";
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
 import { Market, MarketDetail, MarketType, MarketInfo, Price } from "./generated/markets_pb";
@@ -10,6 +11,7 @@ import { Observer } from './observer';
 import Footer from './Footer';
 import Price2 from './Price';
 import './MarketDetailPage.css';
+import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
 
 export interface URLParams {
   url: string // market detail page url
@@ -114,19 +116,26 @@ export class MarketDetailPage extends React.Component<Props, State> {
       return <Redirect to="/" />;
     }
     const now = moment();
+    const name = ms.getName();
+    const mt = ms.getMarketType();
+    const openInterest = ms.getMarketCapitalization();
+    const prediction = renderPrediction(mt, ms.getPredictionsList());
+    const marketSummary = getMarketSummaryString(name, openInterest, prediction);
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
-          <h3 className="title">{ms.getName()}</h3>
+          <h3 className="title">{name}</h3>
           {renderForking(mi)}
           {renderNeedsMigration(mi)}
           {renderCategoryAndTags(ms)}
         </div>
       } />
       <section className="section">
+        <ReactTooltip/>
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
+              {renderDatum(prediction.node)}
               {renderLastTradedDate(now, ms)}
               {renderEndDate(now, ms)}
               {renderFinalizationBlockNumber(mi)}
@@ -134,8 +143,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
               {renderDatum(ethereumAddressLink(ms.getId(), "view market contract"))}
               {renderDatum("volume", mi.getVolume())}
               {renderResolutionSource(ms)}
-              {renderMarketType(ms)}
-              {renderDatum("open interest", <Price2 p={ms.getMarketCapitalization()} o={this.props.currencyObserver} />)}
+              {renderMarketType(mt)}
+              {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
               {renderDatum("designated reporter", ethereumAddressLink(mi.getDesignatedReporter()))}
               {renderDesignatedReporterStake(ms, mi, this.props.currencyObserver)}
               {renderScalarDetail(ms, mi)}
@@ -206,7 +215,7 @@ function renderCategoryAndTags(ms: Market): React.ReactNode {
   </p>;
 }
 
-function renderMarketType(ms: Market): React.ReactNode {
+function renderMarketType(mtIn: MarketType): React.ReactNode {
   function parse(mt: MarketType): string {
     switch (mt) {
       case MarketType.YESNO:
@@ -217,7 +226,7 @@ function renderMarketType(ms: Market): React.ReactNode {
         return "Scalar";
     }
   }
-  return renderDatum("market type", parse(ms.getMarketType()));
+  return renderDatum("market type", parse(mtIn));
 }
 
 function ethereumAddressLink(address: string, text?: string): React.ReactNode {
@@ -234,8 +243,13 @@ function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
+  const raw = ms.getLastTradeTime();
+  const label = "last traded";
+  if (raw === 0) {
+    return renderDatum(label, "never");
+  }
   const lastTraded = moment.unix(ms.getLastTradeTime());
-  return renderDatum("last traded", now.to(lastTraded));
+  return renderDatum(label, now.to(lastTraded));
 }
 
 function renderResolutionSource(ms: Market): React.ReactNode {
@@ -248,7 +262,7 @@ function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
   if (ms.getMarketType() !== MarketType.SCALAR) {
     return;
   }
-  return renderDatum('Scalar market scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} (tick size ${mi.getTickSize()})`);
+  return renderDatum('Scalar market scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} ${mi.getScalarDenomination()} (tick size ${mi.getTickSize()})`);
 }
 
 function renderFeeWindow(mi: MarketInfo): React.ReactNode {

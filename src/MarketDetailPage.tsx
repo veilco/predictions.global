@@ -140,15 +140,15 @@ export class MarketDetailPage extends React.Component<Props, State> {
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
-          <ReactTooltip /> {/* ReactTooltip is extremely non-performant; we try to have at most one of these, but we want Header to be the first child of outermost <div> (for consistency with other pages, since Header isn't yet rendered in one place only), so we'll just have two ReactTooltip on detail page for now. 2 is okay, but eg. O(markets) of ReactTooltip will brick the page. */}
           <h3 className="title">{name}</h3>
           {renderForking(mi)}
           {renderNeedsMigration(mi)}
           {renderCategoryAndTags(m)}
           <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(m).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true} />
+          <ReactTooltip /> {/* ReactTooltip is extremely non-performant; we try to have at most one of these, but we want Header to be the first child of outermost <div> (for consistency with other pages, since Header isn't yet rendered in one place only), so we'll just have two ReactTooltip on detail page for now. 2 is okay, but eg. O(markets) of ReactTooltip will brick the page. */}
         </div>
       } />
-      <section className="section">
+      <section className="detail section">
         <ReactTooltip />
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
@@ -228,12 +228,12 @@ function capitalizeNonAcronym(s: string): string {
 }
 
 function renderCategoryAndTags(ms: Market): React.ReactNode {
-  return <p>
+  return <span>
     {[ms.getCategory(), ...ms.getTagsList()]
       .map(s => s.trim())
       .map(s => capitalizeNonAcronym(s))
       .filter(s => s.length > 0).join(", ")}
-  </p>;
+  </span>;
 }
 
 function reportingStateToString(rs: ReportingState): React.ReactNode {

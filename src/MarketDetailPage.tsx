@@ -14,6 +14,7 @@ import './MarketDetailPage.css';
 import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
 import MarketControls from './MarketControls';
 import AllOutcomesSummary from './AllOutcomesSummary';
+import { makePriceFromEthAmount, ExchangeRates, getExchangeRatesFromMarketsSummary } from './ExchangeRates';
 
 export interface URLParams {
   url: string // market detail page url
@@ -152,8 +153,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <div className="container">
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
-              <AllOutcomesSummary m={m} mi={mi} />
-              {renderDatum(prediction.node)}
+              <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver}/>
               {renderLastTradedDate(now, m)}
               {renderEndDate(now, m)}
               {renderFinalizationBlockNumber(mi)}
@@ -349,39 +349,6 @@ function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
   return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
 }
 
-type ExchangeRates = { [key in Currency]: number };
-
-// getExchangeRatesRelativeToETH uses an existing Price to compute exchange rates because we don't yet have explicit exchange rates in our data model.
-function getExchangeRatesRelativeToETH(p: Price): ExchangeRates | undefined {
-  const eth = p.getEth();
-  if (eth === 0) {
-    return;
-  }
-  return {
-    [Currency.ETH]: 1,
-    [Currency.BTC]: p.getBtc() / eth,
-    [Currency.USD]: p.getUsd() / eth,
-  };
-}
-
-// getExchangeRatesFromMarketsSummary returns ETH/USD/BTC exchange rates, so long as at least one market has open interest.
-function getExchangeRatesFromMarketsSummary(ms: MarketsSummary): ExchangeRates | undefined {
-  for(const m of ms.getMarketsList()) {
-    const p = m.getMarketCapitalization();
-    if (p !== undefined && p.getEth() !== 0) {
-      return getExchangeRatesRelativeToETH(p);
-    }
-  }
-  return;
-}
-
-function makePriceFromEthAmount(ex: ExchangeRates, ethAmount: number): Price {
-  const p = new Price();
-  p.setEth(ethAmount);
-  p.setBtc(ethAmount * ex[Currency.BTC]);
-  p.setUsd(ethAmount * ex[Currency.USD]);
-  return p;
-}
 
 function renderVolume(ex: ExchangeRates, mi: MarketInfo, o: Observer<Currency>): React.ReactNode {
   const volume = parseFloat(mi.getVolume());

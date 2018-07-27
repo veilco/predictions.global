@@ -1,9 +1,14 @@
 import * as React from 'react';
-import Price2, { numberFormat, smartRoundThreeDecimals, usdFormat } from "./Price";
+import { ExchangeRates, makePriceFromEthAmount } from './ExchangeRates';
 import { Market, MarketInfo, OutcomeInfo } from './generated/markets_pb';
 import { renderPrediction } from './OneMarketSummary';
+import Price2, { numberFormat, smartRoundThreeDecimals } from "./Price";
+import { Observer } from './observer';
+import { Currency } from './Currency';
 
 interface Props {
+  currencyObserver: Observer<Currency>;
+  exchangeRates: ExchangeRates;
   m: Market;
   mi: MarketInfo;
 }
@@ -24,11 +29,6 @@ export default class AllOutcomesSummary extends React.Component<Props> {
         const volume: number | undefined = oi && parseVolume(oi);
         const last: number | undefined = oi && parseLast(oi);
         return <div key={index} className="columns is-mobile has-text-centered is-centered">
-          {/* name predicted%  bidqty bid ask askqty last volume */}
-          {/* <div className="column">
-            <strong>Outcome:</strong><br />
-            {p.getName()}
-          </div> */}
           <div className="column">
             {/* TODO renderPrediction() is tightly coupled to use-case of rendering only top prediction, needs refactoring to render an arbitrary predction. The text surrounding the prediction should be customizable, too, eg. 'No redictions' or 'Augur predicts:'. Perhaps this could be two separate functions, one to produce an opininated prediction for use in OneMarketSummary, and another lower level function to just produce the core "56% Yes | 250 Billions of USD" */}
             <strong>Prediction:</strong><br />
@@ -55,8 +55,9 @@ export default class AllOutcomesSummary extends React.Component<Props> {
             {last && last !== 0 ? numberFormat.format(smartRoundThreeDecimals(last)) : '-'}
           </div>
           <div className="column">
-            <strong>Volume: TODO price</strong><br />
-            {volume && volume !== 0 ? numberFormat.format(smartRoundThreeDecimals(volume)) : '-'}
+            <strong>Volume:</strong><br />
+            {volume && volume !== 0 ?
+              <Price2 p={makePriceFromEthAmount(this.props.exchangeRates, volume)} o={this.props.currencyObserver}/> : '-'}
           </div>
         </div>;
       })
@@ -79,14 +80,3 @@ function parseVolume(oi: OutcomeInfo): number | undefined {
   }
   return volume;
 }
-
-// interface BidAskQtyDatumProps {
-//
-// }
-//
-// const BidAskQtyDatum: React.SFC<BidAskQtyDatumProps> = (props) => {
-//   <strong>Qty:</strong><br /> {/* best bid quantity */}
-//   {topOutcomeBestBid && topOutcomeBestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(topOutcomeBestBid.getAmount())) : '-'}
-// }
-//
-// export BidAskQtyDatum;

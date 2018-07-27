@@ -1,3 +1,5 @@
+@import './Brand.scss';
+
 .market-controls {
   $control-padding-not-mobile: 3.6466px; // small golden ratio^4 * 25px square length of twitter icon
   $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
@@ -61,4 +63,8 @@
     height: 25px; // same dimension as twitter logo
     width: 25px;
   }
+}
+
+.embed-copied {
+  color: $tetrad-orange-3;
 }

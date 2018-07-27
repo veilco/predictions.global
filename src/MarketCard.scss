@@ -1,3 +1,5 @@
+@import './Brand.scss';
+
 .market {
   margin-top: 0.75rem; // cards are getting tall, reduce margin so ppl can see more on one screen; may later vary this responsively
 
@@ -13,18 +15,14 @@
   }
 
   .badge {
-    padding: 0.4rem 0.6rem;
-    color: white;
-    background-color: #0ad136; // this is $tetrad-green-3, TODO import variables
+    background-color: $tetrad-green-3;
     border-radius: 2rem;
+    color: white;
+    padding: 0.4rem 0.6rem;
   }
 
   & > .column {
-    border-left: 6px solid #0d9bb6; // this is blue-3, TODO import variables
+    border-left: 6px solid $tetrad-blue-3;
     border-radius: 4px;
   }
-}
-
-.embed-copied {
-  color: #ff830c; // $tetrad-orange TODO import variable
 }

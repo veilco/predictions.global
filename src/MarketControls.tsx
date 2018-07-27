@@ -7,6 +7,7 @@ import './MarketControls.css';
 interface Props {
   callToActionURL: string,
   className?: string,
+  forceAllowLinkToAugurApp?: true, // if passed, the link to view market in local augur app will be generated. Otherwise it'll be generated iff type === 'mobile'
   isEmbedded?: boolean,
   marketId: string,
   marketSummary: string, // textual summary of market, eg. to include in a tweet
@@ -104,7 +105,7 @@ export default class MarketControls extends React.Component<Props, State> {
       <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
         {/* for link href, the &description on querystring must be non-empty for Augur UI to correctly load the market, and the market does load correctly even with a bogus description */}
         {
-          type === 'mobile' ?
+          type === 'mobile' && this.props.forceAllowLinkToAugurApp === undefined ?
             <img className="augur-logo"
               src="/augur-logo.svg"
               data-multiline={true}

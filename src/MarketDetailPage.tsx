@@ -12,6 +12,7 @@ import Footer from './Footer';
 import Price2 from './Price';
 import './MarketDetailPage.css';
 import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
+import MarketControls from './MarketControls';
 
 export interface URLParams {
   url: string // market detail page url
@@ -49,15 +50,23 @@ const whitespaceRegexp = /\s+/g;
 const validCharactersRegexp = /[^-0-9a-zA-Z]/g;
 const collapseDashesRegexp = /-+/g;
 
-export function makeMarketDetailPageURL(m: Market): string {
+interface URL {
+  relative: string, // relative URL that can be used in a react-router Link or <a>
+  absolute: string, // absolute URL useful externally, eg. in a tweet
+}
+
+export function makeMarketDetailPageURL(m: Market): URL {
   const urlName = m.getName()
     .replace(whitespaceRegexp, '-')
     .replace(otherCharactersToTurnIntoDashesRegexp, '-')
     .replace(validCharactersRegexp, '')
-    .replace(collapseDashesRegexp, '-')
     .substring(0, 120)
     .toLowerCase();
-  return `${marketDetailPageURLPrefix}/${urlName}-${m.getId()}`;
+  const relative =  `${marketDetailPageURLPrefix}/${urlName}-${m.getId()}`.replace(collapseDashesRegexp, '-');
+  return {
+    absolute: `${window.location.protocol}//${window.location.host}${relative}`,
+    relative,
+  }
 }
 
 function getMarketIdFromDetailPageURL(url: string): string | undefined {
@@ -124,10 +133,12 @@ export class MarketDetailPage extends React.Component<Props, State> {
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
+          <ReactTooltip/> {/* ReactTooltip is extremely non-performant; we try to have at most one of these, but we want Header to be the first child of outermost <div> (for consistency with other pages, since Header isn't yet rendered in one place only), so we'll just have two ReactTooltip on detail page for now. 2 is okay, but eg. O(markets) of ReactTooltip will brick the page. */}
           <h3 className="title">{name}</h3>
           {renderForking(mi)}
           {renderNeedsMigration(mi)}
           {renderCategoryAndTags(ms)}
+          <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(ms).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true}/>
         </div>
       } />
       <section className="section">

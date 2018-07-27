@@ -162,7 +162,8 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
     const isFeatured = props.m.getIsFeatured();
     const prediction = renderPrediction(mt, ps);
     const openInterest = props.m.getMarketCapitalization();
-    const callToActionURL = "https://predictions.global" // TODO   link to this market directly once that's possible
+    const marketDetailPageURL = makeMarketDetailPageURL(m);
+    const callToActionURL = marketDetailPageURL.absolute;
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
 
     function renderEndDate(): React.ReactNode {
@@ -192,11 +193,11 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               <div className="column content is-12-mobile is-4-tablet is-4-desktop is-marginless">
                 <div className="columns is-multiline">
                   <div className="column is-12">
-                    <Dotdotdot clamp={4}>
+                    <Dotdotdot clamp={3}>
                       {!isEmbedded && (
                         <strong className="orange">#{props.index + 1}</strong>
                       )}
-                      {" "}<strong><Link to={makeMarketDetailPageURL(m)}>{name}</Link></strong>
+                      {" "}<strong><Link to={marketDetailPageURL.relative}>{name}</Link></strong>
                     </Dotdotdot>
                   </div>
                   <div className="column is-12 is-hidden-mobile">

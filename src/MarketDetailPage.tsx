@@ -4,12 +4,12 @@ import { Redirect, RouteComponentProps } from 'react-router';
 import * as ReactTooltip from "react-tooltip";
 import { Link } from 'react-router-dom';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType, MarketInfo, Price, ReportingState } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketType, MarketInfo, Price, ReportingState, MarketsSummary } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import Header, { HasMarketsSummary } from './Header';
 import { Observer } from './observer';
 import Footer from './Footer';
-import Price2 from './Price';
+import Price2, { smartRoundThreeDecimals } from './Price';
 import './MarketDetailPage.css';
 import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
 import MarketControls from './MarketControls';
@@ -114,8 +114,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
     if (md === undefined) {
       return LoadingHTML;
     }
-    const ms = md.getMarketSummary();
-    if (ms === undefined) {
+    const m = md.getMarketSummary();
+    if (m === undefined) {
       // unexpected; marketDetail is defined but its marketSummary is undefined.
       return <Redirect to="/" />;
     }
@@ -124,11 +124,16 @@ export class MarketDetailPage extends React.Component<Props, State> {
       // unexpected; marketDetail is defined but its marketInfo is undefined.
       return <Redirect to="/" />;
     }
+    const exchangeRates = getExchangeRatesFromMarketsSummary(this.props.ms);
+    if (exchangeRates === undefined) {
+      // unexpected; exchangeRates will be defined if at least one market has non-zero open interest
+      return <Redirect to="/" />;
+    }
     const now = moment();
-    const name = ms.getName();
-    const mt = ms.getMarketType();
-    const openInterest = ms.getMarketCapitalization();
-    const prediction = renderPrediction(mt, ms.getPredictionsList());
+    const name = m.getName();
+    const mt = m.getMarketType();
+    const openInterest = m.getMarketCapitalization();
+    const prediction = renderPrediction(mt, m.getPredictionsList());
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
@@ -137,8 +142,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
           <h3 className="title">{name}</h3>
           {renderForking(mi)}
           {renderNeedsMigration(mi)}
-          {renderCategoryAndTags(ms)}
-          <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(ms).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true} />
+          {renderCategoryAndTags(m)}
+          <MarketControls type="mobile" callToActionURL={makeMarketDetailPageURL(m).absolute} isEmbedded={false} marketId={marketId} marketSummary={marketSummary} forceAllowLinkToAugurApp={true} />
         </div>
       } />
       <section className="section">
@@ -147,19 +152,19 @@ export class MarketDetailPage extends React.Component<Props, State> {
           <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
             <div className="column is-half-desktop is-half-tablet is-12-mobile">
               {renderDatum(prediction.node)}
-              {renderLastTradedDate(now, ms)}
-              {renderEndDate(now, ms)}
+              {renderLastTradedDate(now, m)}
+              {renderEndDate(now, m)}
               {renderFinalizationBlockNumber(mi)}
               {renderFinalizationTime(mi)}
-              {renderDatum(ethereumAddressLink(ms.getId(), "view market contract"))}
-              {renderDatum("volume", mi.getVolume())}
-              {renderResolutionSource(ms)}
+              {renderDatum(ethereumAddressLink(m.getId(), "view market contract"))}
+              {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
+              {renderResolutionSource(m)}
               {renderMarketType(mt)}
               {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
               {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
               {renderDatum("designated reporter", ethereumAddressLink(mi.getDesignatedReporter()))}
-              {renderDesignatedReporterStake(ms, mi, this.props.currencyObserver)}
-              {renderScalarDetail(ms, mi)}
+              {renderDesignatedReporterStake(mi)}
+              {renderScalarDetail(m, mi)}
               {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
               {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
               {renderDatum("author", ethereumAddressLink(mi.getAuthor()))}
@@ -170,7 +175,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
             </div>
             <div className="column is-half-desktop is-half-tablet is-12-mobile content">
               details:
-              {ms.getDetails()}
+              {m.getDetails()}
             </div>
             <div className="column is-12 has-text-left">
               <pre>
@@ -342,11 +347,10 @@ function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
   return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
 }
 
+type ExchangeRates = { [key in Currency]: number };
+
 // getExchangeRatesRelativeToETH uses an existing Price to compute exchange rates because we don't yet have explicit exchange rates in our data model.
-function getExchangeRatesRelativeToETH(p?: Price): { [key in Currency]: number } | undefined {
-  if (p === undefined) {
-    return;
-  }
+function getExchangeRatesRelativeToETH(p: Price): ExchangeRates | undefined {
   const eth = p.getEth();
   if (eth === 0) {
     return;
@@ -358,21 +362,39 @@ function getExchangeRatesRelativeToETH(p?: Price): { [key in Currency]: number }
   };
 }
 
-function renderDesignatedReporterStake(ms: Market, mi: MarketInfo, o: Observer<Currency>): React.ReactNode {
-  // TODO can pull this exchange rate stuff out into something like `getPriceFromReferencePrice(eth, price): Price | undefined`
-  const stakeETh = parseFloat(mi.getDesignatedReportStake());
-  if (isNaN(stakeETh)) {
+// getExchangeRatesFromMarketsSummary returns ETH/USD/BTC exchange rates, so long as at least one market has open interest.
+function getExchangeRatesFromMarketsSummary(ms: MarketsSummary): ExchangeRates | undefined {
+  for(const m of ms.getMarketsList()) {
+    const p = m.getMarketCapitalization();
+    if (p !== undefined && p.getEth() !== 0) {
+      return getExchangeRatesRelativeToETH(p);
+    }
+  }
+  return;
+}
+
+function makePriceFromEthAmount(ex: ExchangeRates, ethAmount: number): Price {
+  const p = new Price();
+  p.setEth(ethAmount);
+  p.setBtc(ethAmount * ex[Currency.BTC]);
+  p.setUsd(ethAmount * ex[Currency.USD]);
+  return p;
+}
+
+function renderVolume(ex: ExchangeRates, mi: MarketInfo, o: Observer<Currency>): React.ReactNode {
+  const volume = parseFloat(mi.getVolume());
+  if (isNaN(volume)) {
     return;
   }
-  const ex = getExchangeRatesRelativeToETH(ms.getMarketCapitalization());
-  if (ex === undefined) {
+  return renderDatum("volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o}/>);
+}
+
+function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
+  const stakeEth = parseFloat(mi.getDesignatedReportStake());
+  if (isNaN(stakeEth)) {
     return;
   }
-  const stakePrice = new Price();
-  stakePrice.setEth(stakeETh);
-  stakePrice.setBtc(stakeETh * ex[Currency.BTC]);
-  stakePrice.setUsd(stakeETh * ex[Currency.USD]);
-  return renderDatum("designated reporter stake", <Price2 p={stakePrice} o={o} />);
+  return renderDatum("designated reporter stake", `${smartRoundThreeDecimals(stakeEth)} REP`);
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state

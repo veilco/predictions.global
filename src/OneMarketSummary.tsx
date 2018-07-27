@@ -87,13 +87,6 @@ export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: Render
   }
 }
 
-function renderCappedLength(l: number, s: string): React.ReactNode {
-  if (s.length < l) {
-    return s;
-  }
-  return <span>{s.substring(0, l)}&hellip;</span>;
-}
-
 export function getMarketSummaryString(name: string, openInterest: Price | undefined,
   prediction: RenderedPrediction): string {
   if (name.charAt(name.length - 1) !== '?') {

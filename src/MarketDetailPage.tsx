@@ -226,7 +226,8 @@ function renderDatum(label: React.ReactNode, datum?: React.ReactNode, opts?: Ren
       }
     </div>
     {datum !== undefined && datum !== null &&
-      <div className="column is-narrow is-paddingless">
+      /* as a special case, omit className is-narrow if datum looks like a paragraph of text, because is-narrow causes the data to not wrap */
+      <div className={classNames("column is-paddingless", (typeof datum === 'string' && datum.length > 50) || "is-narrow")}>
         {datum}
       </div>
     }
@@ -326,7 +327,7 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
 function renderResolutionSource(ms: Market): React.ReactNode {
   // ?? TODO make this two columns so that "resolution source" never has a line break
   const rs = ms.getResolutionSource().trim();
-  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs), { className: "is-12" });
+  return renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs), { className: "is-12", isNotMobile: true });
 }
 
 function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
@@ -400,7 +401,15 @@ const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-
 function tryToMakeLink(s: string): React.ReactNode {
   if (urlRegexp.test(s)) {
     const href = s.toLowerCase().startsWith('http') ? s : 'http://' + s;
-    return <a target="_blank" href={href}>{s}</a>;
+    // TODO a better truncation method is to truncate for mobile and less so for table/desktop, similar to renderEthereumAddressLink.
+    return <a target="_blank" href={href}>{renderCappedLength(32, s)}</a>;
   }
   return s;
+}
+
+function renderCappedLength(l: number, s: string): React.ReactNode {
+  if (s.length < l) {
+    return s;
+  }
+  return <span>{s.substring(0, l)}&hellip;</span>;
 }

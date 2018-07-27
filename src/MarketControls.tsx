@@ -78,7 +78,7 @@ export default class MarketControls extends React.Component<Props, State> {
           onCopy={this.marketSummaryCopiedToClipboard}>
           <i className={
             (this.state.isMarketSummaryCopiedToClipboard ? 'fas' : 'far') + ' fa-copy'}
-            data-place={isEmbedded && 'right' /* while embedded, the market controls are pushed to left due to our logo, so this tooltip needs to be right or it's off the side of iframe */}
+            data-place={isEmbedded ? 'right' : 'top' /* while embedded, the market controls are pushed to left due to our logo, so this tooltip needs to be right or it's off the side of iframe. data-place='top' is default */}
             data-tip={
               /* mobile tooltips don't display until clicked, but embedded is mobile view by default, so we'll show desktop tooltip */
               type === 'mobile' && !isEmbedded ? "Copied market summary to clipboard" : "Copy market summary to clipboard"

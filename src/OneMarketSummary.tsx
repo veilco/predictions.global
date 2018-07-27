@@ -22,28 +22,34 @@ interface RenderedPrediction {
   text: string, // rendered prediction text, expected to correspond to what human would see when `node` is rendered. Used for tweet generation.
 }
 
-export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPrediction {
+interface RenderPredictionOpts {
+  includePrefixInNode?: boolean // default true
+}
+
+const renderPredictionPrefix = "Augur predicts: ";
+const renderPredictionPrefixNode = <span>{renderPredictionPrefix}<br /></span>;
+
+export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: RenderPredictionOpts): RenderedPrediction {
   if (ps.length < 1) {
     return {
       node: <span>No predictions</span>,
       text: 'No predictions',
     };
   }
-  const prefix = "Augur predicts: ";
-  let text = prefix; // see note on RenderedPrediction
+  let text = renderPredictionPrefix; // see note on RenderedPrediction
   // TODO these locals are never all required
   const p = Math.round(ps[0].getPercent()); // the percent is rounded here, instead of during rendering, so that the red/green color is chosen off the rounded value
   const r = `${Math.round(p)}%`; // assume 0 <= p < 100 (as opposed to p < 1.0)
   const name = ps[0].getName();
   const v = numberFormat.format(ps[0].getValue());
+  const includePrefixInNode: boolean = opts && opts.includePrefixInNode !== undefined ? opts.includePrefixInNode : true;
   switch (mt) {
     case MarketType.YESNO:
       text += `${r} Yes`;
       // TODO upgrade this Likely/Unlikely to our proprietary awesome enum.
       return {
         node: <span>
-          {prefix}
-          <br />
+          {includePrefixInNode && renderPredictionPrefixNode}
           <strong
             className={p < 50 ? "red-3" : "green-3"}
             data-tip={`${r} chance to be a Yes. (${p < 50 ? 'Unlikely' : 'Likely'})`}>{r} Yes</strong>
@@ -54,8 +60,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPred
       text += `${r} ${name}`;
       return {
         node: <span>
-          {prefix}
-          <br />
+          {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
               data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
@@ -69,8 +74,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[]): RenderedPred
       text += `${v} ${name}`;
       return {
         node: <span>
-          {prefix}
-          <br />
+          {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
               data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>

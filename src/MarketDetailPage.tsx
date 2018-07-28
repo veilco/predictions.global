@@ -139,6 +139,30 @@ export class MarketDetailPage extends React.Component<Props, State> {
     const prediction = renderPrediction(mt, m.getPredictionsList());
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
     const details = m.getDetails().trim();
+    // otherDetails is rendered in two places; one for each of mobile and desktop.
+    const otherDetails = <div className="box">
+      <div className="columns is-vcentered is-multiline">
+        <div className="column is-12">
+          <h5 className="title is-5">Other Details</h5>
+        </div>
+        {renderResolutionSource(m)}
+        {renderMarketType(mt)}
+        {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
+        {renderScalarDetail(m, mi)}
+        {renderEthereumAddressLink("author", mi.getAuthor())}
+        {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
+        {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
+        {renderFinalizationBlockNumber(mi)}
+        {renderFinalizationTime(mi)}
+        {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
+        {renderDesignatedReporterStake(mi)}
+        {renderEthereumAddressLink("universe", mi.getUniverse())}
+        {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
+        {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
+        {renderFeeWindow(mi)}
+        {renderEthereumAddressLink("market contract", marketId)}
+      </div>
+    </div>;
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
@@ -167,6 +191,9 @@ export class MarketDetailPage extends React.Component<Props, State> {
                 </div>
               </div>
               <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver} />
+              <div className="is-hidden-mobile">
+                {otherDetails}
+              </div>
             </div>
             <div className="column is-5-desktop is-4-tablet is-12-mobile content">
               <div className="box has-text-centered">
@@ -190,28 +217,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
           </div>
           <div className="columns">
             <div className="column is-7-desktop is-8-tablet is-12-mobile">
-              <div className="box">
-                <div className="columns is-vcentered is-multiline">
-                  <div className="column is-12">
-                    <h5 className="title is-5">Other Details</h5>
-                  </div>
-                  {renderResolutionSource(m)}
-                  {renderMarketType(mt)}
-                  {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
-                  {renderScalarDetail(m, mi)}
-                  {renderEthereumAddressLink("author", mi.getAuthor())}
-                  {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
-                  {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
-                  {renderFinalizationBlockNumber(mi)}
-                  {renderFinalizationTime(mi)}
-                  {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
-                  {renderDesignatedReporterStake(mi)}
-                  {renderEthereumAddressLink("universe", mi.getUniverse())}
-                  {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
-                  {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
-                  {renderFeeWindow(mi)}
-                  {renderEthereumAddressLink("market contract", marketId)}
-                </div>
+              <div className="is-hidden-tablet">
+                {otherDetails}
               </div>
             </div>
           </div>

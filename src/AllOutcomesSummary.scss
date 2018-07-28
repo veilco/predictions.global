@@ -1,3 +1,9 @@
+@media(max-width: 768px) {
+  // bulma is-mobile stops at 768px.
+  .all-outcomes-summary {
+    margin-bottom: 0 !important; // margin-bottom isn't needed in mobile, when padding gives nice spacing between boxes
+  }
+}
 
 .all-outcomes-summary {
   // in desktop, prediction and volume are on same row as others; on mobile they are on their own row and should appear closer to others as a cohesive group.

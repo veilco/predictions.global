@@ -160,7 +160,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
         {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
         {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
         {renderFeeWindow(mi)}
-        {renderEthereumAddressLink("market contract", marketId)}
+        {renderEthereumAddressLink("market contract", marketId, undefined, { className: "has-padding-bottom" })}
       </div>
     </div>;
     return <div>
@@ -187,6 +187,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
                   {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
                   {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
                   {renderLastTradedDate(now, m)}
+                  {renderMarketFee(mi)}
                   {renderEndDate(now, m)}
                 </div>
               </div>
@@ -247,6 +248,12 @@ interface RenderDatumOpts {
   isNotMobile?: true,
   isLabelNotStrong?: true,
   key?: string,
+}
+
+function mergeRenderDatumOpts(a: RenderDatumOpts, b: RenderDatumOpts): RenderDatumOpts {
+  const c = Object.assign({}, a);
+  c.className = classNames(c.className, b.className);
+  return c;
 }
 
 function renderDatum(label: React.ReactNode, datum?: React.ReactNode, opts?: RenderDatumOpts): React.ReactNode {
@@ -323,20 +330,20 @@ function renderMarketType(mtIn: MarketType): React.ReactNode {
   return renderDatum("market type", parse(mtIn));
 }
 
-function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string): [React.ReactNode, React.ReactNode] {
+function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string, opts: RenderDatumOpts = {}): [React.ReactNode, React.ReactNode] {
   // TODO we don't need to compute truncatedAddressLink at all if linkText is defined
   // On mobile, display only first N characters of address because it's too long for iPhone5, even on its own row. Perhaps a preferable way to render this is adoption of <MediaQuery> react components which will render correct option, instead of rendering both and relegating visibility to CSS.
   const fullAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? ethAddress : linkText}</a>;
-  const truncatedAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? <span>{ethAddress.substring(0, 30)}&hellip;</span> : linkText}</a>;
+  const truncatedAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? <span>{ethAddress.substring(0, 26)}&hellip;</span> : linkText}</a>;
   if (datumLabel !== undefined) {
     return [
-      renderDatum(datumLabel, fullAddressLink, { className: "is-hidden-mobile", isNotMobile: true, key: "0" }),
-      renderDatum(datumLabel, truncatedAddressLink, { className: "is-hidden-tablet", isNotMobile: true, key: "1" }),
+      renderDatum(datumLabel, fullAddressLink, mergeRenderDatumOpts({ className: "is-hidden-mobile", isNotMobile: true, key: "0" }, opts)),
+      renderDatum(datumLabel, truncatedAddressLink, mergeRenderDatumOpts({ className: "is-hidden-tablet", isNotMobile: true, key: "1" }, opts)),
     ];
   } else {
     return [
-      renderDatum(fullAddressLink, undefined, { className: "is-hidden-mobile", isNotMobile: true, key: "0", isLabelNotStrong: true, }),
-      renderDatum(truncatedAddressLink, undefined, { className: "is-hidden-tablet", isNotMobile: true, key: "1", isLabelNotStrong: true, }),
+      renderDatum(fullAddressLink, undefined, mergeRenderDatumOpts({ className: "is-hidden-mobile", isNotMobile: true, key: "0", isLabelNotStrong: true, }, opts)),
+      renderDatum(truncatedAddressLink, undefined, mergeRenderDatumOpts({ className: "is-hidden-tablet", isNotMobile: true, key: "1", isLabelNotStrong: true, }, opts)),
     ];
   }
 }
@@ -347,7 +354,7 @@ function ethereumBlockLink(blockNumber: number): React.ReactNode {
 
 function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   const endDate = moment.unix(ms.getEndDate());
-  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12", isNotMobile: true });
+  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12-mobile is-7-desktop is-7-tablet has-padding-bottom", isNotMobile: true });
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
@@ -364,7 +371,7 @@ function renderResolutionSource(ms: Market): [React.ReactNode, React.ReactNode] 
   const rs = ms.getResolutionSource().trim();
   return [
     renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
-    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 32), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
+    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
   ];
 }
 
@@ -450,4 +457,19 @@ function renderCappedLength(l: number, s: string): React.ReactNode {
     return s;
   }
   return <span>{s.substring(0, l)}&hellip;</span>;
+}
+
+function renderMarketFee(mi: MarketInfo): React.ReactNode {
+  const combinedFees = parseFloat(mi.getSettlementFee()); // settlementFee is reportingFeeRatemarketCreatorFeeRate; we'll render it instead of doing addition ourselves just to allow backend to own its definition
+  const creatorFee = parseFloat(mi.getMarketCreatorFeeRate());
+  const reporterFee = parseFloat(mi.getReportingFeeRate());
+  if (isNaN(combinedFees)) {
+    return;
+  }
+  // TODO NaN check for creatorFee / reporterFee
+  const fees = <span>
+    {smartRoundThreeDecimals(combinedFees*100)}%&nbsp;
+    <i className="far fa-question-circle" data-multiline={true} data-tip={`The trading settlement fee<br>is a combination of the<br>Market Creator Fee (${smartRoundThreeDecimals(creatorFee*100)}%)<br>and the Reporting Fee (${smartRoundThreeDecimals(reporterFee*100)}%)`}/>
+  </span>;
+  return renderDatum("fee", fees, { className: "has-padding-bottom no-padding-bottom-tablet" });
 }

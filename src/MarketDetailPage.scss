@@ -4,8 +4,15 @@
   padding-top: 0;
 }
 
+@media(max-width: 1023px) {
+  // bulma tablet stops at 1023px.
+  .no-padding-bottom-tablet {
+    padding-bottom: 0;
+  }
+}
+
 .datum {
-  &:not(:last-child) {
+  &:not(.has-padding-bottom) {
     padding-bottom: 0;
   }
 }

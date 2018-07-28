@@ -203,7 +203,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                       {!isEmbedded && (
                         <strong className="orange">#{props.index + 1}</strong>
                       )}
-                      {" "}<strong><Link to={marketDetailPageURL.relative}>{name}</Link></strong>
+                      {" "}<strong>
+                        {isEmbedded ?
+                          <a href={marketDetailPageURL.absolute} target="_blank">{name}</a> :
+                          <Link to={marketDetailPageURL.relative}>{name}</Link>
+                        }
+                      </strong>
                     </Dotdotdot>
                   </div>
                   <div className="column is-12 is-hidden-mobile">

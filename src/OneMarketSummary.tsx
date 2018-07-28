@@ -181,7 +181,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
               {this.props.index === 0 && !isEmbedded && (
                 <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3-bg badge" key="featured">
-                    click market title for detail page
+                    click market name for detail page
                     {' '}<i className="fas fa-star" />
                     <br />
                   </strong>

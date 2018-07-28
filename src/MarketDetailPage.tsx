@@ -1,21 +1,21 @@
 import * as classNames from 'classnames';
-import * as React from 'react';
 import * as moment from 'moment';
+import * as React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router';
 import * as ReactTooltip from "react-tooltip";
-import { Link } from 'react-router-dom';
-import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType, MarketInfo, Price, ReportingState, MarketsSummary } from "./generated/markets_pb";
-import { LoadingHTML } from './Loading';
-import Header, { HasMarketsSummary } from './Header';
-import { Observer } from './observer';
-import Footer from './Footer';
-import Price2, { smartRoundThreeDecimals } from './Price';
-import './MarketDetailPage.css';
-import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
-import MarketControls from './MarketControls';
 import AllOutcomesSummary from './AllOutcomesSummary';
-import { makePriceFromEthAmount, ExchangeRates, getExchangeRatesFromMarketsSummary } from './ExchangeRates';
+import { Currency, getSavedCurrencyPreference } from "./Currency";
+import { ExchangeRates, getExchangeRatesFromMarketsSummary, makePriceFromEthAmount } from './ExchangeRates';
+import Footer from './Footer';
+import { Market, MarketDetail, MarketInfo, MarketType, ReportingState } from "./generated/markets_pb";
+import Header, { HasMarketsSummary } from './Header';
+import { LoadingHTML } from './Loading';
+import MarketControls from './MarketControls';
+import './MarketDetailPage.css';
+import { Observer } from './observer';
+import { getMarketSummaryString, renderPrediction } from './OneMarketSummary';
+import Price2, { smartRoundThreeDecimals } from './Price';
+import { Helmet } from 'react-helmet';
 
 export interface URLParams {
   url: string // market detail page url
@@ -226,6 +226,10 @@ export class MarketDetailPage extends React.Component<Props, State> {
         </div>
       </section>
       {Footer}
+      <Helmet>
+        <title>Odds on {m.getName().substring(0,80)}</title>
+        <meta name="description" content={`Augur prediction market data and statistics for ${m.getName()}. ${m.getDetails()}`} />
+      </Helmet>
     </div>;
   }
   private doFetchMarketDetail() {

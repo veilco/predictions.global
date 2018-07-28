@@ -1,14 +1,14 @@
 import * as React from 'react';
+import { Helmet } from "react-helmet";
 import { RouteComponentProps } from "react-router";
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Home } from './App';
 import { Currency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
 import { EmbeddedMarketCard } from './EmbeddedMarketCard';
 import { MarketsSummary } from "./generated/markets_pb";
-import Header, { HasMarketsSummary } from './Header';
 import { LoadingHTML } from './Loading';
 import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
-import { makeObserverOwner, ObserverOwner, Observer } from './observer';
+import { makeObserverOwner, ObserverOwner } from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import ScrollToTop from './ScrollToTop';
 
@@ -109,6 +109,10 @@ export class Routes extends React.Component<any, RoutesState> {
     return (
       <Router>
         <div>
+          <Helmet>
+            <title>Augur Prediction Market Data &amp; Statistics | Predictions.Global</title>
+            <meta name="description" content="Latest odds on Augur Prediction markets. Tools for Augur traders, market creators, and reporters. Augur prediction market discusion, trading volume, bid ask, and charts." />
+          </Helmet>
           <ScrollToTop>
             <Switch>
               <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard} />

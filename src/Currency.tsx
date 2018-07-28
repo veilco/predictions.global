@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 export enum Currency {
   ETH = "ETH Ξ",
   USD = "USD $",
@@ -19,4 +21,12 @@ export function getSavedCurrencyPreference(): Currency {
 
 export function saveCurrencyPreference(c: Currency) {
   localStorage.setItem('currency', c);
+}
+
+export function ethToGwei(eth: BigNumber) {
+  return eth.shiftedBy(9);
+}
+
+export function gweiToEth(gwei: BigNumber) {
+  return gwei.shiftedBy(-9);
 }

@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { RouteComponentProps } from "react-router";
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import { Home } from './App';
-import { Currency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
-import { EmbeddedMarketCard } from './EmbeddedMarketCard';
-import { MarketsSummary } from "./generated/markets_pb";
-import Header, { HasMarketsSummary } from './Header';
-import { LoadingHTML } from './Loading';
-import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
-import { makeObserverOwner, ObserverOwner, Observer } from './observer';
+import {RouteComponentProps} from "react-router";
+import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
+import {Home} from './App';
+import {Currency, getSavedCurrencyPreference, saveCurrencyPreference} from './Currency';
+import {EmbeddedMarketCard} from './EmbeddedMarketCard';
+import {MarketsSummary} from "./generated/markets_pb";
+import {LoadingHTML} from './Loading';
+import {MarketDetailPage, marketDetailPageURLPrefix, URLParams} from './MarketDetailPage';
+import {makeObserverOwner, ObserverOwner, Observer} from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import ScrollToTop from './ScrollToTop';
+import {AugurFeeWindowInfo} from './AugurFeeWindowInfo/AugurFeeWindowInfo';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -89,12 +89,14 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const { marketsSummary } = this.state;
+    const {marketsSummary} = this.state;
     if (marketsSummary == null) {
       return LoadingHTML;
     }
 
-    const renderHome = (props: object) => (<Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner} ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+    const renderHome = (props: object) => (
+      <Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner}
+            ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     const renderEmbeddedMarketCard = (props: object) => (
       <EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     const renderPublicEthereumNodes = () => <PublicEthereumNodes
@@ -106,16 +108,21 @@ export class Routes extends React.Component<any, RoutesState> {
       currencyObserver={this.state.currencySelectionObserverOwner.observer}
       {...props}
     />;
+    const renderAugurFeeWindows = () => <AugurFeeWindowInfo ms={marketsSummary}
+                                                            currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+    />;
+
     return (
       <Router>
         <div>
           <ScrollToTop>
             <Switch>
-              <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard} />
-              <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard} />
-              <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage} />
-              <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes} />
-              <Route exact={true} path="/" render={renderHome} />
+              <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
+              <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
+              <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage}/>
+              <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
+              <Route exact={true} path="/augur-fee-window" render={renderAugurFeeWindows}/>
+              <Route exact={true} path="/" render={renderHome}/>
             </Switch>
           </ScrollToTop>
         </div>

@@ -3,6 +3,11 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
+    "@types/bignumber.js": "^5.0.0",
+    "@types/web3": "^1.0.1",
+    "augur-fee-window-infos": "^1.0.0",
+    "augur.js": "^5.0.0",
+    "bignumber.js": "^7.2.1",
     "bulma": "^0.7.1",
     "classnames": "^2.2.6",
     "google-protobuf": "^3.6.0",
@@ -17,7 +22,8 @@
     "react-router-dom": "^4.3.1",
     "react-scripts-ts": "2.16.0",
     "react-share": "^2.2.0",
-    "react-tooltip": "^3.6.1"
+    "react-tooltip": "^3.6.1",
+    "web3": "^1.0.0-beta.35"
   },
   "scripts": {
     "build-protobuf": "mkdir -p src/generated && npx protoc-gen-grpc-ts --ts_out=service=true:src/generated --proto_path=../interfaces ../interfaces/markets.proto && npx protoc-gen-grpc --js_out=import_style=commonjs,binary:src/generated --grpc_out=src/generated --proto_path=../interfaces ../interfaces/markets.proto && find src/generated/ -type f | xargs -n1 sed -i '' '1s;^;/* tslint:disable */\\\n;'",
@@ -60,5 +66,6 @@
     "sponge": "^0.1.0",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
-  }
+  },
+  "postinstall": "rm -f node_modules/web3/index.d.ts"
 }

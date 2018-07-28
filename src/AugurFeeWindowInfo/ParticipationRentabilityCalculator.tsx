@@ -10,12 +10,14 @@ interface Props<T> {
 interface State<T> {
   augurFeeWindow: AugurFeeWindow,
   currentFeeWindow?: FeeWindow,
-  fees: BigNumber,
-  gasPrice: BigNumber,
-  gasUsed: BigNumber,
-  numRep: BigNumber,
-  repEthPrice: BigNumber,
-  stake: BigNumber,
+
+  // These are stored as strings to support trailing decimals (e.g. 1.) in the inputs
+  fees?: string,
+  gasPrice?: string,
+  gasUsed: string,
+  numRep: string,
+  repEthPrice?: string,
+  stake?: string,
 }
 
 export class ParticipationRentabilityCalculator<T> extends React.Component<Props<T>, State<T>> {
@@ -26,41 +28,56 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
 
     this.state = {
       augurFeeWindow: new AugurFeeWindow(),
-      fees: new BigNumber(0),
-      gasPrice: new BigNumber(0),
-      gasUsed: new BigNumber(323848),
-      numRep: new BigNumber(1),
-      repEthPrice: new BigNumber(0),
-      stake: new BigNumber(0),
+      gasUsed: '323848',
+      numRep: '1',
     };
 
     this.state.augurFeeWindow.getCurrentFeeWindow()
       .then(currentFeeWindow => {
         this.setState({
-          fees: currentFeeWindow.balance,
-          stake: currentFeeWindow.totalFeeStake,
+          fees: currentFeeWindow.balance.toFixed(),
+          stake: currentFeeWindow.totalFeeStake.toFixed(),
         });
       })
-      // tslint:disable-next-line
-      .catch(console.error);
+      .catch((err) => {
+        this.setState({
+          fees: '0',
+          stake: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
 
     this.state.augurFeeWindow.getGasPrice()
       .then(gasPrice => {
         this.setState({
-          gasPrice: ethToGwei(gasPrice),
+          gasPrice: ethToGwei(gasPrice).toFixed(),
         });
       })
-      // tslint:disable-next-line
-      .catch(console.error);
+      .catch((err) => {
+        this.setState({
+          gasPrice: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
 
     this.state.augurFeeWindow.getRepEthPrice()
       .then(repEthPrice => {
         this.setState({
-          repEthPrice,
+          repEthPrice: repEthPrice.toFixed(),
         });
       })
-      // tslint:disable-next-line
-      .catch(console.error);
+      .catch((err) => {
+        this.setState({
+          repEthPrice: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
   }
 
   public render() {
@@ -73,13 +90,28 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
       stake,
     } = this.state;
 
+    if (!fees || !gasPrice || !repEthPrice || !stake) {
+      return (
+        <section className="hero">
+          <div className="hero-body">
+            <div className="container">
+              <h4 className="title is-4">Participation Rentability Calculator</h4>
+              <div className="box has-text-centered">
+                <i className="fas fa-sync fa-spin fa-2x"/>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
     const participationRentabilityResult = this.state.augurFeeWindow.calculateParticipationRentability(
-      fees,
-      gweiToEth(gasPrice),
-      gasUsed,
-      numRep,
-      repEthPrice,
-      stake,
+      new BigNumber(fees),
+      gweiToEth(new BigNumber(gasPrice)),
+      new BigNumber(gasUsed),
+      new BigNumber(numRep),
+      new BigNumber(repEthPrice),
+      new BigNumber(stake),
     );
 
     return (
@@ -100,7 +132,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="repEthPrice" value={repEthPrice.toFixed()}
+                            <input className="input" id="repEthPrice" value={repEthPrice}
                                    onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -118,7 +150,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="gasPrice" value={gasPrice.toFixed()} onChange={this.handleInputChange}/>
+                            <input className="input" id="gasPrice" value={gasPrice} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
                             <div className="button is-static">
@@ -136,7 +168,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="gasUsed" value={gasUsed.toFixed()} onChange={this.handleInputChange}/>
+                            <input className="input" id="gasUsed" value={gasUsed} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
                             <div className="button is-static">
@@ -153,7 +185,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="numRep" value={numRep.toFixed()} onChange={this.handleInputChange}/>
+                            <input className="input" id="numRep" value={numRep} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
                             <div className="button is-static">
@@ -170,7 +202,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="fees" value={fees.toFixed()} onChange={this.handleInputChange}/>
+                            <input className="input" id="fees" value={fees} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
                             <div className="button is-static">
@@ -187,7 +219,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td>
                         <div className="field has-addons">
                           <div className="control">
-                            <input className="input" id="stake" value={stake.toFixed()} onChange={this.handleInputChange}/>
+                            <input className="input" id="stake" value={stake} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
                             <div className="button is-static">
@@ -255,7 +287,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
   private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = e.target.id;
     const nextState = {};
-    nextState[id] = new BigNumber(parseInt(e.target.value, 10));
+    nextState[id] = e.target.value;
 
     this.setState(nextState);
   };

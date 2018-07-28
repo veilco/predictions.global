@@ -227,8 +227,8 @@ export class MarketDetailPage extends React.Component<Props, State> {
       </section>
       {Footer}
       <Helmet>
-        <title>Odds on {m.getName().substring(0,80)}</title>
-        <meta name="description" content={`Augur prediction market data and statistics for ${m.getName()}. ${m.getDetails()}`} />
+        <title>Odds on {m.getName().substring(0,85)}</title>
+        <meta name="description" content={`Augur prediction market data and statistics. ${m.getDetails().substring(0, 250)}`} />
       </Helmet>
     </div>;
   }

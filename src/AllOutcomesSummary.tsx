@@ -21,11 +21,13 @@ export default class AllOutcomesSummary extends React.Component<Props> {
     const bestAsksMap = m.getBestAsksMap();
     const outcomesById: { [key: number]: OutcomeInfo } = {};
     mi.getOutcomesList().forEach(o => outcomesById[o.getId()] = o);
+    const ps = m.getPredictionsList();
     return <div className="all-outcomes-summary box content">
       <div>
         <h5 className="title is-5">Outcomes</h5>
       </div>
-      {m.getPredictionsList().map((p, index) => {
+      {ps.length < 1 && "Outcomes will show once there is volume or liquidity."}
+      {ps.map((p, index) => {
         const outcomeId = p.getOutcomeId();
         const bestBid = bestBidsMap.get(outcomeId);
         const bestAsk = bestAsksMap.get(outcomeId);

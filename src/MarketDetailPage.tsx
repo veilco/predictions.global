@@ -373,7 +373,7 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
   const raw = ms.getLastTradeTime();
   const label = "Last Traded";
   if (raw === 0) {
-    return renderDatum(label, "never");
+    return renderDatum(label, "Never");
   }
   const lastTraded = moment.unix(ms.getLastTradeTime());
   return renderDatum(label, now.to(lastTraded));
@@ -382,8 +382,8 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
 function renderResolutionSource(ms: Market): [React.ReactNode, React.ReactNode] {
   const rs = ms.getResolutionSource().trim();
   return [
-    renderDatum("Resolution Source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
-    renderDatum("Resolution Source", rs.length < 1 ? "none" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "None" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "None" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
   ];
 }
 

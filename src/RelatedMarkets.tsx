@@ -108,7 +108,7 @@ export class RelatedMarkets extends React.Component<Props> {
         <div className="content">
           <h5 className="title is-5">Other Markets By This Author</h5>
         </div>
-        {r.byAuthor.slice(0, 6).map((m, index) =>
+        {r.byAuthor.map((m, index) =>
           <OneMarketSummary
             key={index}
             index={index}

@@ -178,15 +178,6 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           </div>
           <div className="column is-12-mobile is-11-tablet is-11-desktop">
             <div className="market-content columns is-mobile is-multiline">
-              {this.props.index === 0 && !isEmbedded && (
-                <div className="column content is-12 is-marginless no-padding-bottom">
-                  <strong className="featured green-3-bg badge" key="featured">
-                    click market name for detail page
-                    {' '}<i className="fas fa-star" />
-                    <br />
-                  </strong>
-                </div>
-              )}
               {isFeatured && !isEmbedded && (
                 <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3-bg badge" key="featured">
@@ -223,8 +214,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     {prediction.node}
                   </div>
                   <div className="middle-column-left column content is-12">
-                    <p className="is-italic comment-link is-marginless"
-                      data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
+                    {isEmbedded ?
+                      <a href={marketDetailPageURL.absolute} target="_blank">{name}</a> :
+                      <Link to={marketDetailPageURL.relative}><span className="view-details">View Details</span></Link>
+                    }
                   </div>
                 </div>
               </div>

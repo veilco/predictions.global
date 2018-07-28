@@ -211,7 +211,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
               </div>
               <div className="box">
                 <strong>Details:</strong><br />
-                {details.length < 1 ? "none" : details}
+                {details.length < 1 ? "-" : details}
               </div>
             </div>
           </div>

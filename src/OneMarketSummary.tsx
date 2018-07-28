@@ -63,7 +63,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: Render
           {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-              data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+              data-tip={`${r} chance to be ${name}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
               {r} {name}
             </strong>
           </Dotdotdot>
@@ -77,7 +77,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: Render
           {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-              data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+              data-tip={`${v} ${name}<br>is the numeric prediction for this market.`}>
               {v} {name}
             </strong>
           </Dotdotdot>

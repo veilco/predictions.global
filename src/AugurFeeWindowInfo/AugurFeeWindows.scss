@@ -1,0 +1,11 @@
+.augur-fee-windows {
+  background: pink;
+
+  .column {
+    overflow: hidden;
+
+    p {
+      overflow-x: scroll;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import moment from 'moment';
 import AugurFeeWindow, {FeeWindow} from 'augur-fee-window-infos';
+import './AugurFeeWindows.css';
 
 interface Props<T> {
   test?: any
@@ -66,7 +67,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
     } = this.state;
 
     return (
-      <section className="hero is-primary">
+      <section className="hero is-primary augur-fee-windows">
         <div className="hero-body">
           <div className="container">
             <h4 className="title is-4">Augur Fee Windows</h4>

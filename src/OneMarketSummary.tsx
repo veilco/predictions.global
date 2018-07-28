@@ -178,6 +178,15 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
           </div>
           <div className="column is-12-mobile is-11-tablet is-11-desktop">
             <div className="market-content columns is-mobile is-multiline">
+              {this.props.index === 0 && !isEmbedded && (
+                <div className="column content is-12 is-marginless no-padding-bottom">
+                  <strong className="featured green-3-bg badge" key="featured">
+                    click market title for detail page
+                    {' '}<i className="fas fa-star" />
+                    <br />
+                  </strong>
+                </div>
+              )}
               {isFeatured && !isEmbedded && (
                 <div className="column content is-12 is-marginless no-padding-bottom">
                   <strong className="featured green-3-bg badge" key="featured">

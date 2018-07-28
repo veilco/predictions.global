@@ -1,0 +1,18 @@
+
+.all-outcomes-summary {
+  // in desktop, prediction and volume are on same row as others; on mobile they are on their own row and should appear closer to others as a cohesive group.
+  @media(max-width: 768px) {
+    // bulma is-mobile stops at 768px.
+    .prediction,
+    .volume {
+      padding-bottom: 0;
+    }
+  }
+  @media(min-width: 769px) {
+    // bulma is-mobile stops at 768px.
+    .prediction,
+    .volume {
+      padding-right: 0;
+    }
+  }
+}

@@ -3,3 +3,9 @@
 .detail {
   padding-top: 0;
 }
+
+.datum {
+  &:not(:last-child) {
+    padding-bottom: 0;
+  }
+}

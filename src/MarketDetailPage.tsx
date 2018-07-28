@@ -154,36 +154,65 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <ReactTooltip />
         <div className="container">
           <div className="columns is-centered">
-            <div className="column is-half-desktop is-half-tablet is-12-mobile">
-              <div className="columns is-vcentered is-multiline">
-                {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
-                {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
-                {renderLastTradedDate(now, m)}
-                {renderResolutionSource(m)}
-                {renderEndDate(now, m)}
+            <div className="column is-7-desktop is-8-tablet is-12-mobile">
+              <div className="box">
+                <div className="columns is-vcentered is-multiline">
+                  <div className="column is-12">
+                    <h5 className="title is-5">Activity</h5>
+                  </div>
+                  {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
+                  {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
+                  {renderLastTradedDate(now, m)}
+                  {renderEndDate(now, m)}
+                </div>
               </div>
               <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver} />
-              <div className="columns is-vcentered is-multiline">
-                {renderMarketType(mt)}
-                {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
-                {renderScalarDetail(m, mi)}
-                {renderEthereumAddressLink("author", mi.getAuthor())}
-                {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
-                {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
-                {renderFinalizationBlockNumber(mi)}
-                {renderFinalizationTime(mi)}
-                {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
-                {renderDesignatedReporterStake(mi)}
-                {renderEthereumAddressLink("universe", mi.getUniverse())}
-                {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
-                {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
-                {renderFeeWindow(mi)}
-                {renderEthereumAddressLink(undefined, marketId, "view market contract")}
+            </div>
+            <div className="column is-5-desktop is-4-tablet is-12-mobile content">
+              <div className="box has-text-centered">
+                <h5 className="title is-5">Charts Coming Soon</h5>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+              </div>
+              <div className="box">
+                <strong>Details:</strong><br />
+                {details.length < 1 ? "none" : details}
               </div>
             </div>
-            <div className="column is-half-desktop is-half-tablet is-12-mobile content">
-              <strong>Details:</strong><br />
-              {details.length < 1 ? "none" : details}
+          </div>
+          <div className="columns">
+            <div className="column is-7-desktop is-8-tablet is-12-mobile">
+              <div className="box">
+                <div className="columns is-vcentered is-multiline">
+                  <div className="column is-12">
+                    <h5 className="title is-5">Other Details</h5>
+                  </div>
+                  {renderResolutionSource(m)}
+                  {renderMarketType(mt)}
+                  {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
+                  {renderScalarDetail(m, mi)}
+                  {renderEthereumAddressLink("author", mi.getAuthor())}
+                  {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
+                  {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
+                  {renderFinalizationBlockNumber(mi)}
+                  {renderFinalizationTime(mi)}
+                  {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
+                  {renderDesignatedReporterStake(mi)}
+                  {renderEthereumAddressLink("universe", mi.getUniverse())}
+                  {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
+                  {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
+                  {renderFeeWindow(mi)}
+                  {renderEthereumAddressLink("market contract", marketId)}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -214,7 +243,7 @@ interface RenderDatumOpts {
 }
 
 function renderDatum(label: React.ReactNode, datum?: React.ReactNode, opts?: RenderDatumOpts): React.ReactNode {
-  return <div key={opts && opts.key} className={classNames("columns column is-narrow is-marginless no-padding-bottom",
+  return <div key={opts && opts.key} className={classNames("datum columns column is-narrow is-marginless",
     opts && opts.className,
     (opts && opts.isNotMobile || "is-mobile")
   )}>
@@ -311,7 +340,7 @@ function ethereumBlockLink(blockNumber: number): React.ReactNode {
 
 function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   const endDate = moment.unix(ms.getEndDate());
-  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12" });
+  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12", isNotMobile: true });
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
@@ -367,14 +396,14 @@ function renderForking(mi: MarketInfo): React.ReactNode {
   if (!mi.getForking()) {
     return;
   }
-  return renderDatum(<strong className="red-3">FORKING</strong>);
+  return renderDatum(<strong className="red-3">FORKING</strong>, undefined, { className: "is-centered"});
 }
 
 function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
   if (!mi.getNeedsMigration()) {
     return;
   }
-  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
+  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>, undefined, { className: "is-centered"});
 }
 
 
@@ -395,7 +424,7 @@ function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state
-const detailPageDateFormat = "LLL [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
+const detailPageDateFormat = "lll [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
 
 // https://www.regextester.com/93652
 const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;

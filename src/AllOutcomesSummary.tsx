@@ -5,6 +5,7 @@ import { renderPrediction } from './OneMarketSummary';
 import Price2, { numberFormat, smartRoundThreeDecimals } from "./Price";
 import { Observer } from './observer';
 import { Currency } from './Currency';
+import './AllOutcomesSummary.css';
 
 interface Props {
   currencyObserver: Observer<Currency>;
@@ -20,93 +21,47 @@ export default class AllOutcomesSummary extends React.Component<Props> {
     const bestAsksMap = m.getBestAsksMap();
     const outcomesById: { [key: number]: OutcomeInfo } = {};
     mi.getOutcomesList().forEach(o => outcomesById[o.getId()] = o);
-    // return <table className="table is-bordered is-narrow">
-    //   <thead>
-    //     <tr>
-    //       <th>Prediction</th>
-    //       <th>Qty {/* best bid quantity */}</th>
-    //       <th>Bid</th>
-    //       <th>Ask</th>
-    //       <th>Qty {/* best ask quantity */}</th>
-    //       <th>Last</th>
-    //       <th>Volume</th>
-    //     </tr>
-    //   </thead>
-    //   <tbody>
-    //     {m.getPredictionsList().map((p, index) => {
-    //       const outcomeId = p.getOutcomeId();
-    //       const bestBid = bestBidsMap.get(outcomeId);
-    //       const bestAsk = bestAsksMap.get(outcomeId);
-    //       const oi: OutcomeInfo | undefined = outcomesById[outcomeId];
-    //       const volume: number | undefined = oi && parseVolume(oi);
-    //       const last: number | undefined = oi && parseLast(oi);
-    //       return <tr key={index}>
-    //         <td>
-    //           {/* TODO renderPrediction() is tightly coupled to use-case of rendering only top prediction, needs refactoring to render an arbitrary predction. The text surrounding the prediction should be customizable, too, eg. 'No redictions' or 'Augur predicts:'. Perhaps this could be two separate functions, one to produce an opininated prediction for use in OneMarketSummary, and another lower level function to just produce the core "56% Yes | 250 Billions of USD" */}
-    //           {renderPrediction(m.getMarketType(), [p], { includePrefixInNode: false }).node}
-    //         </td>
-    //         <td>
-    //
-    //           {bestBid && bestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getAmount())) : '-'}
-    //         </td>
-    //         <td>
-    //           {bestBid && bestBid.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getPrice())) : '-'}
-    //         </td>
-    //         <td>
-    //           {bestAsk && bestAsk.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getPrice())) : '-'}
-    //         </td>
-    //         <td>
-    //           {bestAsk && bestAsk.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getAmount())) : '-'}
-    //         </td>
-    //         <td>
-    //           {last && last !== 0 ? numberFormat.format(smartRoundThreeDecimals(last)) : '-'}
-    //         </td>
-    //         <td>
-    //           {volume && volume !== 0 ?
-    //             <Price2 p={makePriceFromEthAmount(this.props.exchangeRates, volume)} o={this.props.currencyObserver} /> : '-'}
-    //         </td>
-    //       </tr>
-    //     })}
-    //   </tbody>
-    // </table>;
-    return <div>{
-      m.getPredictionsList().map((p, index) => {
+    return <div className="all-outcomes-summary box content">
+      <div>
+        <h5 className="title is-5">Outcomes</h5>
+      </div>
+      {m.getPredictionsList().map((p, index) => {
         const outcomeId = p.getOutcomeId();
         const bestBid = bestBidsMap.get(outcomeId);
         const bestAsk = bestAsksMap.get(outcomeId);
         const oi: OutcomeInfo | undefined = outcomesById[outcomeId];
         const volume: number | undefined = oi && parseVolume(oi);
         const last: number | undefined = oi && parseLast(oi);
-        return <div key={index} className="columns is-mobile has-text-centered is-centered content">
-          <div className="column">
+        return <div key={index} className="columns is-mobile has-text-centered is-centered is-multiline">
+          <div className="prediction column is-7-mobile is-2-desktop">
             {/* TODO renderPrediction() is tightly coupled to use-case of rendering only top prediction, needs refactoring to render an arbitrary predction. The text surrounding the prediction should be customizable, too, eg. 'No redictions' or 'Augur predicts:'. Perhaps this could be two separate functions, one to produce an opininated prediction for use in OneMarketSummary, and another lower level function to just produce the core "56% Yes | 250 Billions of USD" */}
             <strong>Prediction:</strong><br />
             {renderPrediction(m.getMarketType(), [p], {includePrefixInNode: false}).node}
           </div>
-          <div className="column">
+          <div className="volume column is-5-mobile is-2-desktop">
+            <strong>Volume:</strong><br />
+            {volume && volume !== 0 ?
+              <Price2 p={makePriceFromEthAmount(this.props.exchangeRates, volume)} o={this.props.currencyObserver}/> : '-'}
+          </div>
+          <div className="column no-padding-right">
             <strong>Qty:</strong><br /> {/* best bid quantity */}
             {bestBid && bestBid.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getAmount())) : '-'}
           </div>
-          <div className="column">
+          <div className="column no-padding-right">
             <strong>Bid:</strong><br />
             {bestBid && bestBid.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestBid.getPrice())) : '-'}
           </div>
-          <div className="column">
+          <div className="column no-padding-right">
             <strong>Ask:</strong><br />
             {bestAsk && bestAsk.getPrice() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getPrice())) : '-'}
           </div>
-          <div className="column">
+          <div className="column no-padding-right">
             <strong>Qty:</strong><br /> {/* best ask quantity */}
             {bestAsk && bestAsk.getAmount() !== 0 ? numberFormat.format(smartRoundThreeDecimals(bestAsk.getAmount())) : '-'}
           </div>
           <div className="column">
             <strong>Last:</strong><br />
             {last && last !== 0 ? numberFormat.format(smartRoundThreeDecimals(last)) : '-'}
-          </div>
-          <div className="column">
-            <strong>Volume:</strong><br />
-            {volume && volume !== 0 ?
-              <Price2 p={makePriceFromEthAmount(this.props.exchangeRates, volume)} o={this.props.currencyObserver}/> : '-'}
           </div>
         </div>;
       })

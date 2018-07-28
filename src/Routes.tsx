@@ -11,6 +11,7 @@ import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './Market
 import { makeObserverOwner, ObserverOwner } from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import ScrollToTop from './ScrollToTop';
+import { indexRelatedMarkets, RelatedMarketsIndex } from './RelatedMarkets';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -60,6 +61,7 @@ const cancelFetchMarketsSummary = periodic(fetchMarketsSummary.bind(null, (windo
 
 interface RoutesState {
   marketsSummary?: MarketsSummary,
+  relatedMarketsIndex?: RelatedMarketsIndex,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
 
@@ -89,8 +91,8 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const { marketsSummary } = this.state;
-    if (marketsSummary == null) {
+    const { marketsSummary, relatedMarketsIndex } = this.state;
+    if (marketsSummary === undefined || relatedMarketsIndex === undefined) {
       return LoadingHTML;
     }
 
@@ -105,6 +107,7 @@ export class Routes extends React.Component<any, RoutesState> {
       ms={marketsSummary}
       currencyObserver={this.state.currencySelectionObserverOwner.observer}
       {...props}
+      relatedMarketsIndex={relatedMarketsIndex}
     />;
     return (
       <Router>
@@ -135,6 +138,7 @@ export class Routes extends React.Component<any, RoutesState> {
 
     this.setState({
       marketsSummary,
+      relatedMarketsIndex: indexRelatedMarkets(marketsSummary),
     });
   };
 }

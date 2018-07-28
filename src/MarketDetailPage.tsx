@@ -16,6 +16,7 @@ import { Observer } from './observer';
 import { getMarketSummaryString, renderPrediction } from './OneMarketSummary';
 import Price2, { smartRoundThreeDecimals } from './Price';
 import { Helmet } from 'react-helmet';
+import { RelatedMarketsIndex, RelatedMarkets, MarketsRelatedToOneMarket, getRelatedMarkets } from './RelatedMarkets';
 
 export interface URLParams {
   url: string // market detail page url
@@ -23,12 +24,14 @@ export interface URLParams {
 
 type Props = RouteComponentProps<URLParams> & HasMarketsSummary & {
   currencyObserver: Observer<Currency>,
+  relatedMarketsIndex: RelatedMarketsIndex,
 };
 
 interface State {
   currency: Currency,
   marketDetail: MarketDetail | undefined,
   marketId: string | undefined,
+  relatedMarkets: MarketsRelatedToOneMarket | undefined,
 }
 
 // TODO unify fetchMarketDetail with other fetch into a cohesive data layer/fetch library.
@@ -98,6 +101,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
       currency: getSavedCurrencyPreference(),
       marketDetail: undefined,
       marketId: undefined,
+      relatedMarkets: undefined,
     };
   }
   public componentDidMount() {
@@ -147,20 +151,20 @@ export class MarketDetailPage extends React.Component<Props, State> {
         </div>
         {renderResolutionSource(m)}
         {renderMarketType(mt)}
-        {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
+        {renderDatum("Reporting State", reportingStateToString(mi.getReportingState()))}
         {renderScalarDetail(m, mi)}
-        {renderEthereumAddressLink("author", mi.getAuthor())}
-        {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
-        {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
+        {renderEthereumAddressLink("Author", mi.getAuthor())}
+        {renderDatum("Created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
+        {renderDatum("Creation Block", ethereumBlockLink(mi.getCreationBlock()))}
         {renderFinalizationBlockNumber(mi)}
         {renderFinalizationTime(mi)}
-        {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
+        {renderEthereumAddressLink("Designated Reporter", mi.getDesignatedReporter())}
         {renderDesignatedReporterStake(mi)}
-        {renderEthereumAddressLink("universe", mi.getUniverse())}
-        {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
-        {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
+        {renderEthereumAddressLink("Universe", mi.getUniverse())}
+        {renderEthereumAddressLink("Creator Mailbox", mi.getMarketCreatorMailbox())}
+        {renderEthereumAddressLink("Creator Mailbox Owner", mi.getMarketCreatorMailboxOwner())}
         {renderFeeWindow(mi)}
-        {renderEthereumAddressLink("market contract", marketId, undefined, { className: "has-padding-bottom" })}
+        {renderEthereumAddressLink("Market Contract", marketId, undefined, { className: "has-padding-bottom" })}
       </div>
     </div>;
     return <div>
@@ -185,7 +189,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
                     <h5 className="title is-5">Activity</h5>
                   </div>
                   {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
-                  {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
+                  {renderDatum("Open Interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
                   {renderLastTradedDate(now, m)}
                   {renderMarketFee(mi)}
                   {renderEndDate(now, m)}
@@ -199,11 +203,6 @@ export class MarketDetailPage extends React.Component<Props, State> {
             <div className="column is-5-desktop is-4-tablet is-12-mobile content">
               <div className="box has-text-centered">
                 <h5 className="title is-5">Charts Coming Soon</h5>
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
                 <br />
                 <br />
                 <br />
@@ -223,11 +222,12 @@ export class MarketDetailPage extends React.Component<Props, State> {
               </div>
             </div>
           </div>
+          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets}/>}
         </div>
       </section>
       {Footer}
       <Helmet>
-        <title>Odds on {m.getName().substring(0,85)}</title>
+        <title>Odds on {m.getName().substring(0, 85)}</title>
         <meta name="description" content={`Augur prediction market data and statistics. ${m.getDetails().substring(0, 250)}`} />
       </Helmet>
     </div>;
@@ -241,7 +241,15 @@ export class MarketDetailPage extends React.Component<Props, State> {
       .then(marketDetail => {
         if (this.state.marketId === marketDetail.getMarketId()) {
           // if the current state.marketId is not equal to marketDetail.marketId, thn this may indicate that marketId changed during fetch and that this marketDetail is no longer valid. (In this case, presumably the new marketId will trigger its own fetch, which may be inflight or even already completed.)
-          this.setState({ marketDetail })
+          const m = marketDetail.getMarketSummary();
+          if (m !== undefined) {
+            this.setState({
+              marketDetail,
+              relatedMarkets: getRelatedMarkets(this.props.relatedMarketsIndex, m),
+            });
+          } else {
+            this.setState({ marketDetail });
+          }
         }
       }).catch(console.error.bind(console));
   }
@@ -331,7 +339,7 @@ function renderMarketType(mtIn: MarketType): React.ReactNode {
         return "Scalar";
     }
   }
-  return renderDatum("market type", parse(mtIn));
+  return renderDatum("Market Type", parse(mtIn));
 }
 
 function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string, opts: RenderDatumOpts = {}): [React.ReactNode, React.ReactNode] {
@@ -358,12 +366,12 @@ function ethereumBlockLink(blockNumber: number): React.ReactNode {
 
 function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   const endDate = moment.unix(ms.getEndDate());
-  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12-mobile is-7-desktop is-7-tablet has-padding-bottom", isNotMobile: true });
+  return renderDatum(now.isBefore(endDate) ? 'Ends' : 'Ended', endDate.format(detailPageDateFormat), { className: "is-12-mobile is-7-desktop is-7-tablet has-padding-bottom", isNotMobile: true });
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
   const raw = ms.getLastTradeTime();
-  const label = "last traded";
+  const label = "Last Traded";
   if (raw === 0) {
     return renderDatum(label, "never");
   }
@@ -374,8 +382,8 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
 function renderResolutionSource(ms: Market): [React.ReactNode, React.ReactNode] {
   const rs = ms.getResolutionSource().trim();
   return [
-    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
-    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "none" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
   ];
 }
 
@@ -383,7 +391,7 @@ function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
   if (ms.getMarketType() !== MarketType.SCALAR) {
     return;
   }
-  return renderDatum('Scalar market scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} ${mi.getScalarDenomination()} (tick size ${mi.getTickSize()})`);
+  return renderDatum('Scalar Market Scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} ${mi.getScalarDenomination()} (tick size ${mi.getTickSize()})`);
 }
 
 function renderFeeWindow(mi: MarketInfo): React.ReactNode {
@@ -391,7 +399,7 @@ function renderFeeWindow(mi: MarketInfo): React.ReactNode {
   if (f === '0x0000000000000000000000000000000000000000') {
     return;
   }
-  return renderEthereumAddressLink("fee window", f);
+  return renderEthereumAddressLink("Fee Window", f);
 }
 
 function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
@@ -399,7 +407,7 @@ function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
   if (n === 0) {
     return;
   }
-  return renderDatum("finalization block", ethereumBlockLink(n));
+  return renderDatum("Finalization Block", ethereumBlockLink(n));
 }
 
 function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
@@ -407,21 +415,21 @@ function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
   if (t === 0) {
     return;
   }
-  return renderDatum("finalization time", moment.unix(t).format(detailPageDateFormat));
+  return renderDatum("Finalization Time", moment.unix(t).format(detailPageDateFormat));
 }
 
 function renderForking(mi: MarketInfo): React.ReactNode {
   if (!mi.getForking()) {
     return;
   }
-  return renderDatum(<strong className="red-3">FORKING</strong>, undefined, { className: "is-centered"});
+  return renderDatum(<strong className="red-3">FORKING</strong>, undefined, { className: "is-centered" });
 }
 
 function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
   if (!mi.getNeedsMigration()) {
     return;
   }
-  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>, undefined, { className: "is-centered"});
+  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>, undefined, { className: "is-centered" });
 }
 
 
@@ -430,7 +438,7 @@ function renderVolume(ex: ExchangeRates, mi: MarketInfo, o: Observer<Currency>):
   if (isNaN(volume)) {
     return;
   }
-  return renderDatum("volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o} />);
+  return renderDatum("Volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o} />);
 }
 
 function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
@@ -438,7 +446,7 @@ function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
   if (isNaN(stakeEth)) {
     return;
   }
-  return renderDatum("designated reporter stake", `${smartRoundThreeDecimals(stakeEth)} REP`);
+  return renderDatum("Designated Reporter Stake", `${smartRoundThreeDecimals(stakeEth)} REP`);
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state
@@ -472,8 +480,8 @@ function renderMarketFee(mi: MarketInfo): React.ReactNode {
   }
   // TODO NaN check for creatorFee / reporterFee
   const fees = <span>
-    {smartRoundThreeDecimals(combinedFees*100)}%&nbsp;
-    <i className="far fa-question-circle" data-multiline={true} data-tip={`The trading settlement fee<br>is a combination of the<br>Market Creator Fee (${smartRoundThreeDecimals(creatorFee*100)}%)<br>and the Reporting Fee (${smartRoundThreeDecimals(reporterFee*100)}%)`}/>
+    {smartRoundThreeDecimals(combinedFees * 100)}%&nbsp;
+    <i className="far fa-question-circle" data-multiline={true} data-tip={`The trading settlement fee<br>is a combination of the<br>Market Creator Fee (${smartRoundThreeDecimals(creatorFee * 100)}%)<br>and the Reporting Fee (${smartRoundThreeDecimals(reporterFee * 100)}%)`} />
   </span>;
-  return renderDatum("fee", fees, { className: "has-padding-bottom no-padding-bottom-tablet" });
+  return renderDatum("Fee", fees, { className: "has-padding-bottom no-padding-bottom-tablet" });
 }

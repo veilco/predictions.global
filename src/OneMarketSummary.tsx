@@ -215,7 +215,7 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                   </div>
                   <div className="middle-column-left column content is-12">
                     {isEmbedded ?
-                      <a href={marketDetailPageURL.absolute} target="_blank">{name}</a> :
+                      <a href={marketDetailPageURL.absolute} target="_blank">View Details</a> :
                       <Link to={marketDetailPageURL.relative}><span className="view-details">View Details</span></Link>
                     }
                   </div>

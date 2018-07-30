@@ -32,7 +32,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
           currentTime: new Date(),
         }, () => {
           setInterval(() => {
-            this.setState({ currentTime: new Date() });
+            this.setState({currentTime: new Date()});
           }, 1000);
         });
       })
@@ -67,7 +67,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
     } = this.state;
 
     return (
-      <section className="hero is-primary augur-fee-windows">
+      <section className="hero augur-fee-windows" style={{background: '#fafafa'}}>
         <div className="hero-body">
           <div className="container">
             <h4 className="title is-4">Augur Fee Windows</h4>
@@ -82,15 +82,21 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                   </header>
                   {(currentFeeWindow && currentTime) ? (
                     <div className="card-content">
-                      <div><strong>Address</strong><p>{currentFeeWindow.address}</p></div>
-                      <div><strong>Fees</strong><p>{currentFeeWindow.balance.toString()}Ξ</p></div>
-                      <div><strong>Total Stake</strong><p>{currentFeeWindow.totalFeeStake.toString()}Ξ</p></div>
-                      <div>
-                        <strong>Ends </strong>{moment(currentFeeWindow.endTime).fromNow()}{' on '}
-                        {currentFeeWindow.endTime.toLocaleString()}
+                      <div className="columns is-multiline">
+                        <div className="column is-11"><strong>Address</strong><p><a target="_blank"
+                                                                                    href={`https://etherscan.io/address/${currentFeeWindow.address}`}>{currentFeeWindow.address}</a>
+                        </p></div>
+                        <div className="column is-11"><strong>Fees</strong><p>{currentFeeWindow.balance.toString()}Ξ</p>
+                        </div>
+                        <div className="column is-11"><strong>Total Stake</strong>
+                          <p>{currentFeeWindow.totalFeeStake.toString()}Ξ</p></div>
+                        <div className="column is-11">
+                          <strong>Ends </strong>{moment(currentFeeWindow.endTime).fromNow()}{' on '}
+                          {currentFeeWindow.endTime.toLocaleString()}
 
-                        {/* This causes React to re-render the component so that the time until the end updates */}
-                        <div style={{display: 'none'}}>{ currentTime.valueOf() }</div>
+                          {/* This causes React to re-render the component so that the time until the end updates */}
+                          <div style={{display: 'none'}}>{currentTime.valueOf()}</div>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -110,8 +116,13 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                   </header>
                   {nextFeeWindow ? (
                     <div className="card-content">
-                      <div><strong>Address</strong><p>{nextFeeWindow.address}</p></div>
-                      <div><strong>Fees</strong><p>{nextFeeWindow.balance.toString()}Ξ</p></div>
+                      <div className="columns is-multiline">
+                        <div className="column is-11"><strong>Address</strong><p><a target="_blank"
+                                                                                    href={`https://etherscan.io/address/${nextFeeWindow.address}`}>{nextFeeWindow.address}</a>
+                        </p></div>
+                        <div className="column is-11"><strong>Fees</strong><p>{nextFeeWindow.balance.toString()}Ξ</p>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="card-content has-text-centered">
@@ -130,9 +141,15 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                   </header>
                   {previousFeeWindow ? (
                     <div className="card-content">
-                      <div><strong>Address</strong><p>{previousFeeWindow.address}</p></div>
-                      <div><strong>Fees</strong><p>{previousFeeWindow.balance.toString()}Ξ</p></div>
-                      <div><strong>Total Stake</strong><p>{previousFeeWindow.totalFeeStake.toString()} REP</p></div>
+                      <div className="columns is-multiline">
+                        <div className="column is-11"><strong>Address</strong><p><a target="_blank"
+                                                                                    href={`https://etherscan.io/address/${previousFeeWindow.address}`}>{previousFeeWindow.address}</a>
+                        </p></div>
+                        <div className="column is-11"><strong>Fees</strong>
+                          <p>{previousFeeWindow.balance.toString()}Ξ</p></div>
+                        <div className="column is-11"><strong>Total Stake</strong>
+                          <p>{previousFeeWindow.totalFeeStake.toString()} REP</p></div>
+                      </div>
                     </div>
                   ) : (
                     <div className="card-content has-text-centered">

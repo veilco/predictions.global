@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactTooltip from "react-tooltip";
 import BigNumber from 'bignumber.js';
 import AugurFeeWindow, {FeeWindow} from 'augur-fee-window-infos';
 import {ethToGwei, gweiToEth} from '../Currency';
@@ -116,18 +117,24 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
 
     return (
       <section className="hero">
+        <ReactTooltip/>
         <div className="hero-body">
           <div className="container">
             <h4 className="title is-4">Participation Rentability Calculator</h4>
             <div className="box">
               <div className="columns">
                 <div className="column">
-                  <h6 className="title is-6">Input</h6>
+                  <h6 className="title is-5">Input</h6>
                   <table className="table">
                     <tbody>
                     <tr>
                       <td>
-                        <label htmlFor="repEthPrice">REP price (by CryptoCompare)</label>
+                        <label htmlFor="repEthPrice">
+                          <strong>
+                            {'REP Price '}
+                            <i className="far fa-question-circle" data-multiline={true} data-tip="By CryptoCompare"/>
+                          </strong>
+                        </label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -145,7 +152,12 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     </tr>
                     <tr>
                       <td>
-                        <label htmlFor="gasPrice">Gas price (by Ξ Gas Station)</label>
+                        <label htmlFor="gasPrice">
+                          <strong>
+                            {'Gas Price '}
+                            <i className="far fa-question-circle" data-multiline={true} data-tip="By Ξ Gas Station"/>
+                          </strong>
+                        </label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -162,8 +174,11 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     </tr>
                     <tr>
                       <td>
-                        <label htmlFor="gasUsed">Gas used (for staking REP and withdrawing the profit => 2
-                          transactions)</label>
+                        <label htmlFor="gasUsed"><strong>
+                          {'Gas Used '}
+                          <i className="far fa-question-circle" data-multiline={true} data-tip="For staking REP and withdrawing the profit greater than or equal to two
+                          transactions"/>
+                        </strong></label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -180,7 +195,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     </tr>
                     <tr>
                       <td>
-                        <label htmlFor="numRep">Number of REP</label>
+                        <label htmlFor="numRep"><strong>Number of REP</strong></label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -197,7 +212,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     </tr>
                     <tr>
                       <td>
-                        <label htmlFor="fees">Fees in Current Fee Window</label>
+                        <label htmlFor="fees"><strong>Fees in Current Fee Window</strong></label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -214,7 +229,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     </tr>
                     <tr>
                       <td>
-                        <label htmlFor="stake">Total Stake in Current Fee Window</label>
+                        <label htmlFor="stake"><strong>Total Stake in Current Fee Window</strong></label>
                       </td>
                       <td>
                         <div className="field has-addons">
@@ -234,43 +249,43 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                 </div>
 
                 <div className="column">
-                  <h6 className="title is-6">Result</h6>
+                  <h6 className="title is-5">Results</h6>
                   <table className="table">
                     <tbody>
                     <tr>
-                      <td>Total gas cost</td>
+                      <td><strong>Total Gas Cost</strong></td>
                       <td>{participationRentabilityResult.gasCost.toString()}Ξ</td>
                     </tr>
                     <tr>
-                      <td>Total fee profit</td>
+                      <td><strong>Total Fee Profit</strong></td>
                       <td>{participationRentabilityResult.totalFeeProfit.toString()}Ξ</td>
                     </tr>
                     <tr>
-                      <td>Total profit</td>
+                      <td><strong>Total Profit</strong></td>
                       <td>{participationRentabilityResult.totalProfit.toString()}Ξ</td>
                     </tr>
                     <tr>
-                      <td>Profit per REP</td>
+                      <td><strong>Profit per REP</strong></td>
                       <td>{participationRentabilityResult.profitPerRep.toString()}Ξ</td>
                     </tr>
                     <tr>
-                      <td>Profit in %</td>
+                      <td><strong>Profit in %</strong></td>
                       <td>{participationRentabilityResult.profitPercent.multipliedBy(100).toString()}%</td>
                     </tr>
                     <tr>
-                      <td>Profit in % p.a.</td>
+                      <td><strong>Profit in % P.A.</strong></td>
                       <td>{participationRentabilityResult.profitPercentPA.multipliedBy(100).toString()}%</td>
                     </tr>
                     <tr>
-                      <td>Number of REP to break even</td>
+                      <td><strong>Number of REP to Break Even</strong></td>
                       <td>{participationRentabilityResult.numRepBreakEven.toString()} REP</td>
                     </tr>
                     <tr>
-                      <td>Gas price to break even</td>
+                      <td><strong>Gas Price to Break Even</strong></td>
                       <td>{ethToGwei(participationRentabilityResult.gasPriceBreakEven).toString()} Gwei</td>
                     </tr>
                     <tr>
-                      <td>Number of REP for maximizing profit</td>
+                      <td><strong>Number of REP for Maximizing Profit</strong></td>
                       <td>{participationRentabilityResult.numRepMaxProfitPerRep.toString()}% REP</td>
                     </tr>
                     </tbody>

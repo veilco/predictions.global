@@ -25,4 +25,18 @@
     border-left: 6px solid $tetrad-blue-3;
     border-radius: 4px;
   }
+
+  a {
+    color: inherit;
+    &:visited {
+      color: inherit;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .view-details {
+    text-decoration: underline;
+  }
 }

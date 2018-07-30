@@ -1,21 +1,22 @@
 import * as classNames from 'classnames';
-import * as React from 'react';
 import * as moment from 'moment';
+import * as React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router';
 import * as ReactTooltip from "react-tooltip";
-import { Link } from 'react-router-dom';
-import { Currency, getSavedCurrencyPreference } from "./Currency";
-import { Market, MarketDetail, MarketType, MarketInfo, Price, ReportingState, MarketsSummary } from "./generated/markets_pb";
-import { LoadingHTML } from './Loading';
-import Header, { HasMarketsSummary } from './Header';
-import { Observer } from './observer';
-import Footer from './Footer';
-import Price2, { smartRoundThreeDecimals } from './Price';
-import './MarketDetailPage.css';
-import { renderPrediction, getMarketSummaryString } from './OneMarketSummary';
-import MarketControls from './MarketControls';
 import AllOutcomesSummary from './AllOutcomesSummary';
-import { makePriceFromEthAmount, ExchangeRates, getExchangeRatesFromMarketsSummary } from './ExchangeRates';
+import { Currency, getSavedCurrencyPreference } from "./Currency";
+import { ExchangeRates, getExchangeRatesFromMarketsSummary, makePriceFromEthAmount } from './ExchangeRates';
+import Footer from './Footer';
+import { Market, MarketDetail, MarketInfo, MarketType, ReportingState } from "./generated/markets_pb";
+import Header, { HasMarketsSummary } from './Header';
+import { LoadingHTML } from './Loading';
+import MarketControls from './MarketControls';
+import './MarketDetailPage.css';
+import { Observer } from './observer';
+import { getMarketSummaryString, renderPrediction } from './OneMarketSummary';
+import Price2, { smartRoundThreeDecimals } from './Price';
+import { Helmet } from 'react-helmet';
+import { RelatedMarketsIndex, RelatedMarkets, MarketsRelatedToOneMarket, getRelatedMarkets } from './RelatedMarkets';
 
 export interface URLParams {
   url: string // market detail page url
@@ -23,12 +24,14 @@ export interface URLParams {
 
 type Props = RouteComponentProps<URLParams> & HasMarketsSummary & {
   currencyObserver: Observer<Currency>,
+  relatedMarketsIndex: RelatedMarketsIndex,
 };
 
 interface State {
   currency: Currency,
   marketDetail: MarketDetail | undefined,
   marketId: string | undefined,
+  relatedMarkets: MarketsRelatedToOneMarket | undefined,
 }
 
 // TODO unify fetchMarketDetail with other fetch into a cohesive data layer/fetch library.
@@ -98,6 +101,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
       currency: getSavedCurrencyPreference(),
       marketDetail: undefined,
       marketId: undefined,
+      relatedMarkets: undefined,
     };
   }
   public componentDidMount() {
@@ -139,6 +143,30 @@ export class MarketDetailPage extends React.Component<Props, State> {
     const prediction = renderPrediction(mt, m.getPredictionsList());
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
     const details = m.getDetails().trim();
+    // otherDetails is rendered in two places; one for each of mobile and desktop.
+    const otherDetails = <div className="box">
+      <div className="columns is-vcentered is-multiline">
+        <div className="column is-12">
+          <h5 className="title is-5">Other Details</h5>
+        </div>
+        {renderResolutionSource(m)}
+        {renderMarketType(mt)}
+        {renderDatum("Reporting State", reportingStateToString(mi.getReportingState()))}
+        {renderScalarDetail(m, mi)}
+        {renderEthereumAddressLink("Author", mi.getAuthor())}
+        {renderDatum("Created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
+        {renderDatum("Creation Block", ethereumBlockLink(mi.getCreationBlock()))}
+        {renderFinalizationBlockNumber(mi)}
+        {renderFinalizationTime(mi)}
+        {renderEthereumAddressLink("Designated Reporter", mi.getDesignatedReporter())}
+        {renderDesignatedReporterStake(mi)}
+        {renderEthereumAddressLink("Universe", mi.getUniverse())}
+        {renderEthereumAddressLink("Creator Mailbox", mi.getMarketCreatorMailbox())}
+        {renderEthereumAddressLink("Creator Mailbox Owner", mi.getMarketCreatorMailboxOwner())}
+        {renderFeeWindow(mi)}
+        {renderEthereumAddressLink("Market Contract", marketId, undefined, { className: "has-padding-bottom" })}
+      </div>
+    </div>;
     return <div>
       <Header ms={this.props.ms} currencySelectionObserver={this.props.currencyObserver} doesClickingLogoReloadPage={false} headerContent={
         <div className="has-text-centered content">
@@ -154,41 +182,54 @@ export class MarketDetailPage extends React.Component<Props, State> {
         <ReactTooltip />
         <div className="container">
           <div className="columns is-centered">
-            <div className="column is-half-desktop is-half-tablet is-12-mobile">
-              <div className="columns is-vcentered is-multiline">
-                {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
-                {renderDatum("open interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
-                {renderLastTradedDate(now, m)}
-                {renderResolutionSource(m)}
-                {renderEndDate(now, m)}
+            <div className="column is-7-desktop is-8-tablet is-12-mobile">
+              <div className="box">
+                <div className="columns is-vcentered is-multiline">
+                  <div className="column is-12">
+                    <h5 className="title is-5">Activity</h5>
+                  </div>
+                  {renderVolume(exchangeRates, mi, this.props.currencyObserver)}
+                  {renderDatum("Open Interest", <Price2 p={openInterest} o={this.props.currencyObserver} />)}
+                  {renderLastTradedDate(now, m)}
+                  {renderMarketFee(mi)}
+                  {renderEndDate(now, m)}
+                </div>
               </div>
               <AllOutcomesSummary m={m} mi={mi} exchangeRates={exchangeRates} currencyObserver={this.props.currencyObserver} />
-              <div className="columns is-vcentered is-multiline">
-                {renderMarketType(mt)}
-                {renderDatum("reporting state", reportingStateToString(mi.getReportingState()))}
-                {renderScalarDetail(m, mi)}
-                {renderEthereumAddressLink("author", mi.getAuthor())}
-                {renderDatum("created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat))}
-                {renderDatum("creation block", ethereumBlockLink(mi.getCreationBlock()))}
-                {renderFinalizationBlockNumber(mi)}
-                {renderFinalizationTime(mi)}
-                {renderEthereumAddressLink("designated reporter", mi.getDesignatedReporter())}
-                {renderDesignatedReporterStake(mi)}
-                {renderEthereumAddressLink("universe", mi.getUniverse())}
-                {renderEthereumAddressLink("creator mailbox", mi.getMarketCreatorMailbox())}
-                {renderEthereumAddressLink("creator mailbox owner", mi.getMarketCreatorMailboxOwner())}
-                {renderFeeWindow(mi)}
-                {renderEthereumAddressLink(undefined, marketId, "view market contract")}
+              <div className="is-hidden-mobile">
+                {otherDetails}
               </div>
             </div>
-            <div className="column is-half-desktop is-half-tablet is-12-mobile content">
-              <strong>Details:</strong><br />
-              {details.length < 1 ? "none" : details}
+            <div className="column is-5-desktop is-4-tablet is-12-mobile content">
+              <div className="box has-text-centered">
+                <h5 className="title is-5">Charts Coming Soon</h5>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+              </div>
+              <div className="box">
+                <strong>Details:</strong><br />
+                {details.length < 1 ? "-" : details}
+              </div>
             </div>
           </div>
+          <div className="columns">
+            <div className="column is-7-desktop is-8-tablet is-12-mobile">
+              <div className="is-hidden-tablet">
+                {otherDetails}
+              </div>
+            </div>
+          </div>
+          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets}/>}
         </div>
       </section>
       {Footer}
+      <Helmet>
+        <title>Odds on {m.getName().substring(0, 85)}</title>
+        <meta name="description" content={`Augur prediction market data and statistics. ${m.getDetails().substring(0, 250)}`} />
+      </Helmet>
     </div>;
   }
   private doFetchMarketDetail() {
@@ -200,7 +241,15 @@ export class MarketDetailPage extends React.Component<Props, State> {
       .then(marketDetail => {
         if (this.state.marketId === marketDetail.getMarketId()) {
           // if the current state.marketId is not equal to marketDetail.marketId, thn this may indicate that marketId changed during fetch and that this marketDetail is no longer valid. (In this case, presumably the new marketId will trigger its own fetch, which may be inflight or even already completed.)
-          this.setState({ marketDetail })
+          const m = marketDetail.getMarketSummary();
+          if (m !== undefined) {
+            this.setState({
+              marketDetail,
+              relatedMarkets: getRelatedMarkets(this.props.relatedMarketsIndex, m),
+            });
+          } else {
+            this.setState({ marketDetail });
+          }
         }
       }).catch(console.error.bind(console));
   }
@@ -213,8 +262,14 @@ interface RenderDatumOpts {
   key?: string,
 }
 
+function mergeRenderDatumOpts(a: RenderDatumOpts, b: RenderDatumOpts): RenderDatumOpts {
+  const c = Object.assign({}, a);
+  c.className = classNames(c.className, b.className);
+  return c;
+}
+
 function renderDatum(label: React.ReactNode, datum?: React.ReactNode, opts?: RenderDatumOpts): React.ReactNode {
-  return <div key={opts && opts.key} className={classNames("columns column is-narrow is-marginless no-padding-bottom",
+  return <div key={opts && opts.key} className={classNames("datum columns column is-narrow is-marginless",
     opts && opts.className,
     (opts && opts.isNotMobile || "is-mobile")
   )}>
@@ -284,23 +339,23 @@ function renderMarketType(mtIn: MarketType): React.ReactNode {
         return "Scalar";
     }
   }
-  return renderDatum("market type", parse(mtIn));
+  return renderDatum("Market Type", parse(mtIn));
 }
 
-function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string): [React.ReactNode, React.ReactNode] {
+function renderEthereumAddressLink(datumLabel: string | undefined, ethAddress: string, linkText?: string, opts: RenderDatumOpts = {}): [React.ReactNode, React.ReactNode] {
   // TODO we don't need to compute truncatedAddressLink at all if linkText is defined
   // On mobile, display only first N characters of address because it's too long for iPhone5, even on its own row. Perhaps a preferable way to render this is adoption of <MediaQuery> react components which will render correct option, instead of rendering both and relegating visibility to CSS.
   const fullAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? ethAddress : linkText}</a>;
-  const truncatedAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? <span>{ethAddress.substring(0, 30)}&hellip;</span> : linkText}</a>;
+  const truncatedAddressLink = <a target="_blank" href={`https://etherscan.io/address/${ethAddress}`}>{linkText === undefined ? <span>{ethAddress.substring(0, 26)}&hellip;</span> : linkText}</a>;
   if (datumLabel !== undefined) {
     return [
-      renderDatum(datumLabel, fullAddressLink, { className: "is-hidden-mobile", isNotMobile: true, key: "0" }),
-      renderDatum(datumLabel, truncatedAddressLink, { className: "is-hidden-tablet", isNotMobile: true, key: "1" }),
+      renderDatum(datumLabel, fullAddressLink, mergeRenderDatumOpts({ className: "is-hidden-mobile", isNotMobile: true, key: "0" }, opts)),
+      renderDatum(datumLabel, truncatedAddressLink, mergeRenderDatumOpts({ className: "is-hidden-tablet", isNotMobile: true, key: "1" }, opts)),
     ];
   } else {
     return [
-      renderDatum(fullAddressLink, undefined, { className: "is-hidden-mobile", isNotMobile: true, key: "0", isLabelNotStrong: true, }),
-      renderDatum(truncatedAddressLink, undefined, { className: "is-hidden-tablet", isNotMobile: true, key: "1", isLabelNotStrong: true, }),
+      renderDatum(fullAddressLink, undefined, mergeRenderDatumOpts({ className: "is-hidden-mobile", isNotMobile: true, key: "0", isLabelNotStrong: true, }, opts)),
+      renderDatum(truncatedAddressLink, undefined, mergeRenderDatumOpts({ className: "is-hidden-tablet", isNotMobile: true, key: "1", isLabelNotStrong: true, }, opts)),
     ];
   }
 }
@@ -311,14 +366,14 @@ function ethereumBlockLink(blockNumber: number): React.ReactNode {
 
 function renderEndDate(now: moment.Moment, ms: Market): React.ReactNode {
   const endDate = moment.unix(ms.getEndDate());
-  return renderDatum(now.isBefore(endDate) ? 'ends' : 'ended', endDate.format(detailPageDateFormat), { className: "is-12" });
+  return renderDatum(now.isBefore(endDate) ? 'Ends' : 'Ended', endDate.format(detailPageDateFormat), { className: "is-12-mobile is-7-desktop is-7-tablet has-padding-bottom", isNotMobile: true });
 }
 
 function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
   const raw = ms.getLastTradeTime();
-  const label = "last traded";
+  const label = "Last Traded";
   if (raw === 0) {
-    return renderDatum(label, "never");
+    return renderDatum(label, "Never");
   }
   const lastTraded = moment.unix(ms.getLastTradeTime());
   return renderDatum(label, now.to(lastTraded));
@@ -327,8 +382,8 @@ function renderLastTradedDate(now: moment.Moment, ms: Market): React.ReactNode {
 function renderResolutionSource(ms: Market): [React.ReactNode, React.ReactNode] {
   const rs = ms.getResolutionSource().trim();
   return [
-    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
-    renderDatum("resolution source", rs.length < 1 ? "none" : tryToMakeLink(rs, 32), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "None" : tryToMakeLink(rs, 48), { className: "is-12 is-hidden-mobile", isNotMobile: true, key: "0" }),
+    renderDatum("Resolution Source", rs.length < 1 ? "None" : tryToMakeLink(rs, 28), { className: "is-12 is-hidden-tablet", isNotMobile: true, key: "1" }),
   ];
 }
 
@@ -336,7 +391,7 @@ function renderScalarDetail(ms: Market, mi: MarketInfo): React.ReactNode {
   if (ms.getMarketType() !== MarketType.SCALAR) {
     return;
   }
-  return renderDatum('Scalar market scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} ${mi.getScalarDenomination()} (tick size ${mi.getTickSize()})`);
+  return renderDatum('Scalar Market Scale', `${mi.getMinPrice()} to ${mi.getMaxPrice()} ${mi.getScalarDenomination()} (tick size ${mi.getTickSize()})`);
 }
 
 function renderFeeWindow(mi: MarketInfo): React.ReactNode {
@@ -344,7 +399,7 @@ function renderFeeWindow(mi: MarketInfo): React.ReactNode {
   if (f === '0x0000000000000000000000000000000000000000') {
     return;
   }
-  return renderEthereumAddressLink("fee window", f);
+  return renderEthereumAddressLink("Fee Window", f);
 }
 
 function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
@@ -352,7 +407,7 @@ function renderFinalizationBlockNumber(mi: MarketInfo): React.ReactNode {
   if (n === 0) {
     return;
   }
-  return renderDatum("finalization block", ethereumBlockLink(n));
+  return renderDatum("Finalization Block", ethereumBlockLink(n));
 }
 
 function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
@@ -360,21 +415,21 @@ function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
   if (t === 0) {
     return;
   }
-  return renderDatum("finalization time", moment.unix(t).format(detailPageDateFormat));
+  return renderDatum("Finalization Time", moment.unix(t).format(detailPageDateFormat));
 }
 
 function renderForking(mi: MarketInfo): React.ReactNode {
   if (!mi.getForking()) {
     return;
   }
-  return renderDatum(<strong className="red-3">FORKING</strong>);
+  return renderDatum(<strong className="red-3">FORKING</strong>, undefined, { className: "is-centered" });
 }
 
 function renderNeedsMigration(mi: MarketInfo): React.ReactNode {
   if (!mi.getNeedsMigration()) {
     return;
   }
-  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>);
+  return renderDatum(<strong className="orange-3">NEEDS MIGRATION</strong>, undefined, { className: "is-centered" });
 }
 
 
@@ -383,7 +438,7 @@ function renderVolume(ex: ExchangeRates, mi: MarketInfo, o: Observer<Currency>):
   if (isNaN(volume)) {
     return;
   }
-  return renderDatum("volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o} />);
+  return renderDatum("Volume", <Price2 p={makePriceFromEthAmount(ex, volume)} o={o} />);
 }
 
 function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
@@ -391,11 +446,11 @@ function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
   if (isNaN(stakeEth)) {
     return;
   }
-  return renderDatum("designated reporter stake", `${smartRoundThreeDecimals(stakeEth)} REP`);
+  return renderDatum("Designated Reporter Stake", `${smartRoundThreeDecimals(stakeEth)} REP`);
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state
-const detailPageDateFormat = "LLL [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
+const detailPageDateFormat = "lll [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
 
 // https://www.regextester.com/93652
 const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;
@@ -414,4 +469,19 @@ function renderCappedLength(l: number, s: string): React.ReactNode {
     return s;
   }
   return <span>{s.substring(0, l)}&hellip;</span>;
+}
+
+function renderMarketFee(mi: MarketInfo): React.ReactNode {
+  const combinedFees = parseFloat(mi.getSettlementFee()); // settlementFee is reportingFeeRatemarketCreatorFeeRate; we'll render it instead of doing addition ourselves just to allow backend to own its definition
+  const creatorFee = parseFloat(mi.getMarketCreatorFeeRate());
+  const reporterFee = parseFloat(mi.getReportingFeeRate());
+  if (isNaN(combinedFees)) {
+    return;
+  }
+  // TODO NaN check for creatorFee / reporterFee
+  const fees = <span>
+    {smartRoundThreeDecimals(combinedFees * 100)}%&nbsp;
+    <i className="far fa-question-circle" data-multiline={true} data-tip={`The trading settlement fee<br>is a combination of the<br>Market Creator Fee (${smartRoundThreeDecimals(creatorFee * 100)}%)<br>and the Reporting Fee (${smartRoundThreeDecimals(reporterFee * 100)}%)`} />
+  </span>;
+  return renderDatum("Fee", fees, { className: "has-padding-bottom no-padding-bottom-tablet" });
 }

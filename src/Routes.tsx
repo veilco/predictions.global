@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Helmet} from "react-helmet";
 import {RouteComponentProps} from "react-router";
 import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
 import {Home} from './App';
@@ -11,6 +12,7 @@ import {makeObserverOwner, ObserverOwner, Observer} from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import ScrollToTop from './ScrollToTop';
 import {AugurFeeWindowInfo} from './AugurFeeWindowInfo/AugurFeeWindowInfo';
+import {indexRelatedMarkets, RelatedMarketsIndex} from './RelatedMarkets';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -60,6 +62,7 @@ const cancelFetchMarketsSummary = periodic(fetchMarketsSummary.bind(null, (windo
 
 interface RoutesState {
   marketsSummary?: MarketsSummary,
+  relatedMarketsIndex?: RelatedMarketsIndex,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
 
@@ -89,8 +92,8 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const {marketsSummary} = this.state;
-    if (marketsSummary == null) {
+    const {marketsSummary, relatedMarketsIndex} = this.state;
+    if (marketsSummary === undefined || relatedMarketsIndex === undefined) {
       return LoadingHTML;
     }
 
@@ -107,6 +110,7 @@ export class Routes extends React.Component<any, RoutesState> {
       ms={marketsSummary}
       currencyObserver={this.state.currencySelectionObserverOwner.observer}
       {...props}
+      relatedMarketsIndex={relatedMarketsIndex}
     />;
     const renderAugurFeeWindows = () => <AugurFeeWindowInfo ms={marketsSummary}
                                                             currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
@@ -115,6 +119,11 @@ export class Routes extends React.Component<any, RoutesState> {
     return (
       <Router>
         <div>
+          <Helmet>
+            <title>Augur Prediction Market Data &amp; Statistics | Predictions.Global</title>
+            <meta name="description"
+                  content="Latest odds on Augur Prediction markets. Tools for Augur traders, market creators, and reporters. Augur prediction market discusion, trading volume, bid ask, and charts."/>
+          </Helmet>
           <ScrollToTop>
             <Switch>
               <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
@@ -138,6 +147,7 @@ export class Routes extends React.Component<any, RoutesState> {
 
     this.setState({
       marketsSummary,
+      relatedMarketsIndex: indexRelatedMarkets(marketsSummary),
     });
   };
 }

@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { Helmet } from 'react-helmet';
+import { Currency } from './Currency';
+import Footer from './Footer';
 import Header, { HasMarketsSummary } from "./Header";
 import { Observer } from "./observer";
-import { Currency } from './Currency';
-import { Link } from 'react-router-dom';
-import Footer from './Footer';
 
 type Props = HasMarketsSummary & {
   currencySelectionObserver: Observer<Currency>;
@@ -47,6 +47,11 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
                   <td><code>https://ponytail.io/</code></td>
                   <td><code>wss://ponytail.io/ws</code></td>
                 </tr>
+                <tr>
+                  <td><strong>#4</strong></td>
+                  <td><code>https://epoxide.io/</code></td>
+                  <td><code>wss://epoxide.io/ws</code></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -70,6 +75,10 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
       </div>
     </section>
     {Footer}
+    <Helmet>
+      <title>List of public Ethereum and Augur Node servers with HTTP and Websocket endpoints for augur-app | Predictions.Global</title>
+      <meta name="description" content="List of community-curated, trusted public Ethereum and Augur Node servers for use with Augur App. Endpoints are available for HTTP and Websocket connections. This may be useful as an alternative to Infura." />
+    </Helmet>
   </div>;
 };
 

@@ -63,7 +63,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: Render
           {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-              data-tip={`${r} chance to be ${name.substring(0, 20)}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
+              data-tip={`${r} chance to be ${name}.<br>This is a multiple-choice market.<br>This is the predicted winning choice.<br>(${p < 50 ? 'Best, but still unlikely' : 'And likely'})`}>
               {r} {name}
             </strong>
           </Dotdotdot>
@@ -77,7 +77,7 @@ export function renderPrediction(mt: MarketType, ps: Prediction[], opts?: Render
           {includePrefixInNode && renderPredictionPrefixNode}
           <Dotdotdot clamp={2}>
             <strong className="orange" data-multiline={true}
-              data-tip={`${v} ${name.substring(0, 20)}<br>is the numeric prediction for this market.`}>
+              data-tip={`${v} ${name}<br>is the numeric prediction for this market.`}>
               {v} {name}
             </strong>
           </Dotdotdot>
@@ -194,7 +194,12 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                       {!isEmbedded && (
                         <strong className="orange">#{props.index + 1}</strong>
                       )}
-                      {" "}<strong><Link to={marketDetailPageURL.relative}>{name}</Link></strong>
+                      {" "}<strong>
+                        {isEmbedded ?
+                          <a href={marketDetailPageURL.absolute} target="_blank">{name}</a> :
+                          <Link to={marketDetailPageURL.relative}>{name}</Link>
+                        }
+                      </strong>
                     </Dotdotdot>
                   </div>
                   <div className="column is-12 is-hidden-mobile">
@@ -209,8 +214,10 @@ class OneMarketSummary extends React.Component<OneMarketSummaryProps, OneMarketS
                     {prediction.node}
                   </div>
                   <div className="middle-column-left column content is-12">
-                    <p className="is-italic comment-link is-marginless"
-                      data-tip="Coming Soon!"><strong>{props.m.getCommentCount()}</strong> comments</p>
+                    {isEmbedded ?
+                      <a href={marketDetailPageURL.absolute} target="_blank">View Details</a> :
+                      <Link to={marketDetailPageURL.relative}><span className="view-details">View Details</span></Link>
+                    }
                   </div>
                 </div>
               </div>

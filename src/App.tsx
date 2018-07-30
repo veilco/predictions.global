@@ -66,7 +66,7 @@ function isFeaturedGoesFirst(a: Market, b: Market): number {
   return 0;
 }
 
-type sortKey = 'Recently Traded' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
+type sortKey = 'Recently Traded' | 'Volume' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
 
 const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
   ['Recently Traded', (a: Market, b: Market) => {
@@ -75,6 +75,23 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
       return maybeFeatured;
     }
     return b.getLastTradeTime() - a.getLastTradeTime();
+  }],
+  ['Volume', (a: Market, b: Market) => {
+    const maybeFeatured = isFeaturedGoesFirst(a, b);
+    if (maybeFeatured !== 0) {
+      return maybeFeatured;
+    }
+    const aVolume = a.getVolume();
+    const bVolume = b.getVolume();
+    if (aVolume == null) {
+      return -1;
+    }
+
+    if (bVolume == null) {
+      return 1;
+    }
+
+    return bVolume.getUsd() - aVolume.getUsd();
   }],
   ['Money at Stake', (a: Market, b: Market) => {
     const maybeFeatured = isFeaturedGoesFirst(a, b);
@@ -91,7 +108,7 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
       return 1;
     }
 
-    return bCapitalization.getUsd() - aCapitalization.getUsd()
+    return bCapitalization.getUsd() - aCapitalization.getUsd();
   }],
   ['New Markets', (a: Market, b: Market) => {
     const maybeFeatured = isFeaturedGoesFirst(a, b);
@@ -108,6 +125,9 @@ const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortK
     return a.getEndDate() - b.getEndDate();
   }]
 ]);
+
+const allSortKeys: Set<sortKey> = new Set(sortOrders.keys());
+
 const paginationLimits = [10, 20, 50];
 
 // MarketCategory is our own curated category enum based on empirical survey of size of live categories in Augur App.
@@ -172,14 +192,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     const category: MarketCategory = new Set(Object.keys(MarketCategory).map(k => MarketCategory[k])).has(categoryQuery) ? (categoryQuery as MarketCategory) : MarketCategory.All;
 
     const sortOrder: sortKey = (() => {
-      const sortOrderQuery = getQueryString('s');
-      // TODO should have used an enum for sortKey
-      if (sortOrderQuery === 'New Markets') {
-        return sortOrderQuery;
-      } else if (sortOrderQuery === 'Ending Soon') {
-        return sortOrderQuery;
-      } else if (sortOrderQuery === 'Money at Stake') {
-        return sortOrderQuery;
+      const sortOrderQuery: string = getQueryString('s'); // ie. maybe this is a valid sortKey
+      if (allSortKeys.has(sortOrderQuery as sortKey)) {
+        return sortOrderQuery as sortKey;
       }
       return 'Recently Traded';
     })();

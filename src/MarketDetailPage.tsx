@@ -142,7 +142,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
     const openInterest = m.getMarketCapitalization();
     const prediction = renderPrediction(mt, m.getPredictionsList());
     const marketSummary = getMarketSummaryString(name, openInterest, prediction);
-    const details = m.getDetails().trim();
+    const details = mi.getDetails().trim();
     // otherDetails is rendered in two places; one for each of mobile and desktop.
     const otherDetails = <div className="box">
       <div className="columns is-vcentered is-multiline">
@@ -222,13 +222,26 @@ export class MarketDetailPage extends React.Component<Props, State> {
               </div>
             </div>
           </div>
-          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets}/>}
+          <div className="columns is-vcentered">
+            <div className="column is-12 content has-text-centered">
+              <div className="box">
+                <p>
+                  <i className="fas fa-wrench" />&nbsp;Your app can make these links:<br />
+                  <code>
+                    {'https://predictions.global/augur-markets/'}
+                    <strong>{'<market-id>'}</strong>
+                  </code>
+                </p>
+              </div>
+            </div>
+          </div>
+          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets} />}
         </div>
       </section>
       {Footer}
       <Helmet>
         <title>Odds on {m.getName().substring(0, 85)}</title>
-        <meta name="description" content={`Augur prediction market data and statistics. ${m.getDetails().substring(0, 250)}`} />
+        <meta name="description" content={`Augur prediction market data and statistics. ${details.substring(0, 250)}`} />
       </Helmet>
     </div>;
   }

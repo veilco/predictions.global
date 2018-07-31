@@ -222,7 +222,20 @@ export class MarketDetailPage extends React.Component<Props, State> {
               </div>
             </div>
           </div>
-          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets}/>}
+          <div className="columns is-vcentered">
+            <div className="column is-12 content has-text-centered">
+              <div className="box">
+                <p>
+                  <i className="fas fa-wrench" />&nbsp;Your app can make these links:<br />
+                  <code>
+                    {'https://predictions.global/augur-markets/'}
+                    <strong>{'<market-id>'}</strong>
+                  </code>
+                </p>
+              </div>
+            </div>
+          </div>
+          {this.state.relatedMarkets !== undefined && <RelatedMarkets now={now} currencyObserver={this.props.currencyObserver} relatedMarkets={this.state.relatedMarkets} />}
         </div>
       </section>
       {Footer}

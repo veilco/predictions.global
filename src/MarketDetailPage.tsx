@@ -6,13 +6,13 @@ import * as ReactTooltip from "react-tooltip";
 import AllOutcomesSummary from './AllOutcomesSummary';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
 import { ExchangeRates, getExchangeRatesFromMarketsSummary, makePriceFromEthAmount } from './ExchangeRates';
-import Footer from './Footer';
+import Footer from './Components/Footer';
 import { Market, MarketDetail, MarketInfo, MarketType, ReportingState } from "./generated/markets_pb";
-import Header, { HasMarketsSummary } from './Header';
-import { LoadingHTML } from './Loading';
+import Header, { HasMarketsSummary } from './Components/Header';
+import { LoadingHTML } from './Components/Loading';
 import MarketControls from './MarketControls';
 import './MarketDetailPage.css';
-import { Observer } from './observer';
+import { Observer } from './Components/observer';
 import { getMarketSummaryString, renderPrediction } from './OneMarketSummary';
 import Price2, { smartRoundThreeDecimals } from './Price';
 import { Helmet } from 'react-helmet';
@@ -119,7 +119,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
     }
     const md = this.state.marketDetail;
     if (md === undefined) {
-      return LoadingHTML;
+      return <LoadingHTML />;
     }
     const m = md.getMarketSummary();
     if (m === undefined) {

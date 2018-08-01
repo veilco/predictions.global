@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Currency } from './Currency';
-import { MarketsSummary } from './generated/markets_pb';
+import { Currency } from '../Currency';
+import { MarketsSummary } from '../generated/markets_pb';
 import { Observer } from './observer';
-import Price2, { numberFormat } from './Price';
+import Price2, { numberFormat } from '../Price';
 import { Dropdown } from './Dropdown';
-import MarketCreatorSignup from './MarketCreatorSignup';
+import MarketCreatorSignup from '../MarketCreatorSignup';
 import { Link } from 'react-router-dom';
 
 export const feedbackFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSdTCmsQH3EUKOaIeV1ECA124iLZMB5GiHby7XtRj19glqtNRw/viewform";

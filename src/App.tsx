@@ -5,13 +5,14 @@ import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
 import { Currency, renderCurrency } from './Currency';
-import { Dropdown } from './Dropdown';
-import Footer from './Footer';
+import { Dropdown } from './Components/Dropdown';
+import Footer from './Components/Footer';
 import { Market, MarketsSummary } from './generated/markets_pb';
-import Header, { HasMarketsSummary } from './Header';
-import { Observer, ObserverOwner } from './observer';
+import Header, { HasMarketsSummary } from './Components/Header';
+import { Observer, ObserverOwner } from './Components/observer';
 import OneMarketSummary from './OneMarketSummary';
 import { getQueryString, updateQueryString } from "./url";
+import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -270,11 +271,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             <p><strong>Prediction Markets</strong></p>
           </div>
           <div className="column is-narrow">
-            <Dropdown
-              currentValueOrObserver={currencySelectionObserver}
-              onChange={this.setCurrency}
-              renderValue={renderCurrency}
-              values={[Currency.USD, Currency.ETH, Currency.BTC]} />
+            <CurrencyDropdown currencySelectionObserver={currencySelectionObserver} onChange={this.setCurrency} />
           </div>
           <div className="column is-narrow">
             <div className="level is-mobile" >

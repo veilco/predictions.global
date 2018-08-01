@@ -3,7 +3,7 @@ import * as ReactTooltip from "react-tooltip";
 import {Market, MarketsSummary} from "./generated/markets_pb";
 import OneMarketSummary from "./OneMarketSummary";
 import * as moment from "moment";
-import {makeObserverOwner, ObserverOwner} from "./observer";
+import {makeObserverOwner, ObserverOwner} from "./Components/observer";
 import {Currency} from "./Currency";
 import './EmbeddedMarketCard.css';
 

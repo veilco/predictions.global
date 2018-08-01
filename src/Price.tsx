@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Currency } from "./Currency";
 import { Price } from './generated/markets_pb';
-import { Observer, Unsubscribe } from './observer';
+import { Observer, Unsubscribe } from './Components/observer';
 
 export const numberFormat = new Intl.NumberFormat('en-US');
 

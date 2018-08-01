@@ -2,14 +2,18 @@ import * as React from 'react';
 import * as ReactTooltip from "react-tooltip";
 import BigNumber from 'bignumber.js';
 import AugurFeeWindow, {FeeWindow} from 'augur-fee-window-infos';
-import {ethToGwei, gweiToEth} from '../Currency';
+import {Currency, ethToGwei, gweiToEth} from '../Currency';
+import {ExchangeRates, makePriceFromEthAmount} from '../ExchangeRates';
+import {Observer} from "../Components/observer";
+import Price2 from "../Price";
 
 interface Props<T> {
-  test?: any
+  augurFeeWindow: AugurFeeWindow,
+  currencySelectionObserver: Observer<Currency>,
+  exchangeRates?: ExchangeRates,
 }
 
 interface State<T> {
-  augurFeeWindow: AugurFeeWindow,
   currentFeeWindow?: FeeWindow,
 
   // These are stored as strings to support trailing decimals (e.g. 1.) in the inputs
@@ -28,57 +32,19 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
     super(props);
 
     this.state = {
-      augurFeeWindow: new AugurFeeWindow(),
       gasUsed: '323848',
       numRep: '1',
     };
 
-    this.state.augurFeeWindow.getCurrentFeeWindow()
-      .then(currentFeeWindow => {
-        this.setState({
-          fees: currentFeeWindow.balance.toFixed(),
-          stake: currentFeeWindow.totalFeeStake.toFixed(),
-        });
-      })
-      .catch((err) => {
-        this.setState({
-          fees: '0',
-          stake: '0',
-        });
+    this.updateAugurFeeWindow();
+  }
 
-        // tslint:disable-next-line
-        console.error(err);
-      });
+  public componentDidUpdate(prevProps: Props<T>) {
+    if (prevProps.augurFeeWindow === this.props.augurFeeWindow) {
+      return;
+    }
 
-    this.state.augurFeeWindow.getGasPrice()
-      .then(gasPrice => {
-        this.setState({
-          gasPrice: ethToGwei(gasPrice).toFixed(),
-        });
-      })
-      .catch((err) => {
-        this.setState({
-          gasPrice: '0',
-        });
-
-        // tslint:disable-next-line
-        console.error(err);
-      });
-
-    this.state.augurFeeWindow.getRepEthPrice()
-      .then(repEthPrice => {
-        this.setState({
-          repEthPrice: repEthPrice.toFixed(),
-        });
-      })
-      .catch((err) => {
-        this.setState({
-          repEthPrice: '0',
-        });
-
-        // tslint:disable-next-line
-        console.error(err);
-      });
+    this.updateAugurFeeWindow();
   }
 
   public render() {
@@ -91,7 +57,12 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
       stake,
     } = this.state;
 
-    if (!fees || !gasPrice || !repEthPrice || !stake) {
+    const {
+      currencySelectionObserver,
+      exchangeRates,
+    } = this.props;
+
+    if (!fees || !gasPrice || !repEthPrice || !stake || !exchangeRates) {
       return (
         <section className="hero">
           <div className="hero-body">
@@ -106,7 +77,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
       );
     }
 
-    const participationRentabilityResult = this.state.augurFeeWindow.calculateParticipationRentability(
+    const participationRentabilityResult = this.props.augurFeeWindow.calculateParticipationRentability(
       new BigNumber(fees),
       gweiToEth(new BigNumber(gasPrice)),
       new BigNumber(gasUsed),
@@ -254,19 +225,35 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                     <tbody>
                     <tr>
                       <td><strong>Total Gas Cost</strong></td>
-                      <td>{participationRentabilityResult.gasCost.toString()}Ξ</td>
+                      <td>
+                        <Price2
+                          p={makePriceFromEthAmount(exchangeRates, participationRentabilityResult.gasCost.toNumber())}
+                          o={currencySelectionObserver}/>
+                      </td>
                     </tr>
                     <tr>
                       <td><strong>Total Fee Profit</strong></td>
-                      <td>{participationRentabilityResult.totalFeeProfit.toString()}Ξ</td>
+                      <td>
+                        <Price2
+                          p={makePriceFromEthAmount(exchangeRates, participationRentabilityResult.totalFeeProfit.toNumber())}
+                          o={currencySelectionObserver}/>
+                      </td>
                     </tr>
                     <tr>
                       <td><strong>Total Profit</strong></td>
-                      <td>{participationRentabilityResult.totalProfit.toString()}Ξ</td>
+                      <td>
+                        <Price2
+                          p={makePriceFromEthAmount(exchangeRates, participationRentabilityResult.totalProfit.toNumber())}
+                          o={currencySelectionObserver}/>
+                      </td>
                     </tr>
                     <tr>
                       <td><strong>Profit per REP</strong></td>
-                      <td>{participationRentabilityResult.profitPerRep.toString()}Ξ</td>
+                      <td>
+                        <Price2
+                          p={makePriceFromEthAmount(exchangeRates, participationRentabilityResult.profitPerRep.toNumber())}
+                          o={currencySelectionObserver}/>
+                      </td>
                     </tr>
                     <tr>
                       <td><strong>Profit in %</strong></td>
@@ -284,10 +271,6 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
                       <td><strong>Gas Price to Break Even</strong></td>
                       <td>{ethToGwei(participationRentabilityResult.gasPriceBreakEven).toString()} Gwei</td>
                     </tr>
-                    <tr>
-                      <td><strong>Number of REP for Maximizing Profit</strong></td>
-                      <td>{participationRentabilityResult.numRepMaxProfitPerRep.toString()}% REP</td>
-                    </tr>
                     </tbody>
                   </table>
                 </div>
@@ -298,6 +281,57 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
       </section>
     );
   }
+
+  private updateAugurFeeWindow = () => {
+    const {augurFeeWindow} = this.props;
+
+    augurFeeWindow.getCurrentFeeWindow()
+      .then(currentFeeWindow => {
+        this.setState({
+          fees: currentFeeWindow.balance.toFixed(),
+          stake: currentFeeWindow.totalFeeStake.toFixed(),
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          fees: '0',
+          stake: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
+
+    augurFeeWindow.getGasPrice()
+      .then(gasPrice => {
+        this.setState({
+          gasPrice: ethToGwei(gasPrice).toFixed(),
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          gasPrice: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
+
+    augurFeeWindow.getRepEthPrice()
+      .then(repEthPrice => {
+        this.setState({
+          repEthPrice: repEthPrice.toFixed(),
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          repEthPrice: '0',
+        });
+
+        // tslint:disable-next-line
+        console.error(err);
+      });
+  };
 
   private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = e.target.id;

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { feedbackFormURL } from './Header';
-import MarketCreatorSignup from './MarketCreatorSignup';
+import { feedbackFormURL } from '../Components/Header';
+import MarketCreatorSignup from '../MarketCreatorSignup';
 
 const Footer = <footer className="footer">
   <div className="container">

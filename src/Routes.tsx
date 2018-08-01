@@ -1,17 +1,17 @@
 import * as React from 'react';
 import {Helmet} from "react-helmet";
+import Loadable from 'react-loadable';
 import {RouteComponentProps} from "react-router";
 import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
 import {Home} from './App';
 import {Currency, getSavedCurrencyPreference, saveCurrencyPreference} from './Currency';
 import {EmbeddedMarketCard} from './EmbeddedMarketCard';
 import {MarketsSummary} from "./generated/markets_pb";
-import {LoadingHTML} from './Loading';
+import {LoadingHTML} from './Components/Loading';
 import {MarketDetailPage, marketDetailPageURLPrefix, URLParams} from './MarketDetailPage';
-import {makeObserverOwner, ObserverOwner, Observer} from './observer';
+import {makeObserverOwner, ObserverOwner, Observer} from './Components/observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
-import ScrollToTop from './ScrollToTop';
-import {AugurFeeWindowInfo} from './AugurFeeWindowInfo/AugurFeeWindowInfo';
+import ScrollToTop from './Components/ScrollToTop';
 import {indexRelatedMarkets, RelatedMarketsIndex} from './RelatedMarkets';
 
 const marketsSummaryIntervalDelay = 1000;
@@ -94,7 +94,7 @@ export class Routes extends React.Component<any, RoutesState> {
   public render(): JSX.Element {
     const {marketsSummary, relatedMarketsIndex} = this.state;
     if (marketsSummary === undefined || relatedMarketsIndex === undefined) {
-      return LoadingHTML;
+      return <LoadingHTML/>;
     }
 
     const renderHome = (props: object) => (
@@ -112,8 +112,15 @@ export class Routes extends React.Component<any, RoutesState> {
       {...props}
       relatedMarketsIndex={relatedMarketsIndex}
     />;
-    const renderAugurFeeWindows = () => <AugurFeeWindowInfo ms={marketsSummary}
-                                                            currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+
+    const AsyncAugurFeeWindow = Loadable({
+      loader: () => import('./AugurFeeWindowInfo/AugurFeeWindowInfo'),
+      loading() {
+        return <LoadingHTML/>;
+      }
+    });
+    const renderAugurFeeWindows = () => <AsyncAugurFeeWindow ms={marketsSummary}
+                                                             currencySelectionObserverOwner={this.state.currencySelectionObserverOwner}
     />;
 
     return (

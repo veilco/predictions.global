@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
 import { Currency } from './Currency';
-import Footer from './Footer';
-import Header, { HasMarketsSummary } from "./Header";
-import { Observer } from "./observer";
+import Footer from './Components/Footer';
+import Header, { HasMarketsSummary } from "./Components/Header";
+import { Observer } from "./Components/observer";
 
 type Props = HasMarketsSummary & {
   currencySelectionObserver: Observer<Currency>;

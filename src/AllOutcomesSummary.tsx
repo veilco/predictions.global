@@ -3,7 +3,7 @@ import { ExchangeRates, makePriceFromEthAmount } from './ExchangeRates';
 import { Market, MarketInfo, OutcomeInfo } from './generated/markets_pb';
 import { renderPrediction } from './OneMarketSummary';
 import Price2, { numberFormat, smartRoundThreeDecimals } from "./Price";
-import { Observer } from './observer';
+import { Observer } from './Components/observer';
 import { Currency } from './Currency';
 import './AllOutcomesSummary.css';
 

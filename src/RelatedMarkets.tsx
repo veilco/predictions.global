@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as moment from 'moment';
 import { Market, MarketsSummary } from "./generated/markets_pb";
-import { HasMarketsSummary } from "./Header";
+import { HasMarketsSummary } from "./Components/Header";
 import OneMarketSummary from './OneMarketSummary';
-import { Observer } from './observer';
+import { Observer } from './Components/observer';
 import { Currency } from './Currency';
 
 export interface RelatedMarketsIndex {

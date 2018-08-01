@@ -10,7 +10,7 @@ import { LiquidityAtPrice, Market, MarketType, Prediction, Price } from './gener
 import './MarketCard.css';
 import MarketControls, { getMarketEmbedCode } from './MarketControls';
 import { makeMarketDetailPageURL } from './MarketDetailPage';
-import { Observer } from './observer';
+import { Observer } from './Components/observer';
 import Price2, { numberFormat, smartRoundThreeDecimals, usdFormat } from "./Price";
 
 interface HasMarket {

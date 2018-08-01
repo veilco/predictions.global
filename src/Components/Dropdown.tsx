@@ -1,7 +1,7 @@
-import * as classNames from "classnames";
+import * as classNames from 'classnames';
 import * as React from 'react';
+import { isObserver, Observer, Unsubscribe } from '../Components/observer';
 import './Dropdown.css';
-import { isObserver, Observer, Unsubscribe } from './observer';
 
 interface Props<T> {
   buttonClassNameSuffix?: string,

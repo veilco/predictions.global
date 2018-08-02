@@ -26,9 +26,6 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
   public constructor(props: Props<T>) {
     super(props);
 
-    // tslint:disable:no-console
-    console.log(props);
-
     this.state = {};
     this.updateAugurFeeWindow();
   }
@@ -38,8 +35,6 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
       return;
     }
 
-    // tslint:disable:no-console
-    console.log(this.props);
     this.updateAugurFeeWindow();
   }
 

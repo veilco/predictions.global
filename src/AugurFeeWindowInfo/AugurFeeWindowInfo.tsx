@@ -69,17 +69,15 @@ export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, Sta
                     </div>
                     <div className="field-body">
                       <div className="field">
-                        <p className="control">
-                          <div className="control">
-                            <input className="input" value={network} onChange={this.handleNetworkChange} placeholder="https://mainnet.infura.io/augur" />
-                          </div>
-                        </p>
+                        <div className="control">
+                          <input className="input" value={network} onChange={this.handleNetworkChange} placeholder="https://mainnet.infura.io/augur" />
+                        </div>
                       </div>
                       <div className="field">
-                        <p className="control">
+                        <div className="control">
                           <CurrencyDropdown currencySelectionObserver={currencySelectionObserver}
                                             onChange={this.setCurrency}/>
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -12,6 +12,7 @@ import Header, { HasMarketsSummary } from './Header';
 import { Observer, ObserverOwner } from './observer';
 import OneMarketSummary from './OneMarketSummary';
 import { getQueryString, updateQueryString } from "./url";
+import { saveMarketSortOrderPreference, MarketSortOrder, defaultMarketSortOrder, getSavedMarketSortOrderPreference, marketSortOrders, marketSortFunctions } from './MarketSort';
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -53,80 +54,6 @@ export class Home extends React.Component<Props> {
     );
   }
 }
-
-function isFeaturedGoesFirst(a: Market, b: Market): number {
-  const af = a.getIsFeatured();
-  const bf = b.getIsFeatured();
-  if (af && !bf) {
-    return -1;
-  }
-  if (bf && !af) {
-    return 1;
-  }
-  return 0;
-}
-
-type sortKey = 'Recently Traded' | 'Volume' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
-
-const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
-  ['Recently Traded', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return b.getLastTradeTime() - a.getLastTradeTime();
-  }],
-  ['Volume', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    const aVolume = a.getVolume();
-    const bVolume = b.getVolume();
-    if (aVolume == null) {
-      return -1;
-    }
-
-    if (bVolume == null) {
-      return 1;
-    }
-
-    return bVolume.getUsd() - aVolume.getUsd();
-  }],
-  ['Money at Stake', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    const aCapitalization = a.getMarketCapitalization();
-    const bCapitalization = b.getMarketCapitalization();
-    if (aCapitalization == null) {
-      return -1;
-    }
-
-    if (bCapitalization == null) {
-      return 1;
-    }
-
-    return bCapitalization.getUsd() - aCapitalization.getUsd();
-  }],
-  ['New Markets', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return b.getCreationTime() - a.getCreationTime();
-  }],
-  ['Ending Soon', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return a.getEndDate() - b.getEndDate();
-  }]
-]);
-
-const allSortKeys: Set<sortKey> = new Set(sortOrders.keys());
 
 const paginationLimits = [10, 20, 50];
 
@@ -172,7 +99,7 @@ interface MarketListState {
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
-  sortOrder: sortKey,
+  marketSortOrder: MarketSortOrder,
   topOfMarketList: React.RefObject<HTMLDivElement>,
 }
 
@@ -191,23 +118,15 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     const categoryQuery = getQueryString('c');
     const category: MarketCategory = new Set(Object.keys(MarketCategory).map(k => MarketCategory[k])).has(categoryQuery) ? (categoryQuery as MarketCategory) : MarketCategory.All;
 
-    const sortOrder: sortKey = (() => {
-      const sortOrderQuery: string = getQueryString('s'); // ie. maybe this is a valid sortKey
-      if (allSortKeys.has(sortOrderQuery as sortKey)) {
-        return sortOrderQuery as sortKey;
-      }
-      return 'Recently Traded';
-    })();
-
     const showEnded = getQueryString('e') === '1';
 
     this.state = {
       category,
+      marketSortOrder: getSavedMarketSortOrderPreference(),
       paginationLimit,
       paginationOffset,
       searchQuery: '',
       showEnded,
-      sortOrder,
       topOfMarketList: React.createRef(),
     };
   }
@@ -219,7 +138,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
 
   public render() {
     const { marketList, currencySelectionObserver } = this.props;
-    const { paginationLimit, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
+    const { paginationLimit, paginationOffset, showEnded, marketSortOrder, searchQuery, category } = this.state;
 
     const filteredMarketList: Market[] = (() => {
       let ms = marketList.filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category);
@@ -230,7 +149,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         // Basic fuzzy text search
         ms = ms.filter((m: Market) => m.getName().toLowerCase().replace(whitespaceGlobalRegexp, '').indexOf(searchQuery) !== -1 || m.getId().indexOf(searchQuery) !== -1);
       }
-      ms.sort(sortOrders.get(sortOrder))
+      ms.sort(marketSortFunctions.get(marketSortOrder))
       return ms;
     })();
 
@@ -286,9 +205,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item sort-by-box">
                   <Dropdown
-                    currentValueOrObserver={sortOrder}
-                    onChange={this.setSortOrder}
-                    values={Array.from(sortOrders.keys())} />
+                    currentValueOrObserver={marketSortOrder}
+                    onChange={this.setMarketSortOrder}
+                    values={marketSortOrders} />
                 </div>
               </div>
             </div>
@@ -412,10 +331,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     );
   }
 
-  private setSortOrder = (sortOrder: sortKey) => {
-    updateQueryString('s', sortOrder);
+  private setMarketSortOrder = (marketSortOrder: MarketSortOrder) => {
+    saveMarketSortOrderPreference(marketSortOrder);
     this.setState({
-      sortOrder,
+      marketSortOrder,
     });
     this.setPaginationOffset(0, { scrollIntoView: false }); // go back to first page of results when switching sort order
   };
@@ -477,10 +396,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     window.history.pushState({}, '', '/'); // remove all query strings, which right now is the same thing as resetting filters.
     this.setState({
       category: MarketCategory.All,
+      marketSortOrder: defaultMarketSortOrder,
       paginationOffset: 0,
       searchQuery: '',
       showEnded: false,
-      sortOrder: 'Recently Traded',
     });
   };
 }

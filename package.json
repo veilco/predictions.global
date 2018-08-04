@@ -3,10 +3,6 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
-    "@types/bignumber.js": "^5.0.0",
-    "@types/lodash.debounce": "^4.0.4",
-    "@types/react-loadable": "^5.4.0",
-    "@types/web3": "^1.0.2",
     "augur-fee-window-infos": "^1.0.0",
     "augur.js": "^5.0.0",
     "bignumber.js": "^7.2.1",
@@ -28,7 +24,6 @@
     "react-scripts-ts": "2.16.0",
     "react-share": "^2.2.0",
     "react-tooltip": "^3.6.1",
-    "source-map-explorer": "^1.5.0",
     "web3": "^1.0.0-beta.35"
   },
   "scripts": {
@@ -55,25 +50,30 @@
     "prettier": "prettier --parser typescript --single-quote --trailing-comma --write \"./**/*.tsx\""
   },
   "devDependencies": {
+    "@types/bignumber.js": "^5.0.0",
     "@types/classnames": "^2.2.4",
     "@types/google-protobuf": "^3.2.7",
     "@types/jest": "^23.1.2",
+    "@types/lodash.debounce": "^4.0.4",
     "@types/mkdirp": "^0.5.2",
     "@types/node": "^10.3.6",
     "@types/react": "^16.4.2",
     "@types/react-copy-to-clipboard": "^4.2.5",
     "@types/react-dom": "^16.0.6",
     "@types/react-helmet": "^5.0.6",
+    "@types/react-loadable": "^5.4.0",
     "@types/react-router-dom": "^4.2.7",
     "@types/react-share": "^2.1.0",
     "@types/react-tooltip": "^3.3.5",
+    "@types/web3": "^1.0.2",
     "env-cmd": "^8.0.2",
     "mkdirp": "^0.5.1",
     "prettier": "1.13.7",
     "serve": "^9.1.2",
+    "source-map-explorer": "^1.5.0",
     "sponge": "^0.1.0",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
   },
-  "postinstall": "rm -f node_modules/web3/index.d.ts"
+  "postinstall": "rm -f node_modules/web3/index.d.ts && echo 'removed web3/index.d.ts, see https://github.com/ethereum/web3.js/issues/1658#issuecomment-395662469'"
 }

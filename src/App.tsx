@@ -355,7 +355,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   };
 
   private setPaginationOffset = (paginationOffset: number, opts?: { scrollIntoView: boolean }) => {
-    updateQueryString('p', paginationOffset + 1);
+    updateQueryString('p', paginationOffset === 0 ? undefined : paginationOffset + 1);
     this.setState({
       paginationOffset,
     });

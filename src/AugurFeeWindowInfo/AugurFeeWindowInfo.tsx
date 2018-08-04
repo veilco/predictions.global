@@ -61,7 +61,7 @@ export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, Sta
       <div>
         <Header ms={ms}
                 currencySelectionObserver={currencySelectionObserver}
-                doesClickingLogoReloadPage={true}
+                doesClickingLogoReloadPage={false}
                 headerContent={
                   <div className="field is-horizontal">
                     <div className="field-label is-normal">

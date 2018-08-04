@@ -111,7 +111,7 @@ export default class MarketControls extends React.Component<Props, State> {
               data-multiline={true}
               data-tip={`View market in Augur App.<br>NOTE: Desktop only.<br>To get started,<br>click "Download Augur App"<br>at the bottom of ${isEmbedded ? 'Predictions.Global' : 'this page'}.`} />
             : <a target="_blank"
-              href={"http://localhost:8080/#/market?augur_node=ws%3A%2F%2Flocalhost%3A9001&ethereum_node_http=https%3A%2F%2Fmainnet.infura.io%2Faugur&ethereum_node_ws=wss%3A%2F%2Fmainnet.infura.io%2Fws&description=d&id=" + marketId}>
+              href={"http://localhost:8080/#/market?id=" + marketId}>
               <img className="augur-logo"
                 src="/augur-logo.svg"
                 data-multiline={true}

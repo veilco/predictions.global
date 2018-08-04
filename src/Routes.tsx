@@ -8,10 +8,11 @@ import { EmbeddedMarketCard } from './EmbeddedMarketCard';
 import { MarketsSummary } from "./generated/markets_pb";
 import { LoadingHTML } from './Loading';
 import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
+import { makeMarketSortFunctions, MarketSortFunctions } from './MarketSort';
 import { makeObserverOwner, ObserverOwner } from './observer';
 import PublicEthereumNodes from './PublicEthereumNodes';
-import ScrollToTop from './ScrollToTop';
 import { indexRelatedMarkets, RelatedMarketsIndex } from './RelatedMarkets';
+import ScrollToTop from './ScrollToTop';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -60,6 +61,7 @@ let marketsSummaryCallback: (m: MarketsSummary) => void;
 const cancelFetchMarketsSummary = periodic(fetchMarketsSummary.bind(null, (window as any).DATA_URI), (m: MarketsSummary) => marketsSummaryCallback(m), marketsSummaryIntervalDelay);
 
 interface RoutesState {
+  marketSortFunctions?: MarketSortFunctions,
   marketsSummary?: MarketsSummary,
   relatedMarketsIndex?: RelatedMarketsIndex,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
@@ -76,7 +78,9 @@ export class Routes extends React.Component<any, RoutesState> {
     o.observer.subscribe((newCurrency) => saveCurrencyPreference(newCurrency));
 
     this.cancelFetchMarketsSummary = cancelFetchMarketsSummary;
-    marketsSummaryCallback = (marketsSummary: MarketsSummary) => this.setMarketsSummary(marketsSummary);
+    marketsSummaryCallback = (marketsSummary: MarketsSummary) => {
+      this.setMarketsSummary(marketsSummary);
+    }
 
     this.state = {
       currencySelectionObserverOwner: o,
@@ -91,12 +95,12 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const { marketsSummary, relatedMarketsIndex } = this.state;
-    if (marketsSummary === undefined || relatedMarketsIndex === undefined) {
+    const { marketSortFunctions, marketsSummary, relatedMarketsIndex } = this.state;
+    if (marketSortFunctions === undefined || marketsSummary === undefined || relatedMarketsIndex === undefined) {
       return LoadingHTML;
     }
 
-    const renderHome = (props: object) => (<Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner} ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+    const renderHome = (props: object) => (<Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner} ms={marketsSummary} marketSortFunctions={marketSortFunctions} {...(props as RouteComponentProps<any>)} />);
     const renderEmbeddedMarketCard = (props: object) => (
       <EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     const renderPublicEthereumNodes = () => <PublicEthereumNodes
@@ -137,6 +141,7 @@ export class Routes extends React.Component<any, RoutesState> {
     }
 
     this.setState({
+      marketSortFunctions: makeMarketSortFunctions(marketsSummary),
       marketsSummary,
       relatedMarketsIndex: indexRelatedMarkets(marketsSummary),
     });

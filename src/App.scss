@@ -127,6 +127,16 @@ $canonical-bulma-padding: 0.75rem; // columns seem to use this
   }
 }
 
+.liquidity-tranche-label {
+  width: 8rem;
+}
+
+.liquidity-tranche-box {
+  button {
+    width: 6rem; // prevent liquidity tranche box from resizing when changing selected value, which causes page to jank
+  }
+}
+
 .page-number {
   padding-right: $canonical-bulma-padding;
 }

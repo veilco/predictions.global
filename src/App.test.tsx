@@ -9,7 +9,9 @@ const noop = () => undefined;
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(<Home
-    ms={new MarketsSummary()} currencySelectionObserverOwner={makeObserverOwner(Currency.USD)}
+    marketSortFunctions={new Map()}
+    ms={new MarketsSummary()}
+    currencySelectionObserverOwner={makeObserverOwner(Currency.USD)}
   />, div);
   ReactDOM.unmountComponentAtNode(div);
 });

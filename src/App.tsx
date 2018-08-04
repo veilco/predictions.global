@@ -1,18 +1,20 @@
 import 'bulma/css/bulma.css';
-import * as classNames from 'classnames';
-import * as moment from 'moment';
+import classNames from 'classnames';
+import moment from 'moment';
 import * as React from 'react';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
-import { Currency, renderCurrency } from './Currency';
 import { Dropdown } from './Components/Dropdown';
 import Footer from './Components/Footer';
-import { Market, MarketsSummary } from './generated/markets_pb';
 import Header, { HasMarketsSummary } from './Components/Header';
 import { Observer, ObserverOwner } from './Components/observer';
-import OneMarketSummary from './OneMarketSummary';
-import { getQueryString, updateQueryString } from "./url";
+import { Currency } from './Currency';
 import { CurrencyDropdown } from './Currency/CurrencyDropdown';
+import { Market, MarketsSummary } from './generated/markets_pb';
+import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference } from './MarketSort';
+import OneMarketSummary from './OneMarketSummary';
+import { smartRoundThreeDecimals } from './Price';
+import { getQueryString, updateQueryString } from "./url";
 
 // example of changing moment language globally to fr; only works since fr was imported.
 // import 'moment/locale/fr';
@@ -20,6 +22,7 @@ import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 
 type Props = HasMarketsSummary & {
   currencySelectionObserverOwner: ObserverOwner<Currency>
+  marketSortFunctions: MarketSortFunctions
 }
 
 export class Home extends React.Component<Props> {
@@ -28,9 +31,11 @@ export class Home extends React.Component<Props> {
   }
 
   public render(): JSX.Element {
-    const { currencySelectionObserverOwner } = this.props;
+    const { currencySelectionObserverOwner, marketSortFunctions } = this.props;
     const currencySelectionObserver = currencySelectionObserverOwner.observer;
     const ms: MarketsSummary = this.props.ms;
+    const lmc = ms.getLiquidityMetricsConfig();
+    const liquidityTranches = lmc !== undefined ? lmc.getMillietherTranchesList() : [];
     return (
       <div>
         <Header ms={ms} currencySelectionObserver={currencySelectionObserver}
@@ -47,87 +52,16 @@ export class Home extends React.Component<Props> {
         } />
         <div className="container">
           <MarketList currencySelectionObserverOwner={currencySelectionObserverOwner}
-            currencySelectionObserver={currencySelectionObserver} marketList={ms.getMarketsList()} />
+            currencySelectionObserver={currencySelectionObserver}
+            liquidityTranches={liquidityTranches}
+            marketList={ms.getMarketsList()}
+            marketSortFunctions={marketSortFunctions} />
         </div>
         {Footer}
       </div>
     );
   }
 }
-
-function isFeaturedGoesFirst(a: Market, b: Market): number {
-  const af = a.getIsFeatured();
-  const bf = b.getIsFeatured();
-  if (af && !bf) {
-    return -1;
-  }
-  if (bf && !af) {
-    return 1;
-  }
-  return 0;
-}
-
-type sortKey = 'Recently Traded' | 'Volume' | 'Money at Stake' | 'New Markets' | 'Ending Soon';
-
-const sortOrders: Map<sortKey, (a: Market, b: Market) => number> = new Map<sortKey, (a: Market, b: Market) => number>([
-  ['Recently Traded', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return b.getLastTradeTime() - a.getLastTradeTime();
-  }],
-  ['Volume', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    const aVolume = a.getVolume();
-    const bVolume = b.getVolume();
-    if (aVolume == null) {
-      return -1;
-    }
-
-    if (bVolume == null) {
-      return 1;
-    }
-
-    return bVolume.getUsd() - aVolume.getUsd();
-  }],
-  ['Money at Stake', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    const aCapitalization = a.getMarketCapitalization();
-    const bCapitalization = b.getMarketCapitalization();
-    if (aCapitalization == null) {
-      return -1;
-    }
-
-    if (bCapitalization == null) {
-      return 1;
-    }
-
-    return bCapitalization.getUsd() - aCapitalization.getUsd();
-  }],
-  ['New Markets', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return b.getCreationTime() - a.getCreationTime();
-  }],
-  ['Ending Soon', (a: Market, b: Market) => {
-    const maybeFeatured = isFeaturedGoesFirst(a, b);
-    if (maybeFeatured !== 0) {
-      return maybeFeatured;
-    }
-    return a.getEndDate() - b.getEndDate();
-  }]
-]);
-
-const allSortKeys: Set<sortKey> = new Set(sortOrders.keys());
 
 const paginationLimits = [10, 20, 50];
 
@@ -161,7 +95,9 @@ function getMarketCategory(m: Market): MarketCategory {
 const whitespaceGlobalRegexp = /\s+/g;
 
 interface MarketListProps {
+  liquidityTranches: number[],
   marketList: Market[],
+  marketSortFunctions: MarketSortFunctions,
   currencySelectionObserver: Observer<Currency>,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
@@ -169,11 +105,12 @@ interface MarketListProps {
 // TODO create a UIMarket type as a wrapper for Market, which constructs stuff like getMarketCategory() and a moment(endDate) once at in MarketList constructor, instead of each re-render. Note that Market.AsObject is provided by protobuf, so we don't necessarily want to create a complete 3rd type. We also don't want to aggressively call Market.AsObject, it is really expensive and Market itself is quite optimized by protobuf. Current preference is UIMarket { m: Market, ... newStuff }, so that only new fields are declared directly in UIMarket.
 interface MarketListState {
   category: MarketCategory,
+  liquidityTranche: number,
   paginationLimit: number,
   paginationOffset: number,
   searchQuery: string,
   showEnded: boolean,
-  sortOrder: sortKey,
+  marketSortOrder: MarketSortOrder,
   topOfMarketList: React.RefObject<HTMLDivElement>,
 }
 
@@ -192,23 +129,16 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     const categoryQuery = getQueryString('c');
     const category: MarketCategory = new Set(Object.keys(MarketCategory).map(k => MarketCategory[k])).has(categoryQuery) ? (categoryQuery as MarketCategory) : MarketCategory.All;
 
-    const sortOrder: sortKey = (() => {
-      const sortOrderQuery: string = getQueryString('s'); // ie. maybe this is a valid sortKey
-      if (allSortKeys.has(sortOrderQuery as sortKey)) {
-        return sortOrderQuery as sortKey;
-      }
-      return 'Recently Traded';
-    })();
-
     const showEnded = getQueryString('e') === '1';
 
     this.state = {
       category,
+      liquidityTranche: getSavedLiquidityTranchePreference() || props.liquidityTranches[0] || 0,
+      marketSortOrder: getSavedMarketSortOrderPreference(),
       paginationLimit,
       paginationOffset,
       searchQuery: '',
       showEnded,
-      sortOrder,
       topOfMarketList: React.createRef(),
     };
   }
@@ -219,8 +149,8 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
   }
 
   public render() {
-    const { marketList, currencySelectionObserver } = this.props;
-    const { paginationLimit, paginationOffset, showEnded, sortOrder, searchQuery, category } = this.state;
+    const { liquidityTranches, marketList, marketSortFunctions, currencySelectionObserver } = this.props;
+    const { liquidityTranche, paginationLimit, paginationOffset, showEnded, marketSortOrder, searchQuery, category } = this.state;
 
     const filteredMarketList: Market[] = (() => {
       let ms = marketList.filter((m: Market) => category === MarketCategory.All || getMarketCategory(m) === category);
@@ -231,7 +161,17 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         // Basic fuzzy text search
         ms = ms.filter((m: Market) => m.getName().toLowerCase().replace(whitespaceGlobalRegexp, '').indexOf(searchQuery) !== -1 || m.getId().indexOf(searchQuery) !== -1);
       }
-      ms.sort(sortOrders.get(sortOrder))
+
+      let sortFn: ((a: Market, b: Market) => number) | undefined;
+      if (marketSortOrder === MarketSortOrder.LIQUIDITY) {
+        // Liquidity sort functions are dynamically generated for each liquidity tranche sent from backend, so we must look up sort function dynamically.
+        sortFn = marketSortFunctions.get(makeLiquiditySortKey(liquidityTranche));
+      } else {
+        sortFn = marketSortFunctions.get(marketSortOrder);
+      }
+      if (sortFn !== undefined) {
+        ms.sort(sortFn);
+      }
       return ms;
     })();
 
@@ -283,9 +223,9 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               <div className="level-right" >
                 <div className="level-item sort-by-box">
                   <Dropdown
-                    currentValueOrObserver={sortOrder}
-                    onChange={this.setSortOrder}
-                    values={Array.from(sortOrders.keys())} />
+                    currentValueOrObserver={marketSortOrder}
+                    onChange={this.setMarketSortOrder}
+                    values={marketSortOrders} />
                 </div>
               </div>
             </div>
@@ -334,6 +274,25 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             </div>
           </div>
         </div>
+        { marketSortOrder === MarketSortOrder.LIQUIDITY && <div className="market-list-controls columns is-centered is-vcentered is-mobile">
+          <div className="column is-narrow level is-mobile">
+            <div className="level-left" >
+              <div className="level-item liquidity-tranche-label">
+                Target Liquidity&nbsp;
+              </div>
+            </div>
+            <div className="level-right" >
+              <div className="level-item liquidity-tranche-box">
+                <Dropdown
+                  currentValueOrObserver={liquidityTranche}
+                  onChange={this.setLiquidityTranche}
+                  values={liquidityTranches}
+                  renderValue={renderLiquidityTranche}
+                />
+              </div>
+            </div>
+          </div>
+        </div> }
         {
           filteredMarketList.length < 1 ?
             <div className="columns is-vcentered">
@@ -409,10 +368,10 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     );
   }
 
-  private setSortOrder = (sortOrder: sortKey) => {
-    updateQueryString('s', sortOrder);
+  private setMarketSortOrder = (marketSortOrder: MarketSortOrder) => {
+    saveMarketSortOrderPreference(marketSortOrder);
     this.setState({
-      sortOrder,
+      marketSortOrder,
     });
     this.setPaginationOffset(0, { scrollIntoView: false }); // go back to first page of results when switching sort order
   };
@@ -432,8 +391,16 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     }
   };
 
+  private setLiquidityTranche = (liquidityTranche: number) => {
+    // if liquidityTranche is first one in props.liquidityTranches, assume it's the default and remove queryString
+    saveLiquidityTranchePreference(liquidityTranche === this.props.liquidityTranches[0] ? undefined : liquidityTranche);
+    this.setState({
+      liquidityTranche,
+    });
+  };
+
   private setPaginationOffset = (paginationOffset: number, opts?: { scrollIntoView: boolean }) => {
-    updateQueryString('p', paginationOffset + 1);
+    updateQueryString('p', paginationOffset === 0 ? undefined : paginationOffset + 1);
     this.setState({
       paginationOffset,
     });
@@ -474,10 +441,16 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     window.history.pushState({}, '', '/'); // remove all query strings, which right now is the same thing as resetting filters.
     this.setState({
       category: MarketCategory.All,
+      liquidityTranche: this.props.liquidityTranches[0] || 0,
+      marketSortOrder: defaultMarketSortOrder,
       paginationOffset: 0,
       searchQuery: '',
       showEnded: false,
-      sortOrder: 'Recently Traded',
     });
   };
+}
+
+function renderLiquidityTranche(millietherTranche: number): React.ReactNode {
+  // We decided to show this only in ETH (as opposed to in user's currency preference) because liquidity sort is a trader tool, they think in ETH, and at the time of coding there was an extra burden to use Price2 because the exchangeRates weren't immediately accessible.
+  return `${smartRoundThreeDecimals(millietherTranche/1000)} Ξ`;
 }

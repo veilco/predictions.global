@@ -1,18 +1,19 @@
 import * as React from 'react';
-import {Helmet} from "react-helmet";
+import { Helmet } from "react-helmet";
 import Loadable from 'react-loadable';
-import {RouteComponentProps} from "react-router";
-import {BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
-import {Home} from './App';
-import {Currency, getSavedCurrencyPreference, saveCurrencyPreference} from './Currency';
-import {EmbeddedMarketCard} from './EmbeddedMarketCard';
-import {MarketsSummary} from "./generated/markets_pb";
-import {LoadingHTML} from './Components/Loading';
-import {MarketDetailPage, marketDetailPageURLPrefix, URLParams} from './MarketDetailPage';
-import {makeObserverOwner, ObserverOwner, Observer} from './Components/observer';
-import PublicEthereumNodes from './PublicEthereumNodes';
+import { RouteComponentProps } from "react-router";
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Home } from './App';
+import { LoadingHTML } from './Components/Loading';
+import { makeObserverOwner, ObserverOwner } from './Components/observer';
 import ScrollToTop from './Components/ScrollToTop';
-import {indexRelatedMarkets, RelatedMarketsIndex} from './RelatedMarkets';
+import { Currency, getSavedCurrencyPreference, saveCurrencyPreference } from './Currency';
+import { EmbeddedMarketCard } from './EmbeddedMarketCard';
+import { MarketsSummary } from "./generated/markets_pb";
+import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './MarketDetailPage';
+import { makeMarketSortFunctions, MarketSortFunctions } from './MarketSort';
+import PublicEthereumNodes from './PublicEthereumNodes';
+import { indexRelatedMarkets, RelatedMarketsIndex } from './RelatedMarkets';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -61,6 +62,7 @@ let marketsSummaryCallback: (m: MarketsSummary) => void;
 const cancelFetchMarketsSummary = periodic(fetchMarketsSummary.bind(null, (window as any).DATA_URI), (m: MarketsSummary) => marketsSummaryCallback(m), marketsSummaryIntervalDelay);
 
 interface RoutesState {
+  marketSortFunctions?: MarketSortFunctions,
   marketsSummary?: MarketsSummary,
   relatedMarketsIndex?: RelatedMarketsIndex,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
@@ -77,7 +79,9 @@ export class Routes extends React.Component<any, RoutesState> {
     o.observer.subscribe((newCurrency) => saveCurrencyPreference(newCurrency));
 
     this.cancelFetchMarketsSummary = cancelFetchMarketsSummary;
-    marketsSummaryCallback = (marketsSummary: MarketsSummary) => this.setMarketsSummary(marketsSummary);
+    marketsSummaryCallback = (marketsSummary: MarketsSummary) => {
+      this.setMarketsSummary(marketsSummary);
+    }
 
     this.state = {
       currencySelectionObserverOwner: o,
@@ -92,14 +96,14 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
-    const {marketsSummary, relatedMarketsIndex} = this.state;
-    if (marketsSummary === undefined || relatedMarketsIndex === undefined) {
+    const { marketSortFunctions, marketsSummary, relatedMarketsIndex} = this.state;
+    if (marketSortFunctions === undefined || marketsSummary === undefined || relatedMarketsIndex === undefined) {
       return <LoadingHTML/>;
     }
 
     const renderHome = (props: object) => (
       <Home currencySelectionObserverOwner={this.state.currencySelectionObserverOwner}
-            ms={marketsSummary} {...(props as RouteComponentProps<any>)} />);
+            ms={marketsSummary} marketSortFunctions={marketSortFunctions} {...(props as RouteComponentProps<any>)} />);
     const renderEmbeddedMarketCard = (props: object) => (
       <EmbeddedMarketCard marketsSummary={marketsSummary} {...(props as RouteComponentProps<any>)} />);
     const renderPublicEthereumNodes = () => <PublicEthereumNodes
@@ -153,6 +157,7 @@ export class Routes extends React.Component<any, RoutesState> {
     }
 
     this.setState({
+      marketSortFunctions: makeMarketSortFunctions(marketsSummary),
       marketsSummary,
       relatedMarketsIndex: indexRelatedMarkets(marketsSummary),
     });

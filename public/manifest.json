@@ -1,6 +1,7 @@
 {
-  "short_name": "Predictions.Global",
+  "short_name": "Predictions",
   "name": "Predictions.Global",
+  "description": "Augur Prediction Market Data & Statistics.",
   "icons": [
     {
       "src": "favicon-16x16.png",
@@ -16,10 +17,20 @@
       "src": "favicon-96x96.png",
       "sizes": "96x96",
       "type": "image/x-icon"
-    }
+    },
+    {
+     "src": "logo-192.png",
+     "type": "image/png",
+     "sizes": "192x192"
+   },
+   {
+     "src": "logo-512.png",
+     "type": "image/png",
+     "sizes": "512x512"
+   }
   ],
-  "start_url": "./index.html",
+  "start_url": "/?utm_source=a2hs",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#000000"
 }

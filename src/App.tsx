@@ -11,7 +11,7 @@ import { Observer, ObserverOwner } from './Components/observer';
 import { Currency } from './Currency';
 import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 import { Market, MarketsSummary } from './generated/markets_pb';
-import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference } from './MarketSort';
+import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference } from './MarketSort';
 import OneMarketSummary from './OneMarketSummary';
 import { smartRoundThreeDecimals } from './Price';
 import { getQueryString, updateQueryString } from "./url";
@@ -163,12 +163,12 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       }
 
       let sortFn: ((a: Market, b: Market) => number) | undefined;
-      if (marketSortOrder === MarketSortOrder.LIQUIDITY) {
-        // Liquidity sort functions are dynamically generated for each liquidity tranche sent from backend, so we must look up sort function dynamically.
-        sortFn = marketSortFunctions.get(makeLiquiditySortKey(liquidityTranche));
-      } else {
+      // if (marketSortOrder === MarketSortOrder.LIQUIDITY) {
+      //   // Liquidity sort functions are dynamically generated for each liquidity tranche sent from backend, so we must look up sort function dynamically.
+      //   sortFn = marketSortFunctions.get(makeLiquiditySortKey(liquidityTranche));
+      // } else {
         sortFn = marketSortFunctions.get(marketSortOrder);
-      }
+      // }
       if (sortFn !== undefined) {
         ms.sort(sortFn);
       }
@@ -274,7 +274,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
             </div>
           </div>
         </div>
-        { marketSortOrder === MarketSortOrder.LIQUIDITY && <div className="market-list-controls columns is-centered is-vcentered is-mobile">
+        {/* { marketSortOrder === MarketSortOrder.LIQUIDITY && <div className="market-list-controls columns is-centered is-vcentered is-mobile">
           <div className="column is-narrow level is-mobile">
             <div className="level-left" >
               <div className="level-item liquidity-tranche-label">
@@ -292,7 +292,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
               </div>
             </div>
           </div>
-        </div> }
+        </div> } */}
         {
           filteredMarketList.length < 1 ?
             <div className="columns is-vcentered">

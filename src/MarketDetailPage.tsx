@@ -463,7 +463,7 @@ function renderDesignatedReporterStake(mi: MarketInfo): React.ReactNode {
 }
 
 // TODO render dates when marketDetail is fetched and cache the date rendering in state
-const detailPageDateFormat = "lll [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
+export const detailPageDateFormat = "lll [(UTC]ZZ[)]"; // https://momentjs.com/docs/#/displaying/format/ eg. "Sep 4, 1986 8:30 PM (UTC-700)"
 
 // https://www.regextester.com/93652
 const urlRegexp = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i;

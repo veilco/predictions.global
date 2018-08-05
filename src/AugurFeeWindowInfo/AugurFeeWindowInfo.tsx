@@ -30,18 +30,17 @@ export default class AugurFeeWindowInfo extends React.Component<Props, State> {
   public constructor(props: Props) {
     super(props);
 
+    const web3HttpEndpoint = getSavedWeb3HttpEndpoint();
+
     this.state = {
-      augurFeeWindow: new AugurFeeWindow(),
-      web3HttpEndpoint: '',
+      augurFeeWindow: newAugurFeeWindow(web3HttpEndpoint),
+      web3HttpEndpoint,
     };
 
     this.updateAugurFeeWindow = debounce(() => {
-      const {web3HttpEndpoint} = this.state;
-
-      const web3 = web3HttpEndpoint ? new Web3(new Web3.providers.HttpProvider(web3HttpEndpoint)) : undefined;
-      const augurFeeWindow = new AugurFeeWindow(web3);
+      saveWeb3HttpEndpoint(this.state.web3HttpEndpoint); // save only after using has finished typing (ie debounce fires), to avoid saving partial URL
       this.setState({
-        augurFeeWindow,
+        augurFeeWindow: newAugurFeeWindow(this.state.web3HttpEndpoint),
       });
     }, 1000);
   }
@@ -66,7 +65,7 @@ export default class AugurFeeWindowInfo extends React.Component<Props, State> {
                 headerContent={
                   <div className="field is-horizontal">
                     <div className="field-label is-normal">
-                      <label className="label">Web3&nbsp;Network</label>
+                      <label className="label">Ethereum&nbsp;HTTP&nbsp;Endpoint</label>
                     </div>
                     <div className="field-body">
                       <div className="field">
@@ -112,4 +111,16 @@ export default class AugurFeeWindowInfo extends React.Component<Props, State> {
       web3HttpEndpoint,
     }, this.updateAugurFeeWindow);
   };
+}
+
+function saveWeb3HttpEndpoint(web3HttpEndpoint: string) {
+  localStorage.setItem('web3HttpEndpoint', web3HttpEndpoint);
+}
+
+function getSavedWeb3HttpEndpoint(): string {
+  return localStorage.getItem('web3HttpEndpoint') || '';
+}
+
+function newAugurFeeWindow(web3HttpEndpoint: string): AugurFeeWindow {
+  return new AugurFeeWindow(web3HttpEndpoint ? new Web3(new Web3.providers.HttpProvider(web3HttpEndpoint)) : undefined);
 }

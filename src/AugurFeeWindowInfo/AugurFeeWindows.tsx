@@ -6,6 +6,7 @@ import Price2 from "../Price";
 import { ExchangeRates, makePriceFromEthAmount } from "../ExchangeRates";
 import { Observer } from "../Components/observer";
 import { Currency } from "../Currency";
+import { detailPageDateFormat } from '../MarketDetailPage';
 
 interface Props {
   augurFeeWindow: AugurFeeWindow,
@@ -82,7 +83,7 @@ export class AugurFeeWindows extends React.Component<Props, State> {
                           <p>{currentFeeWindow.totalFeeStake.toFormat(3)} REP</p></div>
                         <div className="column is-11">
                           <strong>Ends </strong>{moment(currentFeeWindow.endTime).fromNow()}{' on '}
-                          {currentFeeWindow.endTime.toLocaleString()}
+                          {moment(currentFeeWindow.endTime).format(detailPageDateFormat)}
 
                           {/* This causes React to re-render the component so that the time until the end updates */}
                           <div style={{ display: 'none' }}>{currentTime.valueOf()}</div>

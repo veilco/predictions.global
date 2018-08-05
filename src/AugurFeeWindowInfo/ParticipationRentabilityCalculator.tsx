@@ -117,7 +117,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="repEthPrice" value={repEthPrice}
                                    onChange={this.handleInputChange}/>
                           </div>
@@ -140,7 +140,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="gasPrice" value={gasPrice} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -161,7 +161,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="gasUsed" value={gasUsed} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -178,7 +178,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="numRep" value={numRep} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -195,7 +195,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="fees" value={fees} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -212,7 +212,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       </td>
                       <td>
                         <div className="field has-addons">
-                          <div className="control">
+                          <div className="control is-expanded">
                             <input className="input" id="stake" value={stake} onChange={this.handleInputChange}/>
                           </div>
                           <div className="control">
@@ -265,19 +265,19 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                     </tr>
                     <tr>
                       <td><strong>Profit in %</strong></td>
-                      <td>{participationRentabilityResult.profitPercent.multipliedBy(100).toString()}%</td>
+                      <td>{participationRentabilityResult.profitPercent.multipliedBy(100).toFormat(5)}%</td>
                     </tr>
                     <tr>
                       <td><strong>Profit in % P.A.</strong></td>
-                      <td>{participationRentabilityResult.profitPercentPA.multipliedBy(100).toString()}%</td>
+                      <td>{participationRentabilityResult.profitPercentPA.multipliedBy(100).toFormat(5)}%</td>
                     </tr>
                     <tr>
                       <td><strong>Number of REP to Break Even</strong></td>
-                      <td>{participationRentabilityResult.numRepBreakEven.toString()} REP</td>
+                      <td>{participationRentabilityResult.numRepBreakEven.toFormat(5)} REP</td>
                     </tr>
                     <tr>
                       <td><strong>Gas Price to Break Even</strong></td>
-                      <td>{ethToGwei(participationRentabilityResult.gasPriceBreakEven).toString()} Gwei</td>
+                      <td>{ethToGwei(participationRentabilityResult.gasPriceBreakEven).toFormat(5)} Gwei</td>
                     </tr>
                     </tbody>
                   </table>

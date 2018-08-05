@@ -79,7 +79,7 @@ export class AugurFeeWindows extends React.Component<Props, State> {
                           o={currencySelectionObserver} /></p>
                         </div>
                         <div className="column is-11"><strong>Total Stake</strong>
-                          <p>{currentFeeWindow.totalFeeStake.toString()} REP</p></div>
+                          <p>{currentFeeWindow.totalFeeStake.toFormat(3)} REP</p></div>
                         <div className="column is-11">
                           <strong>Ends </strong>{moment(currentFeeWindow.endTime).fromNow()}{' on '}
                           {currentFeeWindow.endTime.toLocaleString()}
@@ -104,13 +104,15 @@ export class AugurFeeWindows extends React.Component<Props, State> {
                       Next Fee Window
                     </p>
                   </header>
-                  {nextFeeWindow ? (
+                  {nextFeeWindow && exchangeRates ? (
                     <div className="card-content">
                       <div className="columns is-multiline">
                         <div className="column is-11"><strong>Address</strong><p><a target="_blank"
                           href={`https://etherscan.io/address/${nextFeeWindow.address}`}>{nextFeeWindow.address}</a>
                         </p></div>
-                        <div className="column is-11"><strong>Fees</strong><p>{nextFeeWindow.balance.toString()}Ξ</p>
+                        <div className="column is-11"><strong>Fees</strong><p><Price2
+                          p={makePriceFromEthAmount(exchangeRates, nextFeeWindow.balance.toNumber())}
+                          o={currencySelectionObserver} /></p>
                         </div>
                       </div>
                     </div>
@@ -129,16 +131,18 @@ export class AugurFeeWindows extends React.Component<Props, State> {
                       Previous Fee Window
                     </p>
                   </header>
-                  {previousFeeWindow ? (
+                  {previousFeeWindow && exchangeRates ? (
                     <div className="card-content">
                       <div className="columns is-multiline">
                         <div className="column is-11"><strong>Address</strong><p><a target="_blank"
                           href={`https://etherscan.io/address/${previousFeeWindow.address}`}>{previousFeeWindow.address}</a>
                         </p></div>
-                        <div className="column is-11"><strong>Fees</strong>
-                          <p>{previousFeeWindow.balance.toString()}Ξ</p></div>
+                        <div className="column is-11"><strong>Fees</strong><p>
+                        <Price2
+                          p={makePriceFromEthAmount(exchangeRates, previousFeeWindow.balance.toNumber())}
+                          o={currencySelectionObserver} /></p></div>
                         <div className="column is-11"><strong>Total Stake</strong>
-                          <p>{previousFeeWindow.totalFeeStake.toString()} REP</p></div>
+                          <p>{previousFeeWindow.totalFeeStake.toFormat(3)} REP</p></div>
                       </div>
                     </div>
                   ) : (

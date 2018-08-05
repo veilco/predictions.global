@@ -1,40 +1,43 @@
 import * as React from 'react';
 import moment from 'moment';
-import AugurFeeWindow, {FeeWindow} from 'augur-fee-window-infos';
+import AugurFeeWindow, { FeeWindow } from 'augur-fee-window-infos';
 import './AugurFeeWindows.css';
 import Price2 from "../Price";
-import {ExchangeRates, makePriceFromEthAmount} from "../ExchangeRates";
-import {Observer} from "../Components/observer";
-import {Currency} from "../Currency";
+import { ExchangeRates, makePriceFromEthAmount } from "../ExchangeRates";
+import { Observer } from "../Components/observer";
+import { Currency } from "../Currency";
 
-interface Props<T> {
+interface Props {
   augurFeeWindow: AugurFeeWindow,
   currencySelectionObserver: Observer<Currency>,
   exchangeRates?: ExchangeRates,
 }
 
-interface State<T> {
+interface State {
   currentFeeWindow?: FeeWindow,
   currentTime?: Date,
   nextFeeWindow?: FeeWindow,
   previousFeeWindow?: FeeWindow,
 }
 
-export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
-  public readonly state: State<T>;
-
-  public constructor(props: Props<T>) {
+export class AugurFeeWindows extends React.Component<Props, State> {
+  public constructor(props: Props) {
     super(props);
-
     this.state = {};
     this.updateAugurFeeWindow();
   }
 
-  public componentDidUpdate(prevProps: Props<T>) {
-    if(prevProps.augurFeeWindow === this.props.augurFeeWindow) {
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.augurFeeWindow === this.props.augurFeeWindow) {
       return;
     }
-
+    // augurFeeWindow changes, so clear state until new fee window is loaded
+    this.setState({
+      currentFeeWindow: undefined,
+      currentTime: undefined,
+      nextFeeWindow: undefined,
+      previousFeeWindow: undefined,
+    });
     this.updateAugurFeeWindow();
   }
 
@@ -52,7 +55,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
     } = this.state;
 
     return (
-      <section className="hero augur-fee-windows" style={{background: '#fafafa'}}>
+      <section className="hero augur-fee-windows" style={{ background: '#fafafa' }}>
         <div className="hero-body">
           <div className="container">
             <h4 className="title is-4">Augur Fee Windows</h4>
@@ -69,11 +72,11 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                     <div className="card-content">
                       <div className="columns is-multiline">
                         <div className="column is-11"><strong>Address</strong><p><a target="_blank"
-                                                                                    href={`https://etherscan.io/address/${currentFeeWindow.address}`}>{currentFeeWindow.address}</a>
+                          href={`https://etherscan.io/address/${currentFeeWindow.address}`}>{currentFeeWindow.address}</a>
                         </p></div>
                         <div className="column is-11"><strong>Fees</strong><p><Price2
                           p={makePriceFromEthAmount(exchangeRates, currentFeeWindow.balance.toNumber())}
-                          o={currencySelectionObserver}/></p>
+                          o={currencySelectionObserver} /></p>
                         </div>
                         <div className="column is-11"><strong>Total Stake</strong>
                           <p>{currentFeeWindow.totalFeeStake.toString()} REP</p></div>
@@ -82,15 +85,15 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                           {currentFeeWindow.endTime.toLocaleString()}
 
                           {/* This causes React to re-render the component so that the time until the end updates */}
-                          <div style={{display: 'none'}}>{currentTime.valueOf()}</div>
+                          <div style={{ display: 'none' }}>{currentTime.valueOf()}</div>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="card-content has-text-centered">
-                      <i className="fas fa-sync fa-spin fa-2x"/>
-                    </div>
-                  )}
+                      <div className="card-content has-text-centered">
+                        <i className="fas fa-sync fa-spin fa-2x" />
+                      </div>
+                    )}
                 </div>
               </div>
 
@@ -105,17 +108,17 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                     <div className="card-content">
                       <div className="columns is-multiline">
                         <div className="column is-11"><strong>Address</strong><p><a target="_blank"
-                                                                                    href={`https://etherscan.io/address/${nextFeeWindow.address}`}>{nextFeeWindow.address}</a>
+                          href={`https://etherscan.io/address/${nextFeeWindow.address}`}>{nextFeeWindow.address}</a>
                         </p></div>
                         <div className="column is-11"><strong>Fees</strong><p>{nextFeeWindow.balance.toString()}Ξ</p>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="card-content has-text-centered">
-                      <i className="fas fa-sync fa-spin fa-2x"/>
-                    </div>
-                  )}
+                      <div className="card-content has-text-centered">
+                        <i className="fas fa-sync fa-spin fa-2x" />
+                      </div>
+                    )}
                 </div>
               </div>
 
@@ -130,7 +133,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                     <div className="card-content">
                       <div className="columns is-multiline">
                         <div className="column is-11"><strong>Address</strong><p><a target="_blank"
-                                                                                    href={`https://etherscan.io/address/${previousFeeWindow.address}`}>{previousFeeWindow.address}</a>
+                          href={`https://etherscan.io/address/${previousFeeWindow.address}`}>{previousFeeWindow.address}</a>
                         </p></div>
                         <div className="column is-11"><strong>Fees</strong>
                           <p>{previousFeeWindow.balance.toString()}Ξ</p></div>
@@ -139,10 +142,10 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
                       </div>
                     </div>
                   ) : (
-                    <div className="card-content has-text-centered">
-                      <i className="fas fa-sync fa-spin fa-2x"/>
-                    </div>
-                  )}
+                      <div className="card-content has-text-centered">
+                        <i className="fas fa-sync fa-spin fa-2x" />
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -153,7 +156,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
   }
 
   private updateAugurFeeWindow = () => {
-    const {augurFeeWindow} = this.props;
+    const { augurFeeWindow } = this.props;
 
     augurFeeWindow.getCurrentFeeWindow()
       .then(currentFeeWindow => {
@@ -162,7 +165,7 @@ export class AugurFeeWindows<T> extends React.Component<Props<T>, State<T>> {
           currentTime: new Date(),
         }, () => {
           setInterval(() => {
-            this.setState({currentTime: new Date()});
+            this.setState({ currentTime: new Date() });
           }, 1000);
         });
       })

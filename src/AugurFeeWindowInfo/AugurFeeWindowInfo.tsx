@@ -11,33 +11,34 @@ import {getExchangeRatesFromMarketsSummary} from "../ExchangeRates";
 import {CurrencyDropdown} from "../Currency/CurrencyDropdown";
 import AugurFeeWindow from 'augur-fee-window-infos';
 import Web3 from 'web3';
+import { Cancelable } from '../../node_modules/@types/lodash';
 
-interface State<t> {
-  network: string,
+interface State {
+  web3HttpEndpoint: string,
   augurFeeWindow: AugurFeeWindow,
 }
 
-interface Props<T> {
+interface Props {
   ms: MarketsSummary
   currencySelectionObserverOwner: ObserverOwner<Currency>,
 }
 
-export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, State<T>> {
-  public readonly state: State<T>;
-  private updateAugurFeeWindow: any;
+export default class AugurFeeWindowInfo extends React.Component<Props, State> {
+  public readonly state: State;
+  private updateAugurFeeWindow: (() => void) & Cancelable;
 
-  public constructor(props: Props<T>) {
+  public constructor(props: Props) {
     super(props);
 
     this.state = {
       augurFeeWindow: new AugurFeeWindow(),
-      network: '',
+      web3HttpEndpoint: '',
     };
 
     this.updateAugurFeeWindow = debounce(() => {
-      const {network} = this.state;
+      const {web3HttpEndpoint} = this.state;
 
-      const web3 = network ? new Web3(new Web3.providers.HttpProvider(network)) : undefined;
+      const web3 = web3HttpEndpoint ? new Web3(new Web3.providers.HttpProvider(web3HttpEndpoint)) : undefined;
       const augurFeeWindow = new AugurFeeWindow(web3);
       this.setState({
         augurFeeWindow,
@@ -48,7 +49,7 @@ export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, Sta
   public render() {
     const {
       augurFeeWindow,
-      network,
+      web3HttpEndpoint,
     } = this.state;
 
     const {
@@ -70,7 +71,7 @@ export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, Sta
                     <div className="field-body">
                       <div className="field">
                         <div className="control">
-                          <input className="input" value={network} onChange={this.handleNetworkChange} placeholder="https://mainnet.infura.io/augur" />
+                          <input className="input" value={web3HttpEndpoint} onChange={this.handleNetworkChange} placeholder="https://mainnet.infura.io/augur" />
                         </div>
                       </div>
                       <div className="field">
@@ -105,10 +106,10 @@ export default class AugurFeeWindowInfo<T> extends React.Component<Props<T>, Sta
   };
 
   private handleNetworkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const network = e.target.value;
+    const web3HttpEndpoint = e.target.value;
 
     this.setState({
-      network,
+      web3HttpEndpoint,
     }, this.updateAugurFeeWindow);
   };
 }

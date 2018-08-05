@@ -7,13 +7,13 @@ import {ExchangeRates, makePriceFromEthAmount} from '../ExchangeRates';
 import {Observer} from "../Components/observer";
 import Price2 from "../Price";
 
-interface Props<T> {
+interface Props {
   augurFeeWindow: AugurFeeWindow,
   currencySelectionObserver: Observer<Currency>,
   exchangeRates?: ExchangeRates,
 }
 
-interface State<T> {
+interface State {
   currentFeeWindow?: FeeWindow,
 
   // These are stored as strings to support trailing decimals (e.g. 1.) in the inputs
@@ -25,12 +25,11 @@ interface State<T> {
   stake?: string,
 }
 
-export class ParticipationRentabilityCalculator<T> extends React.Component<Props<T>, State<T>> {
-  public state: State<T>;
-
-  constructor(props: Props<T>) {
+export class ParticipationRentabilityCalculator extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
+    // TODO explain in comment: why this initial state?
     this.state = {
       gasUsed: '323848',
       numRep: '1',
@@ -39,10 +38,18 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
     this.updateAugurFeeWindow();
   }
 
-  public componentDidUpdate(prevProps: Props<T>) {
+  public componentDidUpdate(prevProps: Props) {
     if (prevProps.augurFeeWindow === this.props.augurFeeWindow) {
       return;
     }
+    // augurFeeWindow changes, so clear state until new fee window is loaded
+    this.setState({
+      // The state cleared here is expected to be exactly the state set after successful network fetch in updateAugurFeeWindow().
+      fees: undefined,
+      gasPrice: undefined,
+      repEthPrice: undefined,
+      stake: undefined,
+    });
 
     this.updateAugurFeeWindow();
   }
@@ -286,6 +293,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
   private updateAugurFeeWindow = () => {
     const {augurFeeWindow} = this.props;
 
+    // TODO both ParticipationRentabilityCalculator and AugurFeeWindows calls augurFeeWindow.getCurrentFeeWindow() and we should collapse this into a single network call to reduce load on Ethereum servers.
     augurFeeWindow.getCurrentFeeWindow()
       .then(currentFeeWindow => {
         this.setState({

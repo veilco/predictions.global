@@ -62,7 +62,8 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
       exchangeRates,
     } = this.props;
 
-    if (!fees || !gasPrice || !repEthPrice || !stake || !exchangeRates) {
+    // Check undefined (as opposed to falsy) so that empty values don't trigger the loading screen. Empty values happen normally as user is erasing/typing new values into calculator.
+    if (fees === undefined || gasPrice === undefined || repEthPrice === undefined || stake === undefined || exchangeRates === undefined) {
       return (
         <section className="hero">
           <div className="hero-body">
@@ -336,6 +337,7 @@ export class ParticipationRentabilityCalculator<T> extends React.Component<Props
   private handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = e.target.id;
     const nextState = {};
+
     nextState[id] = e.target.value;
 
     this.setState(nextState);

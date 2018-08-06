@@ -60,7 +60,7 @@ export class AugurFeeWindows extends React.Component<Props, State> {
         <div className="hero-body">
           <div className="container">
             <h4 className="title is-4">Augur Fee Windows</h4>
-
+            <p className="content">Augur’s Reporting system runs on a cycle of consecutive 7-day long Fee Windows. Read more about Fee Windows <a href="http://docs.augur.net/#fee-window" target="_blank">here</a>.</p>
             <div className="columns">
               <div className="column">
                 <div className="card">

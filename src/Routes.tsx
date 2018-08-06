@@ -141,7 +141,7 @@ export class Routes extends React.Component<any, RoutesState> {
               <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
               <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage}/>
               <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
-              <Route exact={true} path="/augur-fee-window" render={renderAugurFeeWindows}/>
+              <Route exact={true} path="/augur-reporter-fee-window-rep-profit-calculator" render={renderAugurFeeWindows}/>
               <Route exact={true} path="/" render={renderHome}/>
             </Switch>
           </ScrollToTop>

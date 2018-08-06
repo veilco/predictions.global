@@ -12,6 +12,7 @@ import {CurrencyDropdown} from "../Currency/CurrencyDropdown";
 import AugurFeeWindow from 'augur-fee-window-infos';
 import Web3 from 'web3';
 import { Cancelable } from '../../node_modules/@types/lodash';
+import { Helmet } from 'react-helmet';
 
 interface State {
   web3HttpEndpoint: string,
@@ -94,6 +95,10 @@ export default class AugurFeeWindowInfo extends React.Component<Props, State> {
           currencySelectionObserver={currencySelectionObserver}
         />
         {Footer}
+        <Helmet>
+          <title>Augur Fee Windows &amp; Reporter REP Profit Calculator | Predictions.Global</title>
+          <meta name="description" content="Information on Augur's Fee Windows, including Current Fee Window, Next Fee Window, and previous Fee Window. Augur REP token profit calculator, also called a participation rentability calculator." />
+        </Helmet>
       </div>
     );
   }

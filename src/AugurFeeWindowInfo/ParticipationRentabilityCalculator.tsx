@@ -25,6 +25,8 @@ interface State {
   stake?: string,
 }
 
+const blurb = "This participation rentability calculator helps an Augur Reporter determine how participation in a Fee Window may yield a profit on the Reporter's REP tokens.";
+
 export class ParticipationRentabilityCalculator extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -75,7 +77,8 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
         <section className="hero">
           <div className="hero-body">
             <div className="container">
-              <h4 className="title is-4">Participation Rentability Calculator</h4>
+              <h4 className="title is-4">REP Profit Calculator</h4>
+              <p className="content">{blurb}</p>
               <div className="box has-text-centered">
                 <i className="fas fa-sync fa-spin fa-2x"/>
               </div>
@@ -99,7 +102,8 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
         <ReactTooltip/>
         <div className="hero-body">
           <div className="container">
-            <h4 className="title is-4">Participation Rentability Calculator</h4>
+            <h4 className="title is-4">REP Profit Calculator</h4>
+            <p className="content">{blurb}</p>
             <div className="box">
               <div className="columns">
                 <div className="column">

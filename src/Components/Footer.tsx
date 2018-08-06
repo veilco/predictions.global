@@ -23,6 +23,12 @@ const Footer = <footer className="footer">
           <div className="column is-12 is-paddingless">
             <Link to="/augur-public-ethereum-nodes">List of Public Ethereum Nodes</Link>
           </div>
+          <div className="column is-12 is-paddingless">
+            <Link to="/augur-reporter-fee-window-rep-profit-calculator">Augur Fee Window Info</Link>
+          </div>
+          <div className="column is-12 is-paddingless">
+            <Link to="/augur-reporter-fee-window-rep-profit-calculator">REP Profit Calculator</Link>
+          </div>
         </div>
       </div>
       <div className="column is-4 has-text-centered is-centered is-vcentered content">

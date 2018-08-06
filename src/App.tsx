@@ -397,6 +397,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
     this.setState({
       liquidityTranche,
     });
+    this.setPaginationOffset(0, { scrollIntoView: false }); // go back to first page of results when switching liquidity tranche
   };
 
   private setPaginationOffset = (paginationOffset: number, opts?: { scrollIntoView: boolean }) => {

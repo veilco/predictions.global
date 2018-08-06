@@ -21,7 +21,7 @@ export default class AllOutcomesSummary extends React.Component<Props> {
     const bestAsksMap = m.getBestAsksMap();
     const outcomesById: { [key: number]: OutcomeInfo } = {};
     mi.getOutcomesList().forEach(o => outcomesById[o.getId()] = o);
-    const ps = m.getPredictionsList();
+    const ps = m.getPredictionsList().slice().sort((p1, p2) => p1.getOutcomeId() - p2.getOutcomeId()); // traders prefer to see outcomes sorted statically by outcome ID. slice() clones the array because sort() occurs in place.
     return <div className="all-outcomes-summary box content">
       <div>
         <h5 className="title is-5">Outcomes</h5>

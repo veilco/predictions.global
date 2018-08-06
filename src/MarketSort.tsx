@@ -2,7 +2,7 @@ import { Market, MarketsSummary } from "./generated/markets_pb";
 import { getQueryString, updateQueryString } from "./url";
 
 export enum MarketSortOrder {
-  // LIQUIDITY = 'Liquidity',
+  LIQUIDITY = 'Liquidity',
   RECENTLY_TRADED = 'Recently Traded',
   VOLUME = 'Volume',
   OPEN_INTEREST = 'Money at Stake',
@@ -82,10 +82,10 @@ export function makeMarketSortFunctions(ms: MarketsSummary): MarketSortFunctions
   ]);
 
   // Liquidity sort functions are dynamically generated; one sort function per millietherTranche passed from back end.
-  // const lmc = ms.getLiquidityMetricsConfig();
-  // if (lmc !== undefined) {
-  //   lmc.getMillietherTranchesList().forEach(millietherTranche => fns.set(makeLiquiditySortKey(millietherTranche), sortLiquidityForTranche.bind(null, millietherTranche)));
-  // }
+  const lmc = ms.getLiquidityMetricsConfig();
+  if (lmc !== undefined) {
+    lmc.getMillietherTranchesList().forEach(millietherTranche => fns.set(makeLiquiditySortKey(millietherTranche), sortLiquidityForTranche.bind(null, millietherTranche)));
+  }
   return fns;
 }
 
@@ -115,9 +115,9 @@ function sortIsFeaturedGoesFirst(a: Market, b: Market): number {
 // Liquidy sort functions are dynamically generated, one per liquidity tranche sent from backend; MarketSortOrderLiquidityKey is the map key for liquidity sort functions into the map MarketSortFunctions.
 type MarketSortOrderLiquidityKey = string;
 
-// export function makeLiquiditySortKey(liquidityTranche: number): MarketSortOrderLiquidityKey {
-//   return `${MarketSortOrder.LIQUIDITY}-${liquidityTranche}`;
-// }
+export function makeLiquiditySortKey(liquidityTranche: number): MarketSortOrderLiquidityKey {
+  return `${MarketSortOrder.LIQUIDITY}-${liquidityTranche}`;
+}
 
 function sortLiquidityForTranche(millietherTranche: number, a: Market, b: Market): number {
   const aR = getRetentionRatioForTranche(millietherTranche, a);

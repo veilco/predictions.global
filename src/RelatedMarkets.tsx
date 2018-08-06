@@ -5,6 +5,7 @@ import { HasMarketsSummary } from "./Components/Header";
 import OneMarketSummary from './OneMarketSummary';
 import { Observer } from './Components/observer';
 import { Currency } from './Currency';
+import { sortByOpenInterestDescending } from './MarketSort';
 
 export interface RelatedMarketsIndex {
   marketsByAuthor: { [key: string]: Market[] };
@@ -58,9 +59,9 @@ export function getRelatedMarkets(rmi: RelatedMarketsIndex, m: Market): MarketsR
     });
   });
   return {
-    byAuthor: rmi.marketsByAuthor[m.getAuthor()].filter(m2 => m2.getId() !== id),
-    byCategory: rmi.marketsByCategory[m.getCategory()].filter(m2 => m2.getId() !== id),
-    byCategoryAndAtLeastOneTag: Array.from(byCatAndTag),
+    byAuthor: rmi.marketsByAuthor[m.getAuthor()].filter(m2 => m2.getId() !== id).sort(sortByOpenInterestDescending),
+    byCategory: rmi.marketsByCategory[m.getCategory()].filter(m2 => m2.getId() !== id).sort(sortByOpenInterestDescending),
+    byCategoryAndAtLeastOneTag: Array.from(byCatAndTag).sort(sortByOpenInterestDescending),
   };
 }
 

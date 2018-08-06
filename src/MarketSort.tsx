@@ -62,17 +62,7 @@ export function makeMarketSortFunctions(ms: MarketsSummary): MarketSortFunctions
       }
       return bVolume.getUsd() - aVolume.getUsd();
     })],
-    [MarketSortOrder.OPEN_INTEREST, composeSortFunctions(sortIsFeaturedGoesFirst, (a: Market, b: Market) => {
-      const aCapitalization = a.getMarketCapitalization();
-      const bCapitalization = b.getMarketCapitalization();
-      if (aCapitalization === undefined) {
-        return -1;
-      }
-      if (bCapitalization === undefined) {
-        return 1;
-      }
-      return bCapitalization.getUsd() - aCapitalization.getUsd();
-    })],
+    [MarketSortOrder.OPEN_INTEREST, composeSortFunctions(sortIsFeaturedGoesFirst, sortByOpenInterestDescending)],
     [MarketSortOrder.NEW_MARKETS, composeSortFunctions(sortIsFeaturedGoesFirst, (a: Market, b: Market) => {
       return b.getCreationTime() - a.getCreationTime();
     })],
@@ -117,6 +107,18 @@ type MarketSortOrderLiquidityKey = string;
 
 export function makeLiquiditySortKey(liquidityTranche: number): MarketSortOrderLiquidityKey {
   return `${MarketSortOrder.LIQUIDITY}-${liquidityTranche}`;
+}
+
+export function sortByOpenInterestDescending(a: Market, b: Market): number {
+  const aCapitalization = a.getMarketCapitalization();
+  const bCapitalization = b.getMarketCapitalization();
+  if (aCapitalization === undefined) {
+    return -1;
+  }
+  if (bCapitalization === undefined) {
+    return 1;
+  }
+  return bCapitalization.getUsd() - aCapitalization.getUsd();
 }
 
 function sortLiquidityForTranche(millietherTranche: number, a: Market, b: Market): number {

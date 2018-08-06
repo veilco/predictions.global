@@ -11,7 +11,7 @@ import { Observer, ObserverOwner } from './Components/observer';
 import { Currency } from './Currency';
 import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 import { Market, MarketsSummary } from './generated/markets_pb';
-import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference } from './MarketSort';
+import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference, getLiquidityRetentionRatioForTranche } from './MarketSort';
 import OneMarketSummary from './OneMarketSummary';
 import { smartRoundThreeDecimals } from './Price';
 import { getQueryString, updateQueryString } from "./url";
@@ -166,6 +166,12 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
       if (marketSortOrder === MarketSortOrder.LIQUIDITY) {
         // Liquidity sort functions are dynamically generated for each liquidity tranche sent from backend, so we must look up sort function dynamically.
         sortFn = marketSortFunctions.get(makeLiquiditySortKey(liquidityTranche));
+
+        // When sorting by liquidity, we also filter out markets with retention ratios below a threshold
+        ms = ms.filter((m: Market) => {
+          const rr = getLiquidityRetentionRatioForTranche(liquidityTranche, m);
+          return rr !== undefined && rr >= 0.5; // ie. don't show markets with retention ratio < 0.5
+        });
       } else {
         sortFn = marketSortFunctions.get(marketSortOrder);
       }
@@ -300,8 +306,14 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
           filteredMarketList.length < 1 ?
             <div className="columns is-vcentered">
               <div className="column content has-text-centered">
-                <strong>No Search Results</strong>
-                <p>Please search on market name or id.</p>
+                {/* Currently market list can be empty for two reasons: no search results or liquidity tranche has no markets */}
+                { this.state.searchQuery.length > 0 ? <div>
+                    <strong>No Search Results</strong>
+                    <p>Please search on market name or id.</p>
+                  </div> : <div>
+                    <strong>No Markets With This Target Liquidity</strong>
+                  </div>
+                }
               </div>
             </div> :
             <div>

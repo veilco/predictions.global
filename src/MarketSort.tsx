@@ -122,21 +122,21 @@ export function sortByOpenInterestDescending(a: Market, b: Market): number {
 }
 
 function sortLiquidityForTranche(millietherTranche: number, a: Market, b: Market): number {
-  const aR = getRetentionRatioForTranche(millietherTranche, a);
+  const aR = getLiquidityRetentionRatioForTranche(millietherTranche, a);
   if (aR === undefined) {
     return 1; // if tranche is undefined for a market, then that market should go at end of list
   }
-  const bR = getRetentionRatioForTranche(millietherTranche, b);
+  const bR = getLiquidityRetentionRatioForTranche(millietherTranche, b);
   if (bR === undefined) {
     return -1;
   }
   return bR - aR;
+}
 
-  function getRetentionRatioForTranche(tranche: number, m: Market): number | undefined {
-    const lm = m.getLiquidityMetrics();
-    if (lm === undefined) {
-      return;
-    }
-    return lm.getRetentionRatioByMillietherTrancheMap().get(tranche);
+export function getLiquidityRetentionRatioForTranche(tranche: number, m: Market): number | undefined {
+  const lm = m.getLiquidityMetrics();
+  if (lm === undefined) {
+    return;
   }
+  return lm.getRetentionRatioByMillietherTrancheMap().get(tranche);
 }

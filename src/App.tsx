@@ -2,6 +2,8 @@ import 'bulma/css/bulma.css';
 import classNames from 'classnames';
 import moment from 'moment';
 import * as React from 'react';
+// @ts-ignore for HashLink which has no TypeScript types
+import { HashLink } from 'react-router-hash-link';
 import * as ReactTooltip from 'react-tooltip';
 import './App.css';
 import { Dropdown } from './Components/Dropdown';
@@ -11,7 +13,7 @@ import { Observer, ObserverOwner } from './Components/observer';
 import { Currency } from './Currency';
 import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 import { Market, MarketsSummary } from './generated/markets_pb';
-import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference, getLiquidityRetentionRatioForTranche, liquidityRetentionRatioCutoff, filterMarketsAboveLiquidityRetentionRatioCutoff } from './MarketSort';
+import { defaultMarketSortOrder, filterMarketsAboveLiquidityRetentionRatioCutoff, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference } from './MarketSort';
 import OneMarketSummary from './OneMarketSummary';
 import { smartRoundThreeDecimals } from './Price';
 import { getQueryString, updateQueryString } from "./url";
@@ -279,7 +281,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         </div>
         { marketSortOrder === MarketSortOrder.LIQUIDITY && <div className="market-list-controls columns is-centered is-vcentered is-mobile is-multiline">
           <div className="column is-12-mobile is-6-tablet is-6-desktop has-text-centered">
-            <p>When sorting by liquidity, markets with both depth and a narrow spread rank better. Markets with poor liquidity are not shown.</p>
+            <p>When sorting by liquidity, markets with both depth and a narrow spread rank better. Markets with poor liquidity are not shown. <HashLink to="/faq#sort-by-liquidity">Learn more.</HashLink></p>
           </div>
           <div className="column is-narrow level is-mobile">
             <div className="level-left" >

@@ -14,6 +14,7 @@ import { MarketDetailPage, marketDetailPageURLPrefix, URLParams } from './Market
 import { makeMarketSortFunctions, MarketSortFunctions } from './MarketSort';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import { indexRelatedMarkets, RelatedMarketsIndex } from './RelatedMarkets';
+import FAQ from './FAQ';
 
 const marketsSummaryIntervalDelay = 1000;
 
@@ -110,6 +111,10 @@ export class Routes extends React.Component<any, RoutesState> {
       ms={marketsSummary}
       currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
     />;
+    const renderFAQ = () => <FAQ
+      ms={marketsSummary}
+      currencySelectionObserver={this.state.currencySelectionObserverOwner.observer}
+    />;
     const renderMarketDetailPage = (props: RouteComponentProps<URLParams>) => <MarketDetailPage
       ms={marketsSummary}
       currencyObserver={this.state.currencySelectionObserverOwner.observer}
@@ -142,6 +147,7 @@ export class Routes extends React.Component<any, RoutesState> {
               <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage}/>
               <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
               <Route exact={true} path="/augur-reporter-fee-window-rep-profit-calculator" render={renderAugurFeeWindows}/>
+              <Route exact={true} path="/faq" render={renderFAQ}/>
               <Route exact={true} path="/" render={renderHome}/>
             </Switch>
           </ScrollToTop>

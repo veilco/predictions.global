@@ -4417,7 +4417,11 @@ globule@^1.0.0:
     lodash "~4.17.10"
     minimatch "~3.0.2"
 
-google-protobuf@^3.5.0, google-protobuf@^3.6.0:
+google-protobuf@^3.5.0:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.6.1.tgz#7ef58e2bea137a93cdaf5cfd5afa5f6abdd92025"
+
+google-protobuf@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.6.0.tgz#e2bafb00c20a8734174d8f89e0a842709e2ceed0"
 
@@ -8116,6 +8120,12 @@ react-router-dom@^4.3.1:
     prop-types "^15.6.1"
     react-router "^4.3.1"
     warning "^4.0.1"
+
+react-router-hash-link@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-router-hash-link/-/react-router-hash-link-1.2.0.tgz#ce824cc5f0502ce9b0686bb6dd9c08659b24094c"
+  dependencies:
+    prop-types "^15.6.0"
 
 react-router@^4.3.1:
   version "4.3.1"

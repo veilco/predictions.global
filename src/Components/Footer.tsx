@@ -29,6 +29,9 @@ const Footer = <footer className="footer">
           <div className="column is-12 is-paddingless">
             <Link to="/augur-reporter-fee-window-rep-profit-calculator">REP Profit Calculator</Link>
           </div>
+          <div className="column is-12 is-paddingless">
+            <Link to="/faq">FAQ</Link>
+          </div>
         </div>
       </div>
       <div className="column is-4 has-text-centered is-centered is-vcentered content">

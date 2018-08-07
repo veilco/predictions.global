@@ -1,11 +1,13 @@
+import moment from 'moment';
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Currency } from '../Currency';
 import { MarketsSummary } from '../generated/markets_pb';
-import { Observer } from './observer';
+import MarketCreatorSignup from '../MarketCreatorSignup';
+import { filterMarketsAboveLiquidityRetentionRatioCutoff } from '../MarketSort';
 import Price2, { numberFormat } from '../Price';
 import { Dropdown } from './Dropdown';
-import MarketCreatorSignup from '../MarketCreatorSignup';
-import { Link } from 'react-router-dom';
+import { Observer } from './observer';
 
 export const feedbackFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSdTCmsQH3EUKOaIeV1ECA124iLZMB5GiHby7XtRj19glqtNRw/viewform";
 
@@ -39,6 +41,7 @@ type Language = "English" |
 const languageNoop = () => {/* no-op for now */ };
 
 const Header: React.SFC<HeaderProps> = (props) => {
+  const liquidMarketCount = getLiquidMarketCount(props.ms);
   const languageSelector = <Dropdown<Language>
     currentValueOrObserver={'English'}
     buttonClassNameSuffix={'is-small'}
@@ -84,6 +87,14 @@ const Header: React.SFC<HeaderProps> = (props) => {
                 </span>
               </div>
             </div>
+            {liquidMarketCount !== undefined && <div className="columns is-vcentered">
+              <div className="datum column is-narrow no-padding-top">
+                <span className="content">
+                  <strong>Liquid Markets: </strong>
+                  {liquidMarketCount}
+                </span>
+              </div>
+            </div>}
           </div>
           <div className="column is-3-mobile is-4-tablet is-4-desktop">
             <div className="is-clearfix">
@@ -120,6 +131,22 @@ const Header: React.SFC<HeaderProps> = (props) => {
       </div>
     </section>
   </div>;
+}
+
+function getLiquidMarketCount(ms: MarketsSummary): number | undefined {
+  const lmc = ms.getLiquidityMetricsConfig();
+  if (lmc === undefined) {
+    return;
+  }
+  const tranches = lmc.getMillietherTranchesList();
+  if (tranches.length < 1) {
+    return;
+  }
+  // TODO this inefficiently constructs one throw-away moment per market
+  const now = moment();
+  return ms.getMarketsList()
+    .filter(m => moment.unix(m.getEndDate()).isAfter(now))
+    .filter(filterMarketsAboveLiquidityRetentionRatioCutoff.bind(null, tranches[0])).length;
 }
 
 export default Header

@@ -133,6 +133,11 @@ function sortLiquidityForTranche(millietherTranche: number, a: Market, b: Market
   return bR - aR;
 }
 
+export function filterMarketsAboveLiquidityRetentionRatioCutoff(liquidityTranche: number, m: Market): boolean {
+  const rr = getLiquidityRetentionRatioForTranche(liquidityTranche, m);
+  return rr !== undefined && rr >= liquidityRetentionRatioCutoff;
+}
+
 export function getLiquidityRetentionRatioForTranche(tranche: number, m: Market): number | undefined {
   const lm = m.getLiquidityMetrics();
   if (lm === undefined) {
@@ -140,3 +145,5 @@ export function getLiquidityRetentionRatioForTranche(tranche: number, m: Market)
   }
   return lm.getRetentionRatioByMillietherTrancheMap().get(tranche);
 }
+
+export const liquidityRetentionRatioCutoff = 0.5; // ie. don't show markets with liquidity retention ratio < 0.5

@@ -11,7 +11,7 @@ import { Observer, ObserverOwner } from './Components/observer';
 import { Currency } from './Currency';
 import { CurrencyDropdown } from './Currency/CurrencyDropdown';
 import { Market, MarketsSummary } from './generated/markets_pb';
-import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference, getLiquidityRetentionRatioForTranche } from './MarketSort';
+import { defaultMarketSortOrder, getSavedLiquidityTranchePreference, getSavedMarketSortOrderPreference, makeLiquiditySortKey, MarketSortFunctions, MarketSortOrder, marketSortOrders, saveLiquidityTranchePreference, saveMarketSortOrderPreference, getLiquidityRetentionRatioForTranche, liquidityRetentionRatioCutoff, filterMarketsAboveLiquidityRetentionRatioCutoff } from './MarketSort';
 import OneMarketSummary from './OneMarketSummary';
 import { smartRoundThreeDecimals } from './Price';
 import { getQueryString, updateQueryString } from "./url";
@@ -168,10 +168,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         sortFn = marketSortFunctions.get(makeLiquiditySortKey(liquidityTranche));
 
         // When sorting by liquidity, we also filter out markets with retention ratios below a threshold
-        ms = ms.filter((m: Market) => {
-          const rr = getLiquidityRetentionRatioForTranche(liquidityTranche, m);
-          return rr !== undefined && rr >= 0.5; // ie. don't show markets with retention ratio < 0.5
-        });
+        ms = ms.filter(filterMarketsAboveLiquidityRetentionRatioCutoff.bind(null, liquidityTranche));
       } else {
         sortFn = marketSortFunctions.get(marketSortOrder);
       }

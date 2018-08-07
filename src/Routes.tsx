@@ -97,6 +97,7 @@ export class Routes extends React.Component<any, RoutesState> {
   }
 
   public render(): JSX.Element {
+    // TODO not every route requires the main MarketsSummary to be loaded. Need to refactor data loading so that LoadingHTML is only shown for data required for that specific page.
     const { marketSortFunctions, marketsSummary, relatedMarketsIndex} = this.state;
     if (marketSortFunctions === undefined || marketsSummary === undefined || relatedMarketsIndex === undefined) {
       return <LoadingHTML/>;

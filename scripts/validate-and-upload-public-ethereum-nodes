@@ -10,6 +10,6 @@ JSON_FILE_TO_UPLOAD="$DIR/$JSON_FILENAME";
 
 cat $JSON_FILE_TO_UPLOAD | json_pp > /dev/null; # will error and exit script if json is malformed
 
-gsutil cp $JSON_FILE_TO_UPLOAD gs://predictions-global-prod/$JSON_FILENAME;
+gsutil cp -a public-read $JSON_FILE_TO_UPLOAD gs://predictions-global-prod/$JSON_FILENAME;
 
 echo "https://storage.googleapis.com/predictions-global-prod/$JSON_FILENAME";

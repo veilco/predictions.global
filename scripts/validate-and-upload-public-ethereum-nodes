@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set +x;
+
+JSON_FILENAME="public-ethereum-nodes.json"; # expected to be in same directory as this script
+
+DIR="$( cd "$(dirname "$0")" ; pwd -P )";
+
+JSON_FILE_TO_UPLOAD="$DIR/$JSON_FILENAME";
+
+cat $JSON_FILE_TO_UPLOAD | json_pp > /dev/null; # will error and exit script if json is malformed
+
+gsutil cp $JSON_FILE_TO_UPLOAD gs://predictions-global-prod/$JSON_FILENAME;
+
+echo "https://storage.googleapis.com/predictions-global-prod/$JSON_FILENAME";

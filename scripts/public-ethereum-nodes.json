@@ -1,0 +1,18 @@
+[
+  {
+    "http": "https://megageth.com/",
+    "ws": "wss://megageth.com/ws"
+  },
+  {
+    "http": "https://gethstar.com/",
+    "ws": "wss://gethstar.com/ws"
+  },
+  {
+    "http": "https://epoxide.io/",
+    "ws": "wss://epoxide.io/ws"
+  },
+  {
+    "http": "https://gethnode.com/http",
+    "ws": "wss://gethnode.com/ws"
+  }
+]

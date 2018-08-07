@@ -170,7 +170,7 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                           </div>
                           <div className="control">
                             <div className="button is-static">
-                              Ξ
+                              Gas
                             </div>
                           </div>
                         </div>

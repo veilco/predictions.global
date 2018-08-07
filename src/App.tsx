@@ -282,7 +282,7 @@ class MarketList extends React.Component<MarketListProps, MarketListState> {
         </div>
         { marketSortOrder === MarketSortOrder.LIQUIDITY && <div className="market-list-controls columns is-centered is-vcentered is-mobile is-multiline">
           <div className="column is-12-mobile is-6-tablet is-6-desktop">
-            <p>With Sort By Liquidity, markets with both depth and a narrow spread have a better liquidity rank. Markets with poor liquidity are not shown.</p>
+            <p>When sorting by liquidity, both depth and a narrow spread contributes to a market's liquidity rank. Markets with poor liquidity are not shown.</p>
           </div>
           <div className="column is-narrow level is-mobile">
             <div className="level-left" >

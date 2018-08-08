@@ -47,7 +47,7 @@ const faqItems: FAQItem[] = [
   },
   {
     body: <div>
-      <p>First, we generate one number, called the <strong>liquidity metric</strong>, for each market. The liquidity metric tells you <strong>how deep the order book is</strong>, and <strong>how wide the spread is</strong>, in <strong>one number</strong>. We do this by simulating a series of buys and sells into each market.</p>
+      <p>First, we generate one number, called the <strong>liquidity metric</strong>, for each market. The liquidity metric tells you <strong>how deep the <a href="https://www.investopedia.com/terms/o/order-book.asp" target="_blank">order book</a> is</strong>, and <strong>how narrow the <a href="https://www.investopedia.com/terms/s/spread.asp" target="_blank">spread</a> is</strong>, in <strong>one number</strong>. We do this by simulating a series of buys and sells into each market.</p>
       <p>Second, we sort markets by the liquidity metric. A higher liquidity metric means the market is more attractive to traders (all other things equal).</p>
       <p>Third, we <strong>hide markets with a liquidity metric below our cut-off</strong>.</p>
       <p>The liquidity metrics themselves are currently not shown.</p>

@@ -98,13 +98,13 @@ const faqItems: FAQItem[] = [
             <td>They escrow shares</td>
           </tr>
           <tr>
-            <td>We escrow ETH</td>
+            <td>You escrow ETH</td>
             <td>Complete sets of shares created; <strong>Open Interest increases</strong></td>
-            <td>We get their existing shares, they get our ETH</td>
+            <td>You get their existing shares, they get your ETH</td>
           </tr>
           <tr>
-            <td>We escrow shares</td>
-            <td>They get our existing shares, we get their ETH</td>
+            <td>You escrow shares</td>
+            <td>They get your existing shares, you get their ETH</td>
             <td>Complete sets of shares destroyed; <strong>Open Interest decreases</strong></td>
           </tr>
         </tbody>

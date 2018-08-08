@@ -23,7 +23,7 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
       <div className="container">
         <div className="columns has-text-centered is-centered is-vcentered is-multiline content">
           <div className="column is-narrow">
-            <table>
+            <table className="table">
               <thead>
                 <tr>
                   <th />

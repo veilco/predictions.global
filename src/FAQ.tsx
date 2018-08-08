@@ -114,6 +114,17 @@ const faqItems: FAQItem[] = [
     id: 'what-is-open-interest',
     title: 'What is "Open Interest"?',
   },
+  {
+    body: <div>
+      <p>Volume goes up each time a share changes hands, and <strong>Volume never goes down</strong>. But, <strong>Money At Stake goes up when shares are created, goes down when shares are destroyed</strong>, and shares can be destroyed before a market is ended.</p>
+
+      <p>A market's Volume is the total historical ETH price of shares transacted since a market was created. The technical name for "Money at Stake" is "Open Interest". Our FAQ entry for <a href="#what-is-open-interest">Open Interest</a> explains how shares get created and destroyed, which has a direct relationship to Money at Stake going up and down.</p>
+
+      <p><strong>So, Volume is a total historical metric that only goes up, whereas Money at Stake goes up and down</strong>. This is how a market with non-zero Volume can simultaneously have zero Money at Stake.</p>
+    </div>,
+    id: 'non-zero-volume-with-zero-open-interest',
+    title: 'Why does a market with non-zero Volume have zero Money at Stake?',
+  },
 ];
 
 const FAQ: React.SFC<Props> = (props) => {
@@ -134,9 +145,9 @@ const FAQ: React.SFC<Props> = (props) => {
         <div className="columns is-centered is-vcentered content">
           <div className="column is-12-mobile is-6-tablet is-6-desktop no-padding-top">
             <ul>
-            {faqItems.map((fi, index) => <li key={fi.id}>
+              {faqItems.map((fi, index) => <li key={fi.id}>
                 <HashLink to={`#${fi.id}`}>{fi.title}</HashLink>
-            </li>)}
+              </li>)}
             </ul>
           </div>
         </div>

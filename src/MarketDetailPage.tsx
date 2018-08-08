@@ -1,5 +1,5 @@
-import * as classNames from 'classnames';
-import * as moment from 'moment';
+import classNames from 'classnames';
+import moment from 'moment';
 import * as React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router';
 import * as ReactTooltip from "react-tooltip";
@@ -7,7 +7,7 @@ import AllOutcomesSummary from './AllOutcomesSummary';
 import { Currency, getSavedCurrencyPreference } from "./Currency";
 import { ExchangeRates, getExchangeRatesFromMarketsSummary, makePriceFromEthAmount } from './ExchangeRates';
 import Footer from './Components/Footer';
-import { Market, MarketDetail, MarketInfo, MarketType, ReportingState } from "./generated/markets_pb";
+import { Market, MarketDetail, MarketInfo, MarketType, ReportingState, MarketDetailByMarketId } from "./generated/markets_pb";
 import Header, { HasMarketsSummary } from './Components/Header';
 import { LoadingHTML } from './Components/Loading';
 import MarketControls from './MarketControls';
@@ -35,7 +35,7 @@ interface State {
 }
 
 // TODO unify fetchMarketDetail with other fetch into a cohesive data layer/fetch library.
-function fetchMarketDetail(dataURI: string): Promise<MarketDetail> {
+function fetchMarketDetail(dataURI: string, marketId: string): Promise<MarketDetail> {
   // fetch polyfill provided by create-react-app
   return fetch(new Request(dataURI, {
     mode: "cors", // mode cors assumes dataURI has a different origin; once dataURI is served from CDN (instead of directly from google storage bucket) we'll want to update this code.
@@ -45,7 +45,12 @@ function fetchMarketDetail(dataURI: string): Promise<MarketDetail> {
     }
     return resp.arrayBuffer();
   }).then(ab => {
-    return MarketDetail.deserializeBinary(new Uint8Array(ab));
+    const mds = MarketDetailByMarketId.deserializeBinary(new Uint8Array(ab));
+    const md = mds.getMarketDetailByMarketIdMap().get(marketId);
+    if (md === undefined) {
+      throw Error("MarketDetail not found");
+    }
+    return md;
   }).catch(console.error.bind(console));
 }
 
@@ -249,8 +254,25 @@ export class MarketDetailPage extends React.Component<Props, State> {
     if (this.state.marketId === undefined) {
       return;
     }
+
+    // TODO this is an inefficient O(N) scan through markets, but it should scale about as well as us sending all markets in one MarketsSummary.
+    let market: Market | undefined;
+    for (const m of this.props.ms.getMarketsList()) {
+      if (this.state.marketId === m.getId()) {
+        market = m;
+        break;
+      }
+    }
+    if (market === undefined) {
+      return;
+    }
+    const mds = market.getMarketDataSources();
+    if (mds === undefined) {
+      return;
+    }
+
     // TODO retries/fallback; right now we'll show loading forever if load fails and then user can just refresh page
-    fetchMarketDetail(`${(window as any).MARKET_DETAIL_URI}/${this.state.marketId}`)
+    fetchMarketDetail(`${(window as any).MARKET_DETAIL_URI}/${mds.getMarketDetailFileName()}`, this.state.marketId)
       .then(marketDetail => {
         if (this.state.marketId === marketDetail.getMarketId()) {
           // if the current state.marketId is not equal to marketDetail.marketId, thn this may indicate that marketId changed during fetch and that this marketDetail is no longer valid. (In this case, presumably the new marketId will trigger its own fetch, which may be inflight or even already completed.)

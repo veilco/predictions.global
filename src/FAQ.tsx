@@ -39,6 +39,17 @@ const faqItems: FAQItem[] = [
   },
   {
     body: <div>
+      <p>An Augur prediction market is often tied to a real world event. For example, a Yes/No market might be titled, "Will the Yankees win the World Series in 2018?"</p>
+      <p><strong>Every Augur market must have a fixed end date &amp; time.</strong></p>
+      <p>Because a market's end time is fixed, it is necessary for a market creator to <strong>pick a market end time which is definitely later than the expected end time of the real world event.</strong></p>
+      <p>For example, if the World Series is expected to end on October 31, a market creator may pick a market end time of 12pm UTC on November 1.</p>
+      <p>Note that Augur allows trading of market shares at any time, including after a market's end time.</p>
+    </div>,
+    id: 'why-do-markets-end-after-real-world-event',
+    title: 'Why do markets often end after their corresponding real world event?',
+  },
+  {
+    body: <div>
       <p>Ξ is the <a href="https://ethereumsymbol.com/" target="_blank">symbol</a> for ETH, the currency of the Ethereum blockchain. We say "10Ξ" (pronounced "ten Ether") the same way we'd say "$10".</p>
       <p>Similarly, Ƀ is the symbol for BTC (Bitcoin).</p>
     </div>,

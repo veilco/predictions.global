@@ -272,7 +272,12 @@ export class ParticipationRentabilityCalculator extends React.Component<Props, S
                       <td>{participationRentabilityResult.profitPercent.multipliedBy(100).toFormat(5)}%</td>
                     </tr>
                     <tr>
-                      <td><strong>Profit in % P.A.</strong></td>
+                      <td>
+                        <strong>
+                          {'Profit in % P.A. '}
+                          <i className="far fa-question-circle" data-multiline={true} data-tip="Yearly profit in % if you were to make the profit calculated here every week of the year"/>
+                      </strong>
+                      </td>
                       <td>{participationRentabilityResult.profitPercentPA.multipliedBy(100).toFormat(5)}%</td>
                     </tr>
                     <tr>

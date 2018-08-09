@@ -5,7 +5,8 @@
     overflow: hidden;
 
     p {
-      overflow-x: scroll;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

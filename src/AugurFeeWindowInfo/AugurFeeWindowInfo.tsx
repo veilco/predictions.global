@@ -11,7 +11,7 @@ import {getExchangeRatesFromMarketsSummary} from "../ExchangeRates";
 import {CurrencyDropdown} from "../Currency/CurrencyDropdown";
 import AugurFeeWindow from 'augur-fee-window-infos';
 import Web3 from 'web3';
-import { Cancelable } from '../../node_modules/@types/lodash';
+import { Cancelable } from 'lodash';
 import { Helmet } from 'react-helmet';
 
 interface State {

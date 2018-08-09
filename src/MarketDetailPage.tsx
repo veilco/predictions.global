@@ -157,6 +157,7 @@ export class MarketDetailPage extends React.Component<Props, State> {
         {renderResolutionSource(m)}
         {renderMarketType(mt)}
         {renderDatum("Reporting State", reportingStateToString(mi.getReportingState()))}
+        {renderLastTradeBlockNumber(mi)}
         {renderScalarDetail(m, mi)}
         {renderEthereumAddressLink("Author", mi.getAuthor())}
         {renderDatum("Created", moment.unix(mi.getCreationTime()).format(detailPageDateFormat), { isNotMobile: true })}
@@ -452,6 +453,15 @@ function renderFinalizationTime(mi: MarketInfo): React.ReactNode {
   }
   return renderDatum("Finalization Time", moment.unix(t).format(detailPageDateFormat));
 }
+
+function renderLastTradeBlockNumber(mi: MarketInfo): React.ReactNode {
+  const n = mi.getLastTradeBlockNumber();
+  if (n === 0) {
+    return;
+  }
+  return renderDatum("Last Trade Block", ethereumBlockLink(n));
+}
+
 
 function renderForking(mi: MarketInfo): React.ReactNode {
   if (!mi.getForking()) {

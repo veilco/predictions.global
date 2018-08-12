@@ -12,10 +12,13 @@ const Footer = <footer className="footer">
             <strong>Links</strong>
           </div>
           <div className="column is-12 is-paddingless">
-            <a href="https://augur.net" target="_blank">Augur</a>
+            <Link to="/how-to-use-augur">How To Use Augur</Link>
           </div>
           <div className="column is-12 is-paddingless">
             <a href="https://github.com/AugurProject/augur-app/releases" target="_blank">Download Augur App</a>
+          </div>
+          <div className="column is-12 is-paddingless">
+            <a href="https://augur.net" target="_blank">Augur.net</a>
           </div>
           <div className="column is-12 is-paddingless">
             <a href="https://twitter.com/PredictionsGlbl" target="_blank">Twitter</a>

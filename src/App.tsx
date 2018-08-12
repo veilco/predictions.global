@@ -2,6 +2,7 @@ import 'bulma/css/bulma.css';
 import classNames from 'classnames';
 import moment from 'moment';
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 // @ts-ignore for HashLink which has no TypeScript types
 import { HashLink } from 'react-router-hash-link';
 import * as ReactTooltip from 'react-tooltip';
@@ -46,10 +47,9 @@ export class Home extends React.Component<Props> {
           <div className="has-text-centered content">
             <p><strong>See What the World Thinks.</strong></p>
             <p>
-              Prediction Markets powered by Augur. Each market trades on the <a href="https://augur.net"
-                target="_blank">Augur</a>
-              {' decentralized prediction market platform, built on the Ethereum blockchain.'}
+              Prediction Markets powered by Augur, built on the Ethereum blockchain. <strong><Link to="/how-to-use-augur">Start using Augur in 5 minutes.</Link></strong>
             </p>
+            <p><strong><Link to="/how-to-use-augur">Start using Augur in 5 minutes</Link></strong></p>
           </div>
         } />
         <div className="container">

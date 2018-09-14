@@ -33,11 +33,6 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>#1</strong></td>
-                  <td><code>https://epoxide.io/</code></td>
-                  <td><code>wss://epoxide.io/ws</code></td>
-                </tr>
-                <tr>
                   <td><strong>#2</strong></td>
                   <td><code>https://gethnode.com/http</code></td>
                   <td><code>wss://gethnode.com/ws</code></td>

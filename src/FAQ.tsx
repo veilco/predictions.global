@@ -116,7 +116,7 @@ const faqItems: FAQItem[] = [
           <tr>
             <td>You escrow shares</td>
             <td>They get your existing shares, you get their ETH</td>
-            <td>Complete sets of shares destroyed; <strong>Open Interest decreases</strong></td>
+            <td>Complete sets of shares destroyed; you get part of the 1.0 ETH that was originally escrowed to create these shares; <a href="#what-fees-does-augur-have">fees are paid</a> from that 1.0 ETH; <strong>Open Interest decreases</strong></td>
           </tr>
         </tbody>
       </table>
@@ -124,6 +124,16 @@ const faqItems: FAQItem[] = [
     </div>,
     id: 'what-is-open-interest',
     title: 'What is "Open Interest"?',
+  },
+  {
+    body: <div>
+      <p>Augur has two fees: 1. an optional Market Creator fee, set individually for each market by its creator; and 2. a non-optional Reporting Fee, automatically updated weekly by the Augur system, ranging from 0.01% to 33%.</p>
+      <p>As of 2018/10, Augur's Reporting Fee is 0.01% (the lowest it can be) and the community expects this low fee to continue for the medium term.</p>
+      <p>Both the Market Creator Fee and Reporting Fee are paid when complete sets of shares are sold back to the system and destroyed. That would most often happen after the end of market resolution when the winner redeems their shares, but can also happen during trading prior to resolution.</p>
+      <p>Our FAQ entry for <a href="#what-is-open-interest">Open Interest</a> explains how shares get created and destroyed, which has a direct relationship to when fees are paid, and who pays the fees.</p>
+    </div>,
+    id: 'what-fees-does-augur-have',
+    title: 'What fees does Augur have, and when are fees paid?',
   },
   {
     body: <div>

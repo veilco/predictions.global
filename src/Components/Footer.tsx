@@ -30,7 +30,7 @@ const Footer = <footer className="footer">
             <Link to="/augur-reporter-fee-window-rep-profit-calculator">REP Profit Calculator</Link>
           </div>
           <div className="column is-12 is-paddingless">
-            <a href="https://veil.market">Veil</a>
+            <a href="https://veil.co">Veil</a>
           </div>
           <div className="column is-12 is-paddingless">
             <Link to="/faq">FAQ</Link>

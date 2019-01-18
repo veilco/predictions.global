@@ -33,9 +33,9 @@ const PublicEthereumNodes: React.SFC<Props> = (props) => {
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>#2</strong></td>
-                  <td><code>https://gethnode.com/http</code></td>
-                  <td><code>wss://gethnode.com/ws</code></td>
+                  <td><strong>#1</strong></td>
+                  <td><code>https://eth-mainnet.alchemyapi.io/jsonrpc/-vPGIFwUyjlMRF9beTLXiGQUK6Nf3k8z</code></td>
+                  <td><span style={{ color: "#999" }}>N/A</span></td>
                 </tr>
               </tbody>
             </table>

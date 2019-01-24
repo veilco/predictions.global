@@ -15,22 +15,28 @@ import { makeMarketSortFunctions, MarketSortFunctions } from './MarketSort';
 import PublicEthereumNodes from './PublicEthereumNodes';
 import { indexRelatedMarkets, RelatedMarketsIndex } from './RelatedMarkets';
 import FAQ from './FAQ';
+import VeilMarketsContext from "./VeilMarketsContext";
 
 const marketsSummaryIntervalDelay = 1000;
 
-function fetchMarketsSummary(dataURI: string): Promise<MarketsSummary> {
+async function fetchMarketsSummary(dataURI: string): Promise<MarketsSummary> {
   // fetch polyfill provided by create-react-app
-  return fetch(new Request(dataURI, {
-    mode: "cors", // mode cors assumes dataURI has a different origin; once dataURI is served from CDN (instead of directly from google storage bucket) we'll want to update this code.
-  })).then(resp => {
-    if (!resp.ok) {
-      throw Error(resp.statusText);
-    }
+  try {
+    const resp = await fetch(new Request(dataURI, {
+      mode: "cors", // mode cors assumes dataURI has a different origin; once dataURI is served from CDN (instead of directly from google storage bucket) we'll want to update this code.
+    }))
 
-    return resp.arrayBuffer();
-  }).then(ab => {
+      if (!resp.ok) {
+        throw Error(resp.statusText);
+      }
+
+    const ab = await resp.arrayBuffer();
     return MarketsSummary.deserializeBinary(new Uint8Array(ab));
-  }).catch(console.error.bind(console));
+  } catch(e) {
+    // tslint:disable-next-line
+    console.error(e);
+    throw e;
+  }
 }
 
 function periodic<T>(func: () => Promise<T>, callback: (data: T) => void, interval: number = 1000): () => void {
@@ -67,6 +73,7 @@ interface RoutesState {
   marketsSummary?: MarketsSummary,
   relatedMarketsIndex?: RelatedMarketsIndex,
   currencySelectionObserverOwner: ObserverOwner<Currency>,
+  veilMarkets: Array<[string, string]>
 }
 
 export class Routes extends React.Component<any, RoutesState> {
@@ -87,7 +94,12 @@ export class Routes extends React.Component<any, RoutesState> {
     this.state = {
       currencySelectionObserverOwner: o,
       marketsSummary: undefined,
+      veilMarkets: []
     };
+  }
+
+  public componentDidMount() {
+    this.fetchVeilMarkets();
   }
 
   public componentWillUnmount() {
@@ -142,15 +154,17 @@ export class Routes extends React.Component<any, RoutesState> {
                   content="Latest odds on Augur Prediction markets. Tools for Augur traders, market creators, and reporters. Augur prediction market discusion, trading volume, bid ask, and charts."/>
           </Helmet>
           <ScrollToTop>
-            <Switch>
-              <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
-              <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
-              <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage}/>
-              <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
-              <Route exact={true} path="/augur-reporter-fee-window-rep-profit-calculator" render={renderAugurFeeWindows}/>
-              <Route exact={true} path="/faq" render={renderFAQ}/>
-              <Route exact={true} path="/" render={renderHome}/>
-            </Switch>
+            <VeilMarketsContext.Provider value={this.state.veilMarkets}>
+              <Switch>
+                <Route exact={true} path="/e/v1/:id" render={renderEmbeddedMarketCard}/>
+                <Route exact={true} path="/e/:id" render={renderEmbeddedMarketCard}/>
+                <Route exact={true} path={`${marketDetailPageURLPrefix}/:url`} render={renderMarketDetailPage}/>
+                <Route exact={true} path="/augur-public-ethereum-nodes" render={renderPublicEthereumNodes}/>
+                <Route exact={true} path="/augur-reporter-fee-window-rep-profit-calculator" render={renderAugurFeeWindows}/>
+                <Route exact={true} path="/faq" render={renderFAQ}/>
+                <Route exact={true} path="/" render={renderHome}/>
+              </Switch>
+            </VeilMarketsContext.Provider>
           </ScrollToTop>
         </div>
       </Router>
@@ -169,4 +183,21 @@ export class Routes extends React.Component<any, RoutesState> {
       relatedMarketsIndex: indexRelatedMarkets(marketsSummary),
     });
   };
+
+  private fetchVeilMarkets = async () => {
+    try {
+      const resp = await fetch(new Request("https://api.veil.co/api/v1/market_ids", {
+        mode: "cors", // mode cors assumes dataURI has a different origin; once dataURI is served from CDN (instead of directly from google storage bucket) we'll want to update this code.
+      }))
+
+      if (!resp.ok) {
+        throw Error(resp.statusText);
+      }
+
+      const json: { data: Array<[string, string]> } = await resp.json();
+      this.setState({ veilMarkets: json.data });
+    } catch(e) {
+      throw e;
+    }
+  }
 }

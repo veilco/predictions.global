@@ -1,11 +1,11 @@
-@import './Brand.scss';
+@import "./Brand.scss";
 
 .market-controls {
   $control-padding-not-mobile: 3.6466px; // small golden ratio^4 * 25px square length of twitter icon
   $control-padding-mobile: 25px; // wider padding on mobile for fat fingers like mine
 
   & > .column {
-    @media(min-width: 769px) {
+    @media (min-width: 769px) {
       // bulma is-mobile stops at 768px.
       // when cursor is pointer, this results ugly blue click box on mobile, which is fixed by only using cursor: pointer on desktop.
       cursor: pointer;
@@ -13,19 +13,21 @@
   }
 
   &.not-mobile {
-    .column {
-      &:not(:first-child) {
-        padding-top: 0;
-      }
+    padding: 10px;
+    display: flex;
+    justify-content: center;
 
-      &:not(:last-child) {
-        padding-bottom: $control-padding-not-mobile;
-      }
+    .column {
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 25px;
     }
   }
 
   &.mobile {
-    align-items: flex-end;
+    align-items: center;
     margin: 0;
 
     .column {
@@ -56,12 +58,21 @@
 
   .globe-logo {
     display: block;
-    width: 25px;
+    width: 20px;
   }
 
   .augur-logo {
-    height: 25px; // same dimension as twitter logo
-    width: 25px;
+    height: 20px; // same dimension as twitter logo
+    width: 20px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .veil-logo {
+    height: 16px;
+    width: 16px;
+    display: block;
+    margin: 0 auto;
   }
 }
 

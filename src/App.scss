@@ -57,6 +57,33 @@ body {
 }
 $canonical-bulma-padding: 0.75rem; // columns seem to use this
 
+.veil-announcement {
+  padding: 6px 0;
+  background-color: #4444ee;
+  color: lighten(#4444ee, 40%);
+  text-align: center;
+
+  .is-mobile {
+    display: none;
+  }
+
+  @media(max-width: 768px) {
+    text-align: left;
+    padding: 12px;
+    .is-mobile {
+      display: initial;
+    }
+  }
+
+  a {
+    color: lighten(#4444ee, 40%);
+    border-bottom: 1px solid lighten(#4444ee, 20%);
+    &:hover {
+      border-bottom-color: currentColor;
+    }
+  }
+}
+
 .header {
   padding: $canonical-bulma-padding;
   // Move header dropdown menu left a fixed amount so that the dropdown items don't appear offscreen on mobile.

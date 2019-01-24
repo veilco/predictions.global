@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import * as React from 'react';
 import * as CopyToClipboard from 'react-copy-to-clipboard';
 import { TwitterIcon, TwitterShareButton } from 'react-share';
+import VeilMarketsContext from "./VeilMarketsContext";
 import './MarketControls.css';
 
 interface Props {
@@ -25,6 +26,15 @@ const initialState: State = {
   isEmbedHTMLCopiedToClipboard: false,
   isMarketIdCopiedToClipboard: false,
   isMarketSummaryCopiedToClipboard: false,
+}
+
+function find<T>(array: T[], predicate: (t: T) => boolean) {
+  for (const element of array) {
+    if (predicate(element)) {
+      return element;
+    }
+  }
+  return undefined;
 }
 
 export default class MarketControls extends React.Component<Props, State> {
@@ -119,6 +129,30 @@ export default class MarketControls extends React.Component<Props, State> {
             </a>
         }
       </div>
+      <VeilMarketsContext.Consumer>
+        {marketIds => {
+          const ids = marketIds.find(([address, _]) => address === marketId);
+          if (!ids) {
+            return null;
+          }
+          return (
+            <div className={"column " + (type === "mobile" ? "is-narrow" : "is-12")}>
+              <a
+                target="_blank"
+                href={`${process.env.REACT_APP_VEIL_URL ||
+                  "https://app.veil.co"}/market/${ids[1]}`}
+              >
+                <img
+                  className="veil-logo"
+                  src="/veil-logo-v.png"
+                  data-multiline={true}
+                  data-tip={`View market in Veil`}
+                />
+              </a>
+            </div>
+          );
+        }}
+      </VeilMarketsContext.Consumer>
       {/* for embedded, we show our logo in the same <columns> as other market controls on mobile, however for desktop the logo we show as its own column/block below the main card */}
       {isEmbedded && type === 'mobile' && (
         <div className={"column is-narrow"}>

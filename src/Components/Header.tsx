@@ -63,18 +63,6 @@ const Header: React.SFC<HeaderProps> = (props) => {
       "जल्द आ रहा है",
     ]} />;
   return <div>
-    <section className="veil-announcement">
-      <div className="container">
-        <b style={{ fontWeight: 600 }}>
-          Predictions.Global is now a part of{" "}
-          <a href="https://veil.co">Veil</a>!
-          <br className="is-mobile" />
-        </b>{" "}
-        <a href="https://medium.com/@pfh/3ac2625c190d">
-          Read the announcement &rarr;
-        </a>
-      </div>
-    </section>
     <section className="header section">
       <div className="container">
         <div className="columns is-mobile">
